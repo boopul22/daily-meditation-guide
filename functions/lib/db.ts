@@ -15,7 +15,7 @@ export function rowToAPI(row: SessionRow) {
     featuredImage: row.featured_image,
     audioUrl: row.audio_url,
     fullContent: row.full_content,
-    relatedSessions: JSON.parse(row.related_sessions),
+    relatedSessions: row.related_sessions ? JSON.parse(row.related_sessions) : [],
     createdAt: row.created_at,
     updatedAt: row.updated_at,
   };
