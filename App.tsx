@@ -2,12 +2,17 @@ import React, { useState, useRef, useEffect, useCallback } from 'react';
 import { Routes, Route, useNavigate, useLocation } from 'react-router-dom';
 import Navbar from './components/Navbar';
 import PlayerBar from './components/PlayerBar';
+import Footer from './components/Footer';
 import HomeView from './views/HomeView';
 import DetailView from './views/DetailView';
 import AdminLogin from './views/admin/AdminLogin';
 import AdminDashboard from './views/admin/AdminDashboard';
 import AdminSessionForm from './views/admin/AdminSessionForm';
 import { Session } from './types';
+import AboutView from './views/AboutView';
+import ContactView from './views/ContactView';
+import PrivacyPolicyView from './views/PrivacyPolicyView';
+import TermsView from './views/TermsView';
 
 const App: React.FC = () => {
   const navigate = useNavigate();
@@ -91,25 +96,32 @@ const App: React.FC = () => {
     <>
       {!isAdminRoute && <Navbar />}
 
-      <main className="flex-grow pt-24 pb-32 px-6 relative max-w-6xl mx-auto w-full">
-        <Routes>
-          <Route path="/" element={<HomeView />} />
-          <Route
-            path="/session/:slug"
-            element={
-              <DetailView
-                onPlay={handlePlaySession}
-                currentTrackId={currentTrack?.id}
-                isPlaying={isPlaying}
-              />
-            }
-          />
-          <Route path="/admin" element={<AdminLogin />} />
-          <Route path="/admin/dashboard" element={<AdminDashboard />} />
-          <Route path="/admin/new" element={<AdminSessionForm />} />
-          <Route path="/admin/edit/:slug" element={<AdminSessionForm />} />
-        </Routes>
-      </main>
+      <div className="min-h-screen flex flex-col">
+        <main className="flex-grow pt-24 px-6 relative max-w-6xl mx-auto w-full">
+          <Routes>
+            <Route path="/" element={<HomeView />} />
+            <Route
+              path="/session/:slug"
+              element={
+                <DetailView
+                  onPlay={handlePlaySession}
+                  currentTrackId={currentTrack?.id}
+                  isPlaying={isPlaying}
+                />
+              }
+            />
+            <Route path="/admin" element={<AdminLogin />} />
+            <Route path="/admin/dashboard" element={<AdminDashboard />} />
+            <Route path="/admin/new" element={<AdminSessionForm />} />
+            <Route path="/admin/edit/:slug" element={<AdminSessionForm />} />
+            <Route path="/about" element={<AboutView />} />
+            <Route path="/contact" element={<ContactView />} />
+            <Route path="/privacy" element={<PrivacyPolicyView />} />
+            <Route path="/terms" element={<TermsView />} />
+          </Routes>
+        </main>
+        {!isAdminRoute && <div className="pb-32"><Footer /></div>}
+      </div>
 
       {!isAdminRoute && (
         <PlayerBar

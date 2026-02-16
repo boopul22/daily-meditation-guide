@@ -2,6 +2,7 @@ import React, { useEffect, useRef, useState } from 'react';
 import { useParams, useNavigate, Link } from 'react-router-dom';
 import { Session } from '../types';
 import { fetchSessionBySlug, fetchSessions } from '../lib/api';
+import SEO from '../components/SEO';
 
 interface DetailViewProps {
   onPlay: (session: Session) => void;
@@ -79,6 +80,15 @@ const DetailView: React.FC<DetailViewProps> = ({ onPlay, currentTrackId, isPlayi
 
   return (
     <div ref={containerRef} className="animate-[fade-enter_0.5s_ease-out]">
+      {session && (
+        <SEO
+          title={session.title}
+          description={`Listen to ${session.title} by ${session.author}. ${session.category} meditation session.`}
+          image={session.featuredImage || '/og-image.jpg'}
+          url={`https://dailymeditationguide.com/session/${session.slug}`}
+          type="article"
+        />
+      )}
       {/* Back Button */}
       <button onClick={() => navigate('/')} className="group flex items-center gap-2 text-zinc-500 hover:text-zinc-200 mb-8 transition-colors">
         <iconify-icon icon="solar:arrow-left-linear" class="group-hover:-translate-x-1 transition-transform"></iconify-icon>
@@ -165,11 +175,11 @@ const DetailView: React.FC<DetailViewProps> = ({ onPlay, currentTrackId, isPlayi
                 {/* Waveform visual */}
                 <div className={`flex items-center gap-1 h-8 items-end justify-center my-2 ${isCurrent && isPlaying ? 'opacity-100' : 'opacity-30'}`}>
                   {[3, 5, 8, 4, 6, 3, 7, 4, 2, 5, 3, 5, 8, 4, 6].map((h, i) => (
-                     <div
-                       key={i}
-                       className={`w-1 bg-zinc-500 rounded-full ${isCurrent && isPlaying ? 'animate-pulse' : ''}`}
-                       style={{ height: `${h * 4}px`, animationDelay: `${i * 0.05}s` }}
-                     ></div>
+                    <div
+                      key={i}
+                      className={`w-1 bg-zinc-500 rounded-full ${isCurrent && isPlaying ? 'animate-pulse' : ''}`}
+                      style={{ height: `${h * 4}px`, animationDelay: `${i * 0.05}s` }}
+                    ></div>
                   ))}
                 </div>
 

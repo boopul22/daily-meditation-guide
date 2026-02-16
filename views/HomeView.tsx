@@ -4,6 +4,7 @@ import { fetchSessions } from '../lib/api';
 import { Session } from '../types';
 import SessionCard from '../components/SessionCard';
 import SessionCardSkeleton from '../components/SessionCardSkeleton';
+import SEO from '../components/SEO';
 
 const HomeView: React.FC = () => {
   const [activeFilter, setActiveFilter] = useState('All');
@@ -24,6 +25,7 @@ const HomeView: React.FC = () => {
 
   return (
     <div className="space-y-20 transition-all duration-500 ease-in-out animate-[fade-enter_0.5s_ease-out]">
+      <SEO />
 
       {/* Hero Section */}
       <section className="grid grid-cols-1 lg:grid-cols-2 gap-12 items-center">
@@ -70,11 +72,10 @@ const HomeView: React.FC = () => {
             <button
               key={filter}
               onClick={() => setActiveFilter(filter)}
-              className={`shrink-0 px-4 py-1.5 rounded-full text-sm font-medium transition-all ${
-                activeFilter === filter
-                  ? 'bg-zinc-100 text-zinc-900'
-                  : 'border border-white/10 hover:border-white/20 hover:bg-white/5 text-zinc-400 hover:text-zinc-200'
-              }`}
+              className={`shrink-0 px-4 py-1.5 rounded-full text-sm font-medium transition-all ${activeFilter === filter
+                ? 'bg-zinc-100 text-zinc-900'
+                : 'border border-white/10 hover:border-white/20 hover:bg-white/5 text-zinc-400 hover:text-zinc-200'
+                }`}
             >
               {filter}
             </button>
@@ -102,8 +103,8 @@ const HomeView: React.FC = () => {
           {loading
             ? Array.from({ length: 6 }).map((_, i) => <SessionCardSkeleton key={i} />)
             : filteredSessions.map(session => (
-                <SessionCard key={session.id} session={session} />
-              ))
+              <SessionCard key={session.id} session={session} />
+            ))
           }
         </div>
       </section>

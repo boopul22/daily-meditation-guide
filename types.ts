@@ -19,13 +19,39 @@ export interface Session {
   updatedAt?: string;
 }
 
+// Global augmentation
 declare global {
   namespace JSX {
     interface IntrinsicElements {
       'iconify-icon': React.DetailedHTMLProps<React.HTMLAttributes<HTMLElement>, HTMLElement> & {
         icon: string;
         width?: string | number;
+        height?: string | number;
+        rotate?: string | number;
+        flip?: string;
+        mode?: string;
+        inline?: boolean;
         'stroke-width'?: string | number;
+        [key: string]: any;
+      };
+    }
+  }
+}
+
+// Module augmentation for React 18+ / React 19
+declare module 'react' {
+  namespace JSX {
+    interface IntrinsicElements {
+      'iconify-icon': React.DetailedHTMLProps<React.HTMLAttributes<HTMLElement>, HTMLElement> & {
+        icon: string;
+        width?: string | number;
+        height?: string | number;
+        rotate?: string | number;
+        flip?: string;
+        mode?: string;
+        inline?: boolean;
+        'stroke-width'?: string | number;
+        [key: string]: any;
       };
     }
   }
