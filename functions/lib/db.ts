@@ -12,6 +12,8 @@ export function rowToAPI(row: SessionRow) {
     category: row.category,
     color: row.color,
     description: row.description,
+    featuredImage: row.featured_image,
+    audioUrl: row.audio_url,
     fullContent: row.full_content,
     relatedSessions: JSON.parse(row.related_sessions),
     createdAt: row.created_at,

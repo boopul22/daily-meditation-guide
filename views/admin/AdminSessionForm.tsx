@@ -41,6 +41,8 @@ const AdminSessionForm: React.FC = () => {
     category: CATEGORIES[0],
     color: COLORS[0],
     description: '',
+    featuredImage: '',
+    audioUrl: '',
     fullContent: '',
     relatedSessions: [] as string[],
   });
@@ -64,6 +66,8 @@ const AdminSessionForm: React.FC = () => {
             category: session.category,
             color: session.color,
             description: session.description,
+            featuredImage: session.featuredImage || '',
+            audioUrl: session.audioUrl || '',
             fullContent: session.fullContent,
             relatedSessions: session.relatedSessions,
           });
@@ -222,6 +226,37 @@ const AdminSessionForm: React.FC = () => {
                 className="input-field resize-y"
                 required
               />
+            </Field>
+
+            <Field label="Featured Image URL">
+              <input
+                value={form.featuredImage}
+                onChange={e => handleChange('featuredImage', e.target.value)}
+                placeholder="https://example.com/image.jpg"
+                className="input-field"
+              />
+              {form.featuredImage && (
+                <img
+                  src={form.featuredImage}
+                  alt="Preview"
+                  className="mt-2 rounded-lg max-h-40 object-cover border border-white/10"
+                  onError={e => (e.currentTarget.style.display = 'none')}
+                />
+              )}
+            </Field>
+
+            <Field label="Audio URL">
+              <input
+                value={form.audioUrl}
+                onChange={e => handleChange('audioUrl', e.target.value)}
+                placeholder="https://example.com/meditation.mp3"
+                className="input-field"
+              />
+              {form.audioUrl && (
+                <audio controls className="mt-2 w-full" src={form.audioUrl}>
+                  Your browser does not support audio.
+                </audio>
+              )}
             </Field>
 
             <Field label="Full Content (HTML)">

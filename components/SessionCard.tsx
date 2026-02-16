@@ -26,7 +26,11 @@ const SessionCard: React.FC<SessionCardProps> = ({ session }) => {
       className="cursor-pointer group relative bg-zinc-900/40 border border-white/5 hover:border-white/10 rounded-2xl p-4 transition-all duration-300 hover:bg-zinc-800/40"
     >
       <div className="relative h-48 w-full rounded-xl overflow-hidden mb-4 bg-zinc-800">
-        <div className={`absolute inset-0 bg-gradient-to-br ${gradientClass} to-black/80`}></div>
+        {session.featuredImage ? (
+          <img src={session.featuredImage} alt={session.title} className="absolute inset-0 w-full h-full object-cover" />
+        ) : (
+          <div className={`absolute inset-0 bg-gradient-to-br ${gradientClass} to-black/80`}></div>
+        )}
         <div className="absolute inset-0 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity duration-300">
           <div className="w-12 h-12 bg-white/10 backdrop-blur-md rounded-full flex items-center justify-center text-white border border-white/20 hover:scale-110 transition-transform">
             <iconify-icon icon="solar:play-linear" width="24" class="ml-1"></iconify-icon>

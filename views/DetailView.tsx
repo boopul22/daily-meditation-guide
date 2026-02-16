@@ -135,7 +135,11 @@ const DetailView: React.FC<DetailViewProps> = ({ onPlay, currentTrackId, isPlayi
             {/* Visual Player Card */}
             <div className="rounded-2xl overflow-hidden bg-zinc-900 border border-white/10 shadow-2xl shadow-black/50">
               <div className={`h-64 bg-gradient-to-br ${gradientClass} to-zinc-900 relative transition-colors duration-500`}>
-                <div className="absolute inset-0 bg-[url('https://grainy-gradients.vercel.app/noise.svg')] opacity-40"></div>
+                {session.featuredImage ? (
+                  <img src={session.featuredImage} alt={session.title} className="absolute inset-0 w-full h-full object-cover" />
+                ) : (
+                  <div className="absolute inset-0 bg-[url('https://grainy-gradients.vercel.app/noise.svg')] opacity-40"></div>
+                )}
                 <div className="absolute inset-0 flex items-center justify-center">
                   <button
                     onClick={() => onPlay(session)}

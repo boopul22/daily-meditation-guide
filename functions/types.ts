@@ -14,6 +14,8 @@ export interface SessionRow {
   category: string;
   color: string;
   description: string;
+  featured_image: string;
+  audio_url: string;
   full_content: string;
   related_sessions: string;
   created_at: string;

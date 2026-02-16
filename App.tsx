@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useRef, useEffect, useCallback } from 'react';
 import { Routes, Route, useNavigate, useLocation } from 'react-router-dom';
 import Navbar from './components/Navbar';
 import PlayerBar from './components/PlayerBar';
@@ -16,22 +16,76 @@ const App: React.FC = () => {
   // Player state
   const [currentTrack, setCurrentTrack] = useState<Session | null>(null);
   const [isPlaying, setIsPlaying] = useState(false);
+  const [currentTime, setCurrentTime] = useState(0);
+  const [duration, setDuration] = useState(0);
+  const audioRef = useRef<HTMLAudioElement | null>(null);
 
   const isAdminRoute = location.pathname.startsWith('/admin');
 
-  const handlePlaySession = (session: Session) => {
+  // Initialize audio element once
+  useEffect(() => {
+    const audio = new Audio();
+    audio.addEventListener('timeupdate', () => setCurrentTime(audio.currentTime));
+    audio.addEventListener('loadedmetadata', () => setDuration(audio.duration));
+    audio.addEventListener('ended', () => setIsPlaying(false));
+    audioRef.current = audio;
+    return () => {
+      audio.pause();
+      audio.src = '';
+    };
+  }, []);
+
+  const handlePlaySession = useCallback((session: Session) => {
+    const audio = audioRef.current;
+    if (!audio) return;
+
     if (currentTrack?.id === session.id) {
-      setIsPlaying(!isPlaying);
+      // Toggle play/pause for same track
+      if (isPlaying) {
+        audio.pause();
+        setIsPlaying(false);
+      } else {
+        audio.play();
+        setIsPlaying(true);
+      }
     } else {
+      // New track
       setCurrentTrack(session);
-      setIsPlaying(true);
+      setCurrentTime(0);
+      if (session.audioUrl) {
+        audio.src = session.audioUrl;
+        audio.play();
+        setIsPlaying(true);
+      } else {
+        audio.pause();
+        audio.src = '';
+        setIsPlaying(false);
+      }
     }
     navigate(`/session/${session.slug}`);
-  };
+  }, [currentTrack, isPlaying, navigate]);
 
-  const togglePlay = () => {
-    setIsPlaying(!isPlaying);
-  };
+  const togglePlay = useCallback(() => {
+    const audio = audioRef.current;
+    if (!audio) return;
+
+    if (isPlaying) {
+      audio.pause();
+      setIsPlaying(false);
+    } else {
+      if (audio.src) {
+        audio.play();
+        setIsPlaying(true);
+      }
+    }
+  }, [isPlaying]);
+
+  const handleSeek = useCallback((time: number) => {
+    const audio = audioRef.current;
+    if (!audio) return;
+    audio.currentTime = time;
+    setCurrentTime(time);
+  }, []);
 
   return (
     <>
@@ -62,6 +116,9 @@ const App: React.FC = () => {
           currentTrack={currentTrack}
           isPlaying={isPlaying}
           onPlayPause={togglePlay}
+          currentTime={currentTime}
+          duration={duration}
+          onSeek={handleSeek}
         />
       )}
     </>

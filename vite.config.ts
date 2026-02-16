@@ -8,6 +8,12 @@ export default defineConfig(({ mode }) => {
       server: {
         port: 3000,
         host: '0.0.0.0',
+        proxy: mode === 'remote' ? {
+          '/api': {
+            target: 'https://daily-meditation-guide.pages.dev',
+            changeOrigin: true,
+          },
+        } : undefined,
       },
       plugins: [react()],
       define: {

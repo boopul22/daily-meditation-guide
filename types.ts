@@ -11,6 +11,8 @@ export interface Session {
   category: string;
   color: 'indigo' | 'teal' | 'orange' | 'rose' | 'blue' | 'emerald' | 'purple';
   description: string;
+  featuredImage: string;
+  audioUrl: string;
   fullContent: string;
   relatedSessions: string[];
   createdAt?: string;

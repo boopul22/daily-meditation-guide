@@ -35,8 +35,8 @@ export const onRequestPut: PagesFunction<Env> = async ({ params, request, env })
   await env.DB.prepare(
     `UPDATE sessions SET
       slug = ?, title = ?, author = ?, role = ?, duration = ?, duration_sec = ?,
-      category = ?, color = ?, description = ?, full_content = ?,
-      related_sessions = ?, updated_at = ?
+      category = ?, color = ?, description = ?, featured_image = ?, audio_url = ?,
+      full_content = ?, related_sessions = ?, updated_at = ?
      WHERE id = ?`
   ).bind(
     body.slug ?? existing.slug,
@@ -48,6 +48,8 @@ export const onRequestPut: PagesFunction<Env> = async ({ params, request, env })
     body.category ?? existing.category,
     body.color ?? existing.color,
     body.description ?? existing.description,
+    body.featuredImage ?? existing.featured_image,
+    body.audioUrl ?? existing.audio_url,
     body.fullContent ?? existing.full_content,
     JSON.stringify(body.relatedSessions ?? JSON.parse(existing.related_sessions)),
     now,
