@@ -1,0 +1,8 @@
+name = "daily-meditation-guide"
+compatibility_date = "2024-12-01"
+pages_build_output_dir = "dist"
+
+[[d1_databases]]
+binding = "DB"
+database_name = "daily-meditation-guide-db"
+database_id = "8a669091-365a-4bb1-9ec5-bace5e4c440a"
