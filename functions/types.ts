@@ -1,6 +1,8 @@
 export interface Env {
   DB: D1Database;
   ADMIN_PASSWORD: string;
+  CF_ACCESS_TEAM_NAME: string;
+  CF_ACCESS_AUD: string;
 }
 
 export interface SessionRow {
@@ -20,4 +22,13 @@ export interface SessionRow {
   related_sessions: string;
   created_at: string;
   updated_at: string;
+}
+
+export interface UserRow {
+  id: string;
+  email: string;
+  name: string;
+  picture: string;
+  created_at: string;
+  last_login: string;
 }

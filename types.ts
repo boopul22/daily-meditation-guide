@@ -1,5 +1,12 @@
 import React from 'react';
 
+export interface User {
+  id: string;
+  email: string;
+  name: string;
+  picture: string;
+}
+
 export interface Session {
   id: string;
   slug: string;

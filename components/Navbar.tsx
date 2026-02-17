@@ -1,8 +1,22 @@
-import React from 'react';
+import React, { useState, useRef, useEffect } from 'react';
 import { Link } from 'react-router-dom';
+import { useAuth } from '../lib/AuthContext';
 
 const Navbar: React.FC = () => {
-  const [isMobileMenuOpen, setIsMobileMenuOpen] = React.useState(false);
+  const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
+  const [isDropdownOpen, setIsDropdownOpen] = useState(false);
+  const dropdownRef = useRef<HTMLDivElement>(null);
+  const { user, loading, login, logout } = useAuth();
+
+  useEffect(() => {
+    function handleClickOutside(event: MouseEvent) {
+      if (dropdownRef.current && !dropdownRef.current.contains(event.target as Node)) {
+        setIsDropdownOpen(false);
+      }
+    }
+    document.addEventListener('mousedown', handleClickOutside);
+    return () => document.removeEventListener('mousedown', handleClickOutside);
+  }, []);
 
   return (
     <>
@@ -34,7 +48,44 @@ const Navbar: React.FC = () => {
               <div className="absolute top-2 right-2 w-1.5 h-1.5 bg-indigo-500 rounded-full"></div>
               <iconify-icon icon="solar:bell-linear" width="20" stroke-width="1.5"></iconify-icon>
             </button>
-            <div className="hidden md:block w-8 h-8 rounded-full bg-gradient-to-tr from-zinc-700 to-zinc-600 border border-white/10"></div>
+
+            {/* Desktop Auth */}
+            {loading ? (
+              <div className="hidden md:block w-8 h-8 rounded-full bg-zinc-800 animate-pulse"></div>
+            ) : user ? (
+              <div className="hidden md:block relative" ref={dropdownRef}>
+                <button
+                  onClick={() => setIsDropdownOpen(!isDropdownOpen)}
+                  className="w-8 h-8 rounded-full bg-gradient-to-tr from-indigo-600 to-purple-600 border border-white/10 flex items-center justify-center text-white text-xs font-medium hover:opacity-90 transition-opacity"
+                >
+                  {user.name.charAt(0).toUpperCase()}
+                </button>
+                {isDropdownOpen && (
+                  <div className="absolute right-0 mt-2 w-56 py-2 bg-zinc-900 border border-white/10 rounded-xl shadow-xl z-50">
+                    <div className="px-4 py-2 border-b border-white/5">
+                      <p className="text-sm text-zinc-200 font-medium truncate">{user.name}</p>
+                      <p className="text-xs text-zinc-500 truncate">{user.email}</p>
+                    </div>
+                    <button
+                      onClick={() => {
+                        setIsDropdownOpen(false);
+                        logout();
+                      }}
+                      className="w-full text-left px-4 py-2 text-sm text-zinc-400 hover:text-zinc-200 hover:bg-white/5 transition-colors"
+                    >
+                      Sign Out
+                    </button>
+                  </div>
+                )}
+              </div>
+            ) : (
+              <button
+                onClick={login}
+                className="hidden md:block px-4 py-1.5 text-sm font-medium text-zinc-300 border border-white/10 hover:border-white/20 hover:bg-white/5 rounded-full transition-colors"
+              >
+                Sign In
+              </button>
+            )}
 
             {/* Mobile Menu Button */}
             <button
@@ -64,7 +115,44 @@ const Navbar: React.FC = () => {
                 <div className="absolute top-3 right-3 w-2 h-2 bg-indigo-500 rounded-full"></div>
                 <iconify-icon icon="solar:bell-linear" width="24"></iconify-icon>
               </button>
-              <div className="w-12 h-12 rounded-full bg-gradient-to-tr from-zinc-700 to-zinc-600 border border-white/10"></div>
+            </div>
+
+            {/* Mobile Auth */}
+            <div className="mt-2 border-t border-white/5 pt-6">
+              {loading ? (
+                <div className="w-12 h-12 rounded-full bg-zinc-800 animate-pulse"></div>
+              ) : user ? (
+                <div className="flex items-center justify-between">
+                  <div className="flex items-center gap-3">
+                    <div className="w-10 h-10 rounded-full bg-gradient-to-tr from-indigo-600 to-purple-600 border border-white/10 flex items-center justify-center text-white text-sm font-medium">
+                      {user.name.charAt(0).toUpperCase()}
+                    </div>
+                    <div>
+                      <p className="text-sm text-zinc-200 font-medium">{user.name}</p>
+                      <p className="text-xs text-zinc-500">{user.email}</p>
+                    </div>
+                  </div>
+                  <button
+                    onClick={() => {
+                      setIsMobileMenuOpen(false);
+                      logout();
+                    }}
+                    className="text-sm text-zinc-500 hover:text-zinc-300 transition-colors"
+                  >
+                    Sign Out
+                  </button>
+                </div>
+              ) : (
+                <button
+                  onClick={() => {
+                    setIsMobileMenuOpen(false);
+                    login();
+                  }}
+                  className="w-full py-3 text-center text-zinc-200 border border-white/10 rounded-xl hover:bg-white/5 transition-colors"
+                >
+                  Sign In with Google
+                </button>
+              )}
             </div>
           </div>
         </div>
