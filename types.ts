@@ -22,6 +22,8 @@ export interface Session {
   audioUrl: string;
   fullContent: string;
   relatedSessions: string[];
+  status: 'draft' | 'published';
+  publishedAt?: string | null;
   createdAt?: string;
   updatedAt?: string;
 }

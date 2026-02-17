@@ -19,3 +19,9 @@ export function requireAuth(request: Request, env: Env): Response | null {
 
   return null; // Auth passed
 }
+
+export function isAdmin(request: Request, env: Env): boolean {
+  const authHeader = request.headers.get('Authorization');
+  if (!authHeader || !authHeader.startsWith('Bearer ')) return false;
+  return authHeader.slice(7) === env.ADMIN_PASSWORD;
+}

@@ -42,7 +42,7 @@ const ToolbarButton: React.FC<{
     onClick={onClick}
     disabled={disabled}
     title={title}
-    className={`w-8 h-8 rounded-lg flex items-center justify-center text-xs font-medium transition-colors ${
+    className={`w-9 h-9 md:w-8 md:h-8 rounded-lg flex items-center justify-center text-xs font-medium transition-colors ${
       active
         ? 'bg-white/10 text-zinc-100'
         : 'text-zinc-400 hover:bg-white/10 hover:text-zinc-200'
@@ -123,7 +123,7 @@ const RichTextEditor: React.FC<RichTextEditorProps> = ({ content, onChange }) =>
       />
 
       {/* Toolbar */}
-      <div className="flex-none flex flex-wrap items-center gap-0.5 px-3 py-1.5 bg-zinc-900/50 border-b border-white/5">
+      <div className="flex-none flex flex-wrap items-center gap-0.5 px-2 md:px-3 py-1 md:py-1.5 bg-zinc-900/50 border-b border-white/5 overflow-x-auto no-scrollbar">
         <ToolbarButton
           onClick={() => editor.chain().focus().toggleHeading({ level: 2 }).run()}
           active={editor.isActive('heading', { level: 2 })}
@@ -233,13 +233,19 @@ const RichTextEditor: React.FC<RichTextEditorProps> = ({ content, onChange }) =>
       <style>{`
         .rte-wrapper .tiptap {
           min-height: 100%;
-          padding: 1.5rem 2rem;
+          padding: 1rem;
           color: #a1a1aa;
-          font-size: 0.875rem;
+          font-size: 0.9375rem;
           line-height: 1.75;
           outline: none;
           max-width: 48rem;
           margin: 0 auto;
+        }
+        @media (min-width: 768px) {
+          .rte-wrapper .tiptap {
+            padding: 1.5rem 2rem;
+            font-size: 0.875rem;
+          }
         }
         .rte-wrapper .tiptap h2 {
           color: #e4e4e7;

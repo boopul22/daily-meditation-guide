@@ -1,8 +1,8 @@
 import { Env, SessionRow } from '../../types';
-import { requireAuth } from '../../lib/auth';
+import { requireAuth, isAdmin } from '../../lib/auth';
 import { rowToAPI } from '../../lib/db';
 
-export const onRequestGet: PagesFunction<Env> = async ({ params, env }) => {
+export const onRequestGet: PagesFunction<Env> = async ({ params, request, env }) => {
   const slug = params.slug as string;
 
   const row = await env.DB.prepare('SELECT * FROM sessions WHERE slug = ?')
@@ -10,6 +10,11 @@ export const onRequestGet: PagesFunction<Env> = async ({ params, env }) => {
     .first<SessionRow>();
 
   if (!row) {
+    return Response.json({ error: 'Session not found' }, { status: 404 });
+  }
+
+  // Non-admin users can only see published sessions
+  if (row.status !== 'published' && !isAdmin(request, env)) {
     return Response.json({ error: 'Session not found' }, { status: 404 });
   }
 
@@ -41,11 +46,24 @@ export const onRequestPut: PagesFunction<Env> = async ({ params, request, env })
       existingRelated = [];
     }
 
+    // Determine new status and published_at
+    const newStatus = body.status ?? existing.status ?? 'draft';
+    let publishedAt = existing.published_at;
+
+    // Set published_at when transitioning to published for the first time
+    if (newStatus === 'published' && existing.status !== 'published') {
+      publishedAt = now;
+    }
+    // Clear published_at when unpublishing
+    if (newStatus === 'draft') {
+      publishedAt = null;
+    }
+
     await env.DB.prepare(
       `UPDATE sessions SET
         slug = ?, title = ?, author = ?, role = ?, duration = ?, duration_sec = ?,
         category = ?, color = ?, description = ?, featured_image = ?, audio_url = ?,
-        full_content = ?, related_sessions = ?, updated_at = ?
+        full_content = ?, related_sessions = ?, status = ?, published_at = ?, updated_at = ?
        WHERE id = ?`
     ).bind(
       body.slug ?? existing.slug,
@@ -61,6 +79,8 @@ export const onRequestPut: PagesFunction<Env> = async ({ params, request, env })
       body.audioUrl ?? existing.audio_url ?? '',
       body.fullContent ?? existing.full_content ?? '',
       JSON.stringify(body.relatedSessions ?? existingRelated),
+      newStatus,
+      publishedAt,
       now,
       existing.id
     ).run();

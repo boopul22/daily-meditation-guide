@@ -16,6 +16,8 @@ export function rowToAPI(row: SessionRow) {
     audioUrl: row.audio_url,
     fullContent: row.full_content,
     relatedSessions: row.related_sessions ? JSON.parse(row.related_sessions) : [],
+    status: row.status || 'published',
+    publishedAt: row.published_at || null,
     createdAt: row.created_at,
     updatedAt: row.updated_at,
   };

@@ -22,6 +22,8 @@ export interface SessionRow {
   audio_url: string;
   full_content: string;
   related_sessions: string;
+  status: string;
+  published_at: string | null;
   created_at: string;
   updated_at: string;
 }
