@@ -112,7 +112,7 @@ const RichTextEditor: React.FC<RichTextEditorProps> = ({ content, onChange }) =>
   if (!editor) return null;
 
   return (
-    <div className="rte-wrapper">
+    <div className="rte-wrapper h-full flex flex-col">
       {/* Hidden file input for image upload */}
       <input
         ref={fileInputRef}
@@ -123,7 +123,7 @@ const RichTextEditor: React.FC<RichTextEditorProps> = ({ content, onChange }) =>
       />
 
       {/* Toolbar */}
-      <div className="flex flex-wrap items-center gap-0.5 p-2 bg-zinc-900/50 border border-white/10 rounded-t-xl">
+      <div className="flex-none flex flex-wrap items-center gap-0.5 px-3 py-1.5 bg-zinc-900/50 border-b border-white/5">
         <ToolbarButton
           onClick={() => editor.chain().focus().toggleHeading({ level: 2 }).run()}
           active={editor.isActive('heading', { level: 2 })}
@@ -226,23 +226,20 @@ const RichTextEditor: React.FC<RichTextEditorProps> = ({ content, onChange }) =>
       </div>
 
       {/* Editor Content */}
-      <EditorContent editor={editor} />
+      <div className="flex-1 min-h-0 overflow-y-auto">
+        <EditorContent editor={editor} />
+      </div>
 
       <style>{`
         .rte-wrapper .tiptap {
-          min-height: 300px;
-          padding: 1rem;
-          background: rgb(24 24 27 / 0.5);
-          border: 1px solid rgb(255 255 255 / 0.1);
-          border-top: none;
-          border-radius: 0 0 0.75rem 0.75rem;
+          min-height: 100%;
+          padding: 1.5rem 2rem;
           color: #a1a1aa;
           font-size: 0.875rem;
           line-height: 1.75;
           outline: none;
-        }
-        .rte-wrapper .tiptap:focus {
-          border-color: rgb(255 255 255 / 0.2);
+          max-width: 48rem;
+          margin: 0 auto;
         }
         .rte-wrapper .tiptap h2 {
           color: #e4e4e7;
