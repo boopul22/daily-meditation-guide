@@ -170,7 +170,7 @@ const AdminSessionForm: React.FC = () => {
 
           {/* Duration + Category + Color */}
           <div className="grid grid-cols-3 gap-2">
-            <div><span className="sf-label">Duration</span><input value={form.duration} onChange={e => handleChange('duration', e.target.value)} placeholder="10:00" className="sf-input" required /></div>
+            <div><span className="sf-label">Duration</span><input value={form.duration} onChange={e => handleChange('duration', e.target.value)} placeholder="Optional" className="sf-input" /></div>
             <div><span className="sf-label">Category</span><select value={form.category} onChange={e => handleChange('category', e.target.value)} className="sf-input">{CATEGORIES.map(c => <option key={c} value={c}>{c}</option>)}</select></div>
             <div>
               <span className="sf-label">Color</span>
