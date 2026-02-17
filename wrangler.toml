@@ -5,8 +5,13 @@ pages_build_output_dir = "dist"
 [vars]
 CF_ACCESS_TEAM_NAME = "dmg-auth"
 CF_ACCESS_AUD = "58cb6ae5fbfc49fdd0e7eaf1968964b6f82b828924b72d1334604c28d7daceae"
+R2_PUBLIC_URL = "https://pub-141831e61e69445289222976a15b6fb3.r2.dev"
 
 [[d1_databases]]
 binding = "DB"
 database_name = "daily-meditation-guide-db"
 database_id = "8a669091-365a-4bb1-9ec5-bace5e4c440a"
+
+[[r2_buckets]]
+binding = "R2"
+bucket_name = "imgtourl"

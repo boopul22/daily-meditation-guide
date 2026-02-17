@@ -67,3 +67,22 @@ export function logout(): void {
 export function isLoggedIn(): boolean {
   return !!sessionStorage.getItem('admin_token');
 }
+
+export async function uploadImage(file: File): Promise<string> {
+  const formData = new FormData();
+  formData.append('file', file);
+
+  const res = await fetch(`${API_BASE}/upload`, {
+    method: 'POST',
+    headers: authHeaders(),
+    body: formData,
+  });
+
+  if (!res.ok) {
+    const body = await res.json().catch(() => ({}));
+    throw new Error((body as any).error || `Upload failed: ${res.status}`);
+  }
+
+  const { url } = await res.json() as { url: string };
+  return url;
+}

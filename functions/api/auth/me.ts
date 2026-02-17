@@ -3,11 +3,9 @@ import { verifyCFAccessJWT } from '../../lib/cfaccess';
 
 export const onRequestGet: PagesFunction<Env> = async ({ request, env }) => {
   const jwtPayload = await verifyCFAccessJWT(request, env);
-
   if (!jwtPayload) {
     return Response.json({ user: null });
   }
-
   const email = jwtPayload.email;
   const name = jwtPayload.name || email.split('@')[0];
   const now = new Date().toISOString();

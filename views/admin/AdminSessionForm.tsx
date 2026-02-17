@@ -1,8 +1,9 @@
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useRef, useState } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { useAdminAuth } from '../../lib/useAdminAuth';
-import { fetchSessions, fetchSessionBySlug, createSession, updateSession } from '../../lib/api';
+import { fetchSessions, fetchSessionBySlug, createSession, updateSession, uploadImage } from '../../lib/api';
 import { Session } from '../../types';
+import RichTextEditor from '../../components/admin/RichTextEditor';
 
 const CATEGORIES = ['Sleep', 'Anxiety', 'Focus', 'Sounds'];
 const COLORS = ['indigo', 'teal', 'orange', 'rose', 'blue', 'emerald', 'purple'];
@@ -31,6 +32,8 @@ const AdminSessionForm: React.FC = () => {
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
   const [error, setError] = useState('');
+  const [uploadingFeatured, setUploadingFeatured] = useState(false);
+  const featuredFileRef = useRef<HTMLInputElement>(null);
 
   const [form, setForm] = useState({
     title: '',
@@ -99,6 +102,20 @@ const AdminSessionForm: React.FC = () => {
         ? prev.relatedSessions.filter(r => r !== id)
         : [...prev.relatedSessions, id],
     }));
+  };
+
+  const handleFeaturedUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    if (!e.target.files?.length) return;
+    setUploadingFeatured(true);
+    try {
+      const url = await uploadImage(e.target.files[0]);
+      handleChange('featuredImage', url);
+    } catch (err: any) {
+      setError(`Image upload failed: ${err.message}`);
+    } finally {
+      setUploadingFeatured(false);
+      if (featuredFileRef.current) featuredFileRef.current.value = '';
+    }
   };
 
   const handleSubmit = async (e: React.FormEvent) => {
@@ -228,13 +245,35 @@ const AdminSessionForm: React.FC = () => {
               />
             </Field>
 
-            <Field label="Featured Image URL">
-              <input
-                value={form.featuredImage}
-                onChange={e => handleChange('featuredImage', e.target.value)}
-                placeholder="https://example.com/image.jpg"
-                className="input-field"
-              />
+            <Field label="Featured Image">
+              <div className="flex gap-2">
+                <input
+                  value={form.featuredImage}
+                  onChange={e => handleChange('featuredImage', e.target.value)}
+                  placeholder="https://example.com/image.jpg"
+                  className="input-field flex-1"
+                />
+                <input
+                  ref={featuredFileRef}
+                  type="file"
+                  accept="image/jpeg,image/png,image/gif,image/webp,image/svg+xml"
+                  className="hidden"
+                  onChange={handleFeaturedUpload}
+                />
+                <button
+                  type="button"
+                  onClick={() => featuredFileRef.current?.click()}
+                  disabled={uploadingFeatured}
+                  className="px-3 py-2 bg-white/5 border border-white/10 rounded-xl text-zinc-300 hover:bg-white/10 transition-colors text-xs font-medium flex items-center gap-1.5 disabled:opacity-50"
+                >
+                  {uploadingFeatured ? (
+                    <span className="w-4 h-4 border-2 border-zinc-500 border-t-zinc-200 rounded-full animate-spin"></span>
+                  ) : (
+                    <iconify-icon icon="solar:upload-linear" width="14"></iconify-icon>
+                  )}
+                  Upload
+                </button>
+              </div>
               {form.featuredImage && (
                 <img
                   src={form.featuredImage}
@@ -259,12 +298,11 @@ const AdminSessionForm: React.FC = () => {
               )}
             </Field>
 
-            <Field label="Full Content (HTML)">
-              <textarea
-                value={form.fullContent}
-                onChange={e => handleChange('fullContent', e.target.value)}
-                rows={12}
-                className="input-field resize-y font-mono text-xs"
+            <Field label="Full Content">
+              <RichTextEditor
+                key={slug || 'new'}
+                content={form.fullContent}
+                onChange={(html) => handleChange('fullContent', html)}
               />
             </Field>
 
@@ -301,7 +339,7 @@ const AdminSessionForm: React.FC = () => {
             <div className="border border-white/5 rounded-xl p-6 bg-zinc-900/30 min-h-[400px] overflow-y-auto">
               {form.fullContent ? (
                 <div
-                  className="prose prose-invert prose-zinc max-w-none text-zinc-400 font-light leading-relaxed"
+                  className="prose prose-invert max-w-none"
                   dangerouslySetInnerHTML={{ __html: form.fullContent }}
                 />
               ) : (

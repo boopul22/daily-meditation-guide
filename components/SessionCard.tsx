@@ -17,8 +17,9 @@ const SessionCard: React.FC<SessionCardProps> = ({ session }) => {
     emerald: 'from-emerald-900/40 group-hover:text-emerald-300',
   };
 
-  const gradientClass = colorMap[session.color].split(' ')[0];
-  const textClass = colorMap[session.color].split(' ')[1];
+  const colorClasses = colorMap[session.color] || colorMap.indigo;
+  const gradientClass = colorClasses.split(' ')[0];
+  const textClass = colorClasses.split(' ')[1];
 
   return (
     <Link

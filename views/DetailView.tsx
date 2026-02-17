@@ -1,8 +1,10 @@
-import React, { useEffect, useRef, useState } from 'react';
+import React, { useEffect, useRef, useState, useMemo } from 'react';
 import { useParams, useNavigate, Link } from 'react-router-dom';
 import { Session } from '../types';
 import { fetchSessionBySlug, fetchSessions } from '../lib/api';
 import SEO from '../components/SEO';
+import { processContentForTOC, TOCItem } from '../utils/tocUtils';
+import TableOfContents from '../components/TableOfContents';
 
 interface DetailViewProps {
   onPlay: (session: Session) => void;
@@ -20,6 +22,10 @@ const DetailView: React.FC<DetailViewProps> = ({ onPlay, currentTrackId, isPlayi
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
 
+  // TOC State
+  const [tocItems, setTocItems] = useState<TOCItem[]>([]);
+  const [processedHtml, setProcessedHtml] = useState<string>('');
+
   useEffect(() => {
     if (!slug) return;
     setLoading(true);
@@ -29,6 +35,13 @@ const DetailView: React.FC<DetailViewProps> = ({ onPlay, currentTrackId, isPlayi
       .then(([s, all]) => {
         setSession(s);
         setAllSessions(all);
+
+        // Process content for TOC immediately after fetching
+        if (s.fullContent) {
+          const result = processContentForTOC(s.fullContent);
+          setProcessedHtml(result.processedContent);
+          setTocItems(result.headings);
+        }
       })
       .catch(err => setError(err.message))
       .finally(() => setLoading(false));
@@ -95,10 +108,10 @@ const DetailView: React.FC<DetailViewProps> = ({ onPlay, currentTrackId, isPlayi
         <span className="text-sm font-medium">Back to Sessions</span>
       </button>
 
-      <article className="grid grid-cols-1 lg:grid-cols-12 gap-12">
+      <article className="grid grid-cols-1 lg:grid-cols-12 gap-12 items-start">
 
         {/* Left: Content */}
-        <div className="lg:col-span-7 space-y-8">
+        <div className="lg:col-span-8 space-y-8">
           <header className="space-y-6">
             <div className="flex items-center gap-3">
               <div className="px-2.5 py-0.5 rounded-full border border-indigo-500/30 bg-indigo-500/10 text-indigo-300 text-[10px] font-medium uppercase tracking-widest">
@@ -132,19 +145,10 @@ const DetailView: React.FC<DetailViewProps> = ({ onPlay, currentTrackId, isPlayi
             </div>
           </header>
 
-          {/* Blog Body - injected HTML from API */}
-          <div
-            className="prose prose-invert prose-zinc max-w-none text-zinc-400 font-light leading-relaxed"
-            dangerouslySetInnerHTML={{ __html: session.fullContent }}
-          />
-        </div>
-
-        {/* Right: Sticky Player/Card */}
-        <div className="lg:col-span-5">
-          <div className="sticky top-24 space-y-6">
-            {/* Visual Player Card */}
+          {/* Mobile Player Card - shown only on mobile */}
+          <div className="lg:hidden">
             <div className="rounded-2xl overflow-hidden bg-zinc-900 border border-white/10 shadow-2xl shadow-black/50">
-              <div className={`h-64 bg-gradient-to-br ${gradientClass} to-zinc-900 relative transition-colors duration-500`}>
+              <div className={`h-52 bg-gradient-to-br ${gradientClass} to-zinc-900 relative transition-colors duration-500`}>
                 {session.featuredImage ? (
                   <img src={session.featuredImage} alt={session.title} className="absolute inset-0 w-full h-full object-cover" />
                 ) : (
@@ -159,7 +163,7 @@ const DetailView: React.FC<DetailViewProps> = ({ onPlay, currentTrackId, isPlayi
                   </button>
                 </div>
               </div>
-              <div className="p-6 space-y-4">
+              <div className="p-5 space-y-3">
                 <div className="flex justify-between items-center text-xs font-medium text-zinc-500 uppercase tracking-widest">
                   <span>{isCurrent && isPlaying ? "Now Playing" : "Up Next"}</span>
                   <span className="flex items-center gap-1">
@@ -167,13 +171,7 @@ const DetailView: React.FC<DetailViewProps> = ({ onPlay, currentTrackId, isPlayi
                     {isCurrent ? 'Online' : 'Offline'}
                   </span>
                 </div>
-                <div>
-                  <h3 className="text-xl font-medium text-zinc-100 tracking-tight">{session.title}</h3>
-                  <p className="text-zinc-500 text-sm mt-1">Guided Audio Session</p>
-                </div>
-
-                {/* Waveform visual */}
-                <div className={`flex items-center gap-1 h-8 items-end justify-center my-2 ${isCurrent && isPlaying ? 'opacity-100' : 'opacity-30'}`}>
+                <div className={`flex items-center gap-1 h-8 items-end justify-center ${isCurrent && isPlaying ? 'opacity-100' : 'opacity-30'}`}>
                   {[3, 5, 8, 4, 6, 3, 7, 4, 2, 5, 3, 5, 8, 4, 6].map((h, i) => (
                     <div
                       key={i}
@@ -182,25 +180,111 @@ const DetailView: React.FC<DetailViewProps> = ({ onPlay, currentTrackId, isPlayi
                     ></div>
                   ))}
                 </div>
-
                 <button className="w-full py-3 rounded-xl bg-white/5 border border-white/10 hover:bg-white/10 text-zinc-200 text-sm font-medium transition-colors flex items-center justify-center gap-2">
                   <iconify-icon icon="solar:download-linear" width="18"></iconify-icon>
                   Download for Offline
                 </button>
               </div>
             </div>
+          </div>
 
+          {/* Mobile TOC - Collapsible */}
+          <div className="block lg:hidden mt-8">
+            <TableOfContents headings={tocItems} />
+          </div>
+
+          {/* Blog Body */}
+          <div
+            className="prose prose-invert max-w-none"
+            dangerouslySetInnerHTML={{ __html: processedHtml || session.fullContent }}
+          />
+
+          {/* Mobile Related Sessions (moved to bottom of content on mobile) */}
+          <div className="lg:hidden pt-8 border-t border-white/5">
+            <h4 className="text-zinc-200 font-medium text-sm mb-4">Related Sessions</h4>
+            <div className="space-y-3">
+              {related.map(r => (
+                <Link key={r.id} to={`/session/${r.slug}`} className="flex items-center gap-3 group cursor-pointer">
+                  <div className="w-12 h-12 rounded-lg bg-zinc-800 flex items-center justify-center flex-shrink-0">
+                    <iconify-icon icon="solar:play-linear" class="text-zinc-500 group-hover:text-zinc-300"></iconify-icon>
+                  </div>
+                  <div>
+                    <p className="text-sm text-zinc-300 group-hover:text-white transition-colors">{r.title}</p>
+                    <p className="text-[10px] text-zinc-500">{r.duration} • {r.category}</p>
+                  </div>
+                </Link>
+              ))}
+            </div>
+          </div>
+
+        </div>
+
+        {/* Right: Sticky Player/Card & TOC - Desktop */}
+        <div className="hidden lg:block lg:col-span-4 lg:col-start-9">
+          <div className="sticky top-24 space-y-8">
+
+            {/* Visual Player Card */}
+            <div className="rounded-2xl overflow-hidden bg-zinc-900 border border-white/10 shadow-2xl shadow-black/50">
+              <div className={`h-48 bg-gradient-to-br ${gradientClass} to-zinc-900 relative transition-colors duration-500`}>
+                {session.featuredImage ? (
+                  <img src={session.featuredImage} alt={session.title} className="absolute inset-0 w-full h-full object-cover" />
+                ) : (
+                  <div className="absolute inset-0 bg-[url('https://grainy-gradients.vercel.app/noise.svg')] opacity-40"></div>
+                )}
+                <div className="absolute inset-0 flex items-center justify-center">
+                  <button
+                    onClick={() => onPlay(session)}
+                    className="w-14 h-14 bg-white rounded-full flex items-center justify-center text-black hover:scale-105 transition-transform shadow-[0_0_30px_rgba(255,255,255,0.2)]"
+                  >
+                    <iconify-icon icon={isCurrent && isPlaying ? "solar:pause-linear" : "solar:play-linear"} width="24" stroke-width="2" class="ml-1"></iconify-icon>
+                  </button>
+                </div>
+              </div>
+              <div className="p-5 space-y-4">
+                <div className="flex justify-between items-center text-xs font-medium text-zinc-500 uppercase tracking-widest">
+                  <span>{isCurrent && isPlaying ? "Now Playing" : "Up Next"}</span>
+                  <span className="flex items-center gap-1">
+                    <span className={`w-1.5 h-1.5 rounded-full ${isCurrent ? 'bg-green-500 animate-pulse' : 'bg-zinc-600'}`}></span>
+                    {isCurrent ? 'Online' : 'Offline'}
+                  </span>
+                </div>
+                <div>
+                  <h3 className="text-lg font-medium text-zinc-100 tracking-tight leading-snug">{session.title}</h3>
+                  <p className="text-zinc-500 text-xs mt-1">Guided Audio Session</p>
+                </div>
+
+                <div className={`flex items-center gap-1 h-6 items-end justify-center my-1 ${isCurrent && isPlaying ? 'opacity-100' : 'opacity-30'}`}>
+                  {[3, 5, 8, 4, 6, 3, 7, 4, 2, 5, 3, 5, 8, 4, 6].map((h, i) => (
+                    <div
+                      key={i}
+                      className={`w-1 bg-zinc-500 rounded-full ${isCurrent && isPlaying ? 'animate-pulse' : ''}`}
+                      style={{ height: `${h * 3}px`, animationDelay: `${i * 0.05}s` }}
+                    ></div>
+                  ))}
+                </div>
+
+                <button className="w-full py-2.5 rounded-lg bg-white/5 border border-white/10 hover:bg-white/10 text-zinc-200 text-xs font-medium transition-colors flex items-center justify-center gap-2">
+                  <iconify-icon icon="solar:download-linear" width="16"></iconify-icon>
+                  Download for Offline
+                </button>
+              </div>
+            </div>
+
+            {/* Table of Contents */}
+            <TableOfContents headings={tocItems} />
+
+            {/* Related Sessions (Desktop) - moved below TOC or kept if short */}
             <div className="rounded-xl p-5 border border-white/5 bg-zinc-900/30">
-              <h4 className="text-zinc-200 font-medium text-sm mb-3">Related Sessions</h4>
-              <div className="space-y-3">
+              <h4 className="text-zinc-200 font-medium text-xs uppercase tracking-widest mb-4">Related</h4>
+              <div className="space-y-4">
                 {related.map(r => (
                   <Link key={r.id} to={`/session/${r.slug}`} className="flex items-center gap-3 group cursor-pointer">
-                    <div className="w-10 h-10 rounded-lg bg-zinc-800 flex items-center justify-center">
+                    <div className="w-10 h-10 rounded-lg bg-zinc-800 flex items-center justify-center flex-shrink-0">
                       <iconify-icon icon="solar:play-linear" class="text-zinc-500 group-hover:text-zinc-300"></iconify-icon>
                     </div>
                     <div>
-                      <p className="text-sm text-zinc-300 group-hover:text-white transition-colors">{r.title}</p>
-                      <p className="text-[10px] text-zinc-500">{r.duration} • {r.category}</p>
+                      <p className="text-sm text-zinc-300 group-hover:text-white transition-colors leading-tight mb-0.5">{r.title}</p>
+                      <p className="text-[10px] text-zinc-500">{r.duration}</p>
                     </div>
                   </Link>
                 ))}

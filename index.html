@@ -6,6 +6,52 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <script src="https://cdn.tailwindcss.com"></script>
+  <script>
+    tailwind.config = {
+      theme: {
+        extend: {
+          typography: {
+            DEFAULT: {
+              css: {
+                '--tw-prose-body': '#a1a1aa',
+                '--tw-prose-headings': '#e4e4e7',
+                '--tw-prose-lead': '#a1a1aa',
+                '--tw-prose-links': '#818cf8',
+                '--tw-prose-bold': '#d4d4d8',
+                '--tw-prose-counters': '#71717a',
+                '--tw-prose-bullets': '#52525b',
+                '--tw-prose-hr': 'rgb(255 255 255 / 0.1)',
+                '--tw-prose-quotes': '#d4d4d8',
+                '--tw-prose-quote-borders': '#6366f1',
+                '--tw-prose-captions': '#71717a',
+                '--tw-prose-code': '#d4d4d8',
+                '--tw-prose-pre-code': '#d4d4d8',
+                '--tw-prose-pre-bg': 'rgb(24 24 27 / 0.8)',
+                '--tw-prose-th-borders': 'rgb(255 255 255 / 0.1)',
+                '--tw-prose-td-borders': 'rgb(255 255 255 / 0.05)',
+                maxWidth: 'none',
+                fontSize: '1.0625rem',
+                lineHeight: '1.8',
+                p: { marginTop: '1.25em', marginBottom: '1.25em' },
+                h2: { fontSize: '1.5em', marginTop: '2em', marginBottom: '0.75em', fontWeight: '500', letterSpacing: '-0.02em' },
+                h3: { fontSize: '1.25em', marginTop: '1.75em', marginBottom: '0.5em', fontWeight: '500', letterSpacing: '-0.01em' },
+                a: { textDecoration: 'none', fontWeight: '400' },
+                blockquote: { fontStyle: 'italic', borderLeftWidth: '2px', borderLeftColor: '#6366f1', backgroundColor: 'rgb(24 24 27 / 0.5)', padding: '1rem 1.5rem', borderRadius: '0.75rem', quotes: 'none' },
+                ul: { paddingLeft: '1.25em' },
+                ol: { paddingLeft: '1.25em' },
+                li: { marginTop: '0.5em', marginBottom: '0.5em' },
+                img: { borderRadius: '0.75rem', border: '1px solid rgb(255 255 255 / 0.1)' },
+                code: { backgroundColor: 'rgb(24 24 27 / 0.8)', padding: '0.2em 0.4em', borderRadius: '0.25rem', fontSize: '0.875em', fontWeight: '400' },
+                'code::before': { content: '""' },
+                'code::after': { content: '""' },
+                pre: { backgroundColor: 'rgb(24 24 27 / 0.8)', border: '1px solid rgb(255 255 255 / 0.1)', borderRadius: '0.75rem', padding: '1rem 1.25rem' },
+              },
+            },
+          },
+        },
+      },
+    };
+  </script>
   <script src="https://code.iconify.design/iconify-icon/1.0.7/iconify-icon.min.js"></script>
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -87,7 +133,6 @@
   }
 }
 </script>
-  <link rel="stylesheet" href="/index.css">
 </head>
 
 <body class="text-zinc-400 antialiased min-h-screen flex flex-col selection:bg-zinc-800 selection:text-white">

@@ -13,6 +13,12 @@
     "db:seed": "wrangler d1 execute daily-meditation-guide-db --local --persist-to=.wrangler/state --file=seed.sql"
   },
   "dependencies": {
+    "@tiptap/extension-image": "^3.19.0",
+    "@tiptap/extension-link": "^3.19.0",
+    "@tiptap/extension-placeholder": "^3.19.0",
+    "@tiptap/pm": "^3.19.0",
+    "@tiptap/react": "^3.19.0",
+    "@tiptap/starter-kit": "^3.19.0",
     "react": "^19.2.4",
     "react-dom": "^19.2.4",
     "react-helmet-async": "^2.0.5",
