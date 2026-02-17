@@ -96,8 +96,8 @@ const App: React.FC = () => {
     <>
       {!isAdminRoute && <Navbar />}
 
-      <div className="min-h-screen flex flex-col">
-        <main className="flex-grow pt-24 px-6 relative max-w-6xl mx-auto w-full">
+      <div className="flex flex-col flex-1">
+        <main className="flex-1 pt-24 px-6 relative max-w-6xl mx-auto w-full">
           <Routes>
             <Route path="/" element={<HomeView />} />
             <Route
@@ -120,7 +120,7 @@ const App: React.FC = () => {
             <Route path="/terms" element={<TermsView />} />
           </Routes>
         </main>
-        {!isAdminRoute && <div className="pb-32"><Footer /></div>}
+        {!isAdminRoute && <Footer />}
       </div>
 
       {!isAdminRoute && (
