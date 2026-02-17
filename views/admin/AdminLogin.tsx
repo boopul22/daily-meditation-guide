@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { login, isLoggedIn } from '../../lib/api';
 
@@ -8,10 +8,13 @@ const AdminLogin: React.FC = () => {
   const [error, setError] = useState('');
   const [loading, setLoading] = useState(false);
 
-  if (isLoggedIn()) {
-    navigate('/admin/dashboard', { replace: true });
-    return null;
-  }
+  useEffect(() => {
+    if (isLoggedIn()) {
+      navigate('/admin/dashboard', { replace: true });
+    }
+  }, [navigate]);
+
+  if (isLoggedIn()) return null;
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
