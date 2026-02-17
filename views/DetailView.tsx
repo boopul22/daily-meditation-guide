@@ -1,7 +1,7 @@
 import React, { useEffect, useRef, useState, useMemo } from 'react';
 import { useParams, useNavigate, Link } from 'react-router-dom';
 import { Session } from '../types';
-import { fetchSessionBySlug, fetchSessions } from '../lib/api';
+import { fetchSessionBySlug, fetchPublicSessions } from '../lib/api';
 import SEO from '../components/SEO';
 import { processContentForTOC, TOCItem } from '../utils/tocUtils';
 import TableOfContents from '../components/TableOfContents';
@@ -31,7 +31,7 @@ const DetailView: React.FC<DetailViewProps> = ({ onPlay, currentTrackId, isPlayi
     setLoading(true);
     setError('');
 
-    Promise.all([fetchSessionBySlug(slug), fetchSessions()])
+    Promise.all([fetchSessionBySlug(slug), fetchPublicSessions()])
       .then(([s, all]) => {
         setSession(s);
         setAllSessions(all);

@@ -29,6 +29,15 @@ export async function fetchSessions(): Promise<Session[]> {
   return request('/sessions');
 }
 
+export async function fetchPublicSessions(): Promise<Session[]> {
+  const res = await fetch(`${API_BASE}/sessions`);
+  if (!res.ok) {
+    const body = await res.json().catch(() => ({}));
+    throw new Error((body as any).error || `Request failed: ${res.status}`);
+  }
+  return res.json();
+}
+
 export async function fetchSessionBySlug(slug: string): Promise<Session> {
   return request(`/sessions/${slug}`);
 }

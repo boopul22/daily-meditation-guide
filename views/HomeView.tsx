@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { FILTERS } from '../constants';
-import { fetchSessions } from '../lib/api';
+import { fetchPublicSessions } from '../lib/api';
 import { Session } from '../types';
 import SessionCard from '../components/SessionCard';
 import SessionCardSkeleton from '../components/SessionCardSkeleton';
@@ -13,7 +13,7 @@ const HomeView: React.FC = () => {
   const [error, setError] = useState('');
 
   useEffect(() => {
-    fetchSessions()
+    fetchPublicSessions()
       .then(setSessions)
       .catch(err => setError(err.message))
       .finally(() => setLoading(false));
