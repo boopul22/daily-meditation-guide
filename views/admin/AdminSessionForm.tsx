@@ -70,6 +70,11 @@ const AdminSessionForm: React.FC = () => {
     setForm(prev => {
       const updated = { ...prev, [field]: value };
       if (field === 'title' && !isEdit) updated.slug = slugify(value);
+      // Auto-fill role when selecting an existing author
+      if (field === 'author') {
+        const match = allSessions.find(s => s.author === value);
+        if (match) updated.role = match.role;
+      }
       return updated;
     });
   };
@@ -113,6 +118,8 @@ const AdminSessionForm: React.FC = () => {
   if (loading) return <div className="h-screen flex items-center justify-center"><p className="text-zinc-500">Loading...</p></div>;
 
   const relatedOptions = allSessions.filter(s => s.slug !== form.slug);
+  const existingAuthors = [...new Set(allSessions.map(s => s.author).filter(Boolean))];
+  const existingRoles = [...new Set(allSessions.map(s => s.role).filter(Boolean))];
 
   return (
     <form onSubmit={handleSubmit} className="fixed inset-0 flex flex-col bg-[#030303] z-50">
@@ -164,8 +171,16 @@ const AdminSessionForm: React.FC = () => {
 
           {/* Author + Role */}
           <div className="grid grid-cols-2 gap-2">
-            <div><span className="sf-label">Author</span><input value={form.author} onChange={e => handleChange('author', e.target.value)} className="sf-input" required /></div>
-            <div><span className="sf-label">Role</span><input value={form.role} onChange={e => handleChange('role', e.target.value)} className="sf-input" required /></div>
+            <div>
+              <span className="sf-label">Author</span>
+              <input value={form.author} onChange={e => handleChange('author', e.target.value)} list="authors-list" className="sf-input" required />
+              <datalist id="authors-list">{existingAuthors.map(a => <option key={a} value={a} />)}</datalist>
+            </div>
+            <div>
+              <span className="sf-label">Role</span>
+              <input value={form.role} onChange={e => handleChange('role', e.target.value)} list="roles-list" className="sf-input" required />
+              <datalist id="roles-list">{existingRoles.map(r => <option key={r} value={r} />)}</datalist>
+            </div>
           </div>
 
           {/* Duration + Category + Color */}
