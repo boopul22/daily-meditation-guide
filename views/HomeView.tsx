@@ -40,12 +40,12 @@ const HomeView: React.FC = () => {
           <p className="text-lg text-zinc-500 font-light max-w-md leading-relaxed">
             Curated audio journeys to help you focus, sleep, and reset. Start your daily practice with just five minutes.
           </p>
-          <div className="flex items-center gap-4 pt-2">
-            <button className="group flex items-center gap-3 px-6 py-3 bg-zinc-100 hover:bg-white text-zinc-950 rounded-full font-medium text-sm transition-all hover:shadow-[0_0_20px_-5px_rgba(255,255,255,0.3)]">
+          <div className="flex flex-col sm:flex-row items-center gap-4 pt-2 w-full sm:w-auto">
+            <button className="group flex items-center justify-center gap-3 px-6 py-3 bg-zinc-100 hover:bg-white text-zinc-950 rounded-full font-medium text-sm transition-all hover:shadow-[0_0_20px_-5px_rgba(255,255,255,0.3)] w-full sm:w-auto">
               <iconify-icon icon="solar:play-circle-linear" width="20" stroke-width="1.5" class="text-zinc-950"></iconify-icon>
               Start Daily Calm
             </button>
-            <button className="px-6 py-3 border border-white/10 hover:border-white/20 hover:bg-white/5 rounded-full text-zinc-300 text-sm font-medium transition-all">
+            <button className="px-6 py-3 border border-white/10 hover:border-white/20 hover:bg-white/5 rounded-full text-zinc-300 text-sm font-medium transition-all w-full sm:w-auto">
               Explore Library
             </button>
           </div>
