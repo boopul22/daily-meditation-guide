@@ -146,47 +146,49 @@ const DetailView: React.FC<DetailViewProps> = ({ onPlay, currentTrackId, isPlayi
           </header>
 
           {/* Mobile Player Card - shown only on mobile */}
-          <div className="lg:hidden">
-            <div className="rounded-2xl overflow-hidden bg-zinc-900 border border-white/10 shadow-2xl shadow-black/50">
-              <div className={`h-52 bg-gradient-to-br ${gradientClass} to-zinc-900 relative transition-colors duration-500`}>
-                {session.featuredImage ? (
-                  <img src={session.featuredImage} alt={session.title} className="absolute inset-0 w-full h-full object-cover" />
-                ) : (
-                  <div className="absolute inset-0 bg-[url('https://grainy-gradients.vercel.app/noise.svg')] opacity-40"></div>
-                )}
-                <div className="absolute inset-0 flex items-center justify-center">
-                  <button
-                    onClick={() => onPlay(session)}
-                    className="w-16 h-16 bg-white rounded-full flex items-center justify-center text-black hover:scale-105 transition-transform shadow-[0_0_30px_rgba(255,255,255,0.2)]"
-                  >
-                    <iconify-icon icon={isCurrent && isPlaying ? "solar:pause-linear" : "solar:play-linear"} width="28" stroke-width="2" class="ml-1"></iconify-icon>
+          {session.audioUrl && (
+            <div className="lg:hidden">
+              <div className="rounded-2xl overflow-hidden bg-zinc-900 border border-white/10 shadow-2xl shadow-black/50">
+                <div className={`h-52 bg-gradient-to-br ${gradientClass} to-zinc-900 relative transition-colors duration-500`}>
+                  {session.featuredImage ? (
+                    <img src={session.featuredImage} alt={session.title} className="absolute inset-0 w-full h-full object-cover" />
+                  ) : (
+                    <div className="absolute inset-0 bg-[url('https://grainy-gradients.vercel.app/noise.svg')] opacity-40"></div>
+                  )}
+                  <div className="absolute inset-0 flex items-center justify-center">
+                    <button
+                      onClick={() => onPlay(session)}
+                      className="w-16 h-16 bg-white rounded-full flex items-center justify-center text-black hover:scale-105 transition-transform shadow-[0_0_30px_rgba(255,255,255,0.2)]"
+                    >
+                      <iconify-icon icon={isCurrent && isPlaying ? "solar:pause-linear" : "solar:play-linear"} width="28" stroke-width="2" class="ml-1"></iconify-icon>
+                    </button>
+                  </div>
+                </div>
+                <div className="p-5 space-y-3">
+                  <div className="flex justify-between items-center text-xs font-medium text-zinc-500 uppercase tracking-widest">
+                    <span>{isCurrent && isPlaying ? "Now Playing" : "Up Next"}</span>
+                    <span className="flex items-center gap-1">
+                      <span className={`w-1.5 h-1.5 rounded-full ${isCurrent ? 'bg-green-500 animate-pulse' : 'bg-zinc-600'}`}></span>
+                      {isCurrent ? 'Online' : 'Offline'}
+                    </span>
+                  </div>
+                  <div className={`flex items-center gap-1 h-8 items-end justify-center ${isCurrent && isPlaying ? 'opacity-100' : 'opacity-30'}`}>
+                    {[3, 5, 8, 4, 6, 3, 7, 4, 2, 5, 3, 5, 8, 4, 6].map((h, i) => (
+                      <div
+                        key={i}
+                        className={`w-1 bg-zinc-500 rounded-full ${isCurrent && isPlaying ? 'animate-pulse' : ''}`}
+                        style={{ height: `${h * 4}px`, animationDelay: `${i * 0.05}s` }}
+                      ></div>
+                    ))}
+                  </div>
+                  <button className="w-full py-3 rounded-xl bg-white/5 border border-white/10 hover:bg-white/10 text-zinc-200 text-sm font-medium transition-colors flex items-center justify-center gap-2">
+                    <iconify-icon icon="solar:download-linear" width="18"></iconify-icon>
+                    Download for Offline
                   </button>
                 </div>
               </div>
-              <div className="p-5 space-y-3">
-                <div className="flex justify-between items-center text-xs font-medium text-zinc-500 uppercase tracking-widest">
-                  <span>{isCurrent && isPlaying ? "Now Playing" : "Up Next"}</span>
-                  <span className="flex items-center gap-1">
-                    <span className={`w-1.5 h-1.5 rounded-full ${isCurrent ? 'bg-green-500 animate-pulse' : 'bg-zinc-600'}`}></span>
-                    {isCurrent ? 'Online' : 'Offline'}
-                  </span>
-                </div>
-                <div className={`flex items-center gap-1 h-8 items-end justify-center ${isCurrent && isPlaying ? 'opacity-100' : 'opacity-30'}`}>
-                  {[3, 5, 8, 4, 6, 3, 7, 4, 2, 5, 3, 5, 8, 4, 6].map((h, i) => (
-                    <div
-                      key={i}
-                      className={`w-1 bg-zinc-500 rounded-full ${isCurrent && isPlaying ? 'animate-pulse' : ''}`}
-                      style={{ height: `${h * 4}px`, animationDelay: `${i * 0.05}s` }}
-                    ></div>
-                  ))}
-                </div>
-                <button className="w-full py-3 rounded-xl bg-white/5 border border-white/10 hover:bg-white/10 text-zinc-200 text-sm font-medium transition-colors flex items-center justify-center gap-2">
-                  <iconify-icon icon="solar:download-linear" width="18"></iconify-icon>
-                  Download for Offline
-                </button>
-              </div>
             </div>
-          </div>
+          )}
 
           {/* Mobile TOC - Collapsible */}
           <div className="block lg:hidden mt-8">
@@ -224,51 +226,53 @@ const DetailView: React.FC<DetailViewProps> = ({ onPlay, currentTrackId, isPlayi
           <div className="sticky top-24 space-y-8">
 
             {/* Visual Player Card */}
-            <div className="rounded-2xl overflow-hidden bg-zinc-900 border border-white/10 shadow-2xl shadow-black/50">
-              <div className={`h-48 bg-gradient-to-br ${gradientClass} to-zinc-900 relative transition-colors duration-500`}>
-                {session.featuredImage ? (
-                  <img src={session.featuredImage} alt={session.title} className="absolute inset-0 w-full h-full object-cover" />
-                ) : (
-                  <div className="absolute inset-0 bg-[url('https://grainy-gradients.vercel.app/noise.svg')] opacity-40"></div>
-                )}
-                <div className="absolute inset-0 flex items-center justify-center">
-                  <button
-                    onClick={() => onPlay(session)}
-                    className="w-14 h-14 bg-white rounded-full flex items-center justify-center text-black hover:scale-105 transition-transform shadow-[0_0_30px_rgba(255,255,255,0.2)]"
-                  >
-                    <iconify-icon icon={isCurrent && isPlaying ? "solar:pause-linear" : "solar:play-linear"} width="24" stroke-width="2" class="ml-1"></iconify-icon>
+            {session.audioUrl && (
+              <div className="rounded-2xl overflow-hidden bg-zinc-900 border border-white/10 shadow-2xl shadow-black/50">
+                <div className={`h-48 bg-gradient-to-br ${gradientClass} to-zinc-900 relative transition-colors duration-500`}>
+                  {session.featuredImage ? (
+                    <img src={session.featuredImage} alt={session.title} className="absolute inset-0 w-full h-full object-cover" />
+                  ) : (
+                    <div className="absolute inset-0 bg-[url('https://grainy-gradients.vercel.app/noise.svg')] opacity-40"></div>
+                  )}
+                  <div className="absolute inset-0 flex items-center justify-center">
+                    <button
+                      onClick={() => onPlay(session)}
+                      className="w-14 h-14 bg-white rounded-full flex items-center justify-center text-black hover:scale-105 transition-transform shadow-[0_0_30px_rgba(255,255,255,0.2)]"
+                    >
+                      <iconify-icon icon={isCurrent && isPlaying ? "solar:pause-linear" : "solar:play-linear"} width="24" stroke-width="2" class="ml-1"></iconify-icon>
+                    </button>
+                  </div>
+                </div>
+                <div className="p-5 space-y-4">
+                  <div className="flex justify-between items-center text-xs font-medium text-zinc-500 uppercase tracking-widest">
+                    <span>{isCurrent && isPlaying ? "Now Playing" : "Up Next"}</span>
+                    <span className="flex items-center gap-1">
+                      <span className={`w-1.5 h-1.5 rounded-full ${isCurrent ? 'bg-green-500 animate-pulse' : 'bg-zinc-600'}`}></span>
+                      {isCurrent ? 'Online' : 'Offline'}
+                    </span>
+                  </div>
+                  <div>
+                    <h3 className="text-lg font-medium text-zinc-100 tracking-tight leading-snug">{session.title}</h3>
+                    <p className="text-zinc-500 text-xs mt-1">Guided Audio Session</p>
+                  </div>
+
+                  <div className={`flex items-center gap-1 h-6 items-end justify-center my-1 ${isCurrent && isPlaying ? 'opacity-100' : 'opacity-30'}`}>
+                    {[3, 5, 8, 4, 6, 3, 7, 4, 2, 5, 3, 5, 8, 4, 6].map((h, i) => (
+                      <div
+                        key={i}
+                        className={`w-1 bg-zinc-500 rounded-full ${isCurrent && isPlaying ? 'animate-pulse' : ''}`}
+                        style={{ height: `${h * 3}px`, animationDelay: `${i * 0.05}s` }}
+                      ></div>
+                    ))}
+                  </div>
+
+                  <button className="w-full py-2.5 rounded-lg bg-white/5 border border-white/10 hover:bg-white/10 text-zinc-200 text-xs font-medium transition-colors flex items-center justify-center gap-2">
+                    <iconify-icon icon="solar:download-linear" width="16"></iconify-icon>
+                    Download for Offline
                   </button>
                 </div>
               </div>
-              <div className="p-5 space-y-4">
-                <div className="flex justify-between items-center text-xs font-medium text-zinc-500 uppercase tracking-widest">
-                  <span>{isCurrent && isPlaying ? "Now Playing" : "Up Next"}</span>
-                  <span className="flex items-center gap-1">
-                    <span className={`w-1.5 h-1.5 rounded-full ${isCurrent ? 'bg-green-500 animate-pulse' : 'bg-zinc-600'}`}></span>
-                    {isCurrent ? 'Online' : 'Offline'}
-                  </span>
-                </div>
-                <div>
-                  <h3 className="text-lg font-medium text-zinc-100 tracking-tight leading-snug">{session.title}</h3>
-                  <p className="text-zinc-500 text-xs mt-1">Guided Audio Session</p>
-                </div>
-
-                <div className={`flex items-center gap-1 h-6 items-end justify-center my-1 ${isCurrent && isPlaying ? 'opacity-100' : 'opacity-30'}`}>
-                  {[3, 5, 8, 4, 6, 3, 7, 4, 2, 5, 3, 5, 8, 4, 6].map((h, i) => (
-                    <div
-                      key={i}
-                      className={`w-1 bg-zinc-500 rounded-full ${isCurrent && isPlaying ? 'animate-pulse' : ''}`}
-                      style={{ height: `${h * 3}px`, animationDelay: `${i * 0.05}s` }}
-                    ></div>
-                  ))}
-                </div>
-
-                <button className="w-full py-2.5 rounded-lg bg-white/5 border border-white/10 hover:bg-white/10 text-zinc-200 text-xs font-medium transition-colors flex items-center justify-center gap-2">
-                  <iconify-icon icon="solar:download-linear" width="16"></iconify-icon>
-                  Download for Offline
-                </button>
-              </div>
-            </div>
+            )}
 
             {/* Table of Contents */}
             <TableOfContents headings={tocItems} />
