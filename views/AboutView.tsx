@@ -7,7 +7,7 @@ const AboutView: React.FC = () => {
             <SEO
                 title="About - Daily Meditation Guide"
                 description="Learn about Daily Meditation Guide - your daily source for guided meditations, ambient soundscapes, and mindfulness resources, created by Bipul Kumar."
-                canonical="/about"
+                url="https://dailymeditationguide.com/about"
             />
 
             {/* Background Ambience */}

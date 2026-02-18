@@ -16,6 +16,7 @@ import TermsView from './views/TermsView';
 import DisclaimerView from './views/DisclaimerView';
 import SessionsView from './views/SessionsView';
 import CookieConsent from './components/CookieConsent';
+import NotFound from './views/NotFound';
 
 const App: React.FC = () => {
   const navigate = useNavigate();
@@ -123,6 +124,7 @@ const App: React.FC = () => {
             <Route path="/privacy" element={<PrivacyPolicyView />} />
             <Route path="/terms" element={<TermsView />} />
             <Route path="/disclaimer" element={<DisclaimerView />} />
+            <Route path="*" element={<NotFound />} />
           </Routes>
         </main>
         {!isAdminRoute && <Footer />}

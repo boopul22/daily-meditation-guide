@@ -8,7 +8,7 @@ const DisclaimerView: React.FC = () => {
             <SEO
                 title="Disclaimer - Daily Meditation Guide"
                 description="Important disclaimers regarding the content on Daily Meditation Guide. This website does not provide medical advice."
-                canonical="/disclaimer"
+                url="https://dailymeditationguide.com/disclaimer"
             />
 
             {/* Background Ambience */}

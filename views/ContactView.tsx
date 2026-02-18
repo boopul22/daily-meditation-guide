@@ -19,7 +19,7 @@ const ContactView: React.FC = () => {
             <SEO
                 title="Contact Us - Daily Meditation Guide"
                 description="Get in touch with the Daily Meditation Guide team. We're here to help with any questions or feedback."
-                canonical="/contact"
+                url="https://dailymeditationguide.com/contact"
             />
 
             {/* Background Ambience */}

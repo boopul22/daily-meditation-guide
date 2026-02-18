@@ -8,7 +8,7 @@ const TermsView: React.FC = () => {
             <SEO
                 title="Terms of Service - Daily Meditation Guide"
                 description="Terms and Conditions for using Daily Meditation Guide. Please read these terms carefully before using our website."
-                canonical="/terms"
+                url="https://dailymeditationguide.com/terms"
             />
 
             {/* Background Ambience */}

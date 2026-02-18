@@ -7,7 +7,7 @@ const PrivacyPolicyView: React.FC = () => {
             <SEO
                 title="Privacy Policy - Daily Meditation Guide"
                 description="Our commitment to protecting your privacy. Read our Privacy Policy to understand how we collect and use your data."
-                canonical="/privacy"
+                url="https://dailymeditationguide.com/privacy"
             />
 
             {/* Background Ambience */}
