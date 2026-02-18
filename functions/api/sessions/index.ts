@@ -31,8 +31,8 @@ export const onRequestPost: PagesFunction<Env> = async ({ request, env }) => {
   const publishedAt = status === 'published' ? now : null;
 
   await env.DB.prepare(
-    `INSERT INTO sessions (id, slug, title, author, role, duration, duration_sec, category, color, description, featured_image, audio_url, full_content, related_sessions, status, published_at, created_at, updated_at)
-     VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`
+    `INSERT INTO sessions (id, slug, title, author, role, duration, duration_sec, category, color, description, featured_image, audio_url, full_content, related_sessions, faq_items, status, published_at, created_at, updated_at)
+     VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`
   ).bind(
     id,
     slug,
@@ -48,6 +48,7 @@ export const onRequestPost: PagesFunction<Env> = async ({ request, env }) => {
     body.audioUrl || '',
     body.fullContent || '',
     JSON.stringify(body.relatedSessions || []),
+    JSON.stringify(body.faqItems || []),
     status,
     publishedAt,
     now,

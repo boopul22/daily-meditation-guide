@@ -2,7 +2,7 @@ import React, { useCallback, useEffect, useRef, useState } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { useAdminAuth } from '../../lib/useAdminAuth';
 import { fetchSessions, fetchSessionBySlug, createSession, updateSession, uploadImage } from '../../lib/api';
-import { Session } from '../../types';
+import { Session, FAQItem } from '../../types';
 import RichTextEditor from '../../components/admin/RichTextEditor';
 
 const CATEGORIES = ['Sleep', 'Anxiety', 'Focus', 'Sounds'];
@@ -30,6 +30,7 @@ interface FormData {
   category: string; color: string; description: string;
   featuredImage: string; audioUrl: string; fullContent: string;
   relatedSessions: string[];
+  faqItems: FAQItem[];
 }
 
 const AdminSessionForm: React.FC = () => {
@@ -63,6 +64,7 @@ const AdminSessionForm: React.FC = () => {
     category: CATEGORIES[0], color: COLORS[0], description: '',
     featuredImage: '', audioUrl: '', fullContent: '',
     relatedSessions: [],
+    faqItems: [],
   });
 
   // Keep formRef in sync
@@ -82,6 +84,7 @@ const AdminSessionForm: React.FC = () => {
             color: session.color, description: session.description,
             featuredImage: session.featuredImage || '', audioUrl: session.audioUrl || '',
             fullContent: session.fullContent, relatedSessions: session.relatedSessions,
+            faqItems: session.faqItems || [],
           });
           setStatus(session.status || 'draft');
           setPublishedAt(session.publishedAt || null);
@@ -113,6 +116,34 @@ const AdminSessionForm: React.FC = () => {
       relatedSessions: prev.relatedSessions.includes(id)
         ? prev.relatedSessions.filter(r => r !== id)
         : [...prev.relatedSessions, id],
+    }));
+    hasUnsavedChanges.current = true;
+    scheduleAutoSave();
+  };
+
+  // FAQ management
+  const addFaqItem = () => {
+    setForm(prev => ({
+      ...prev,
+      faqItems: [...prev.faqItems, { question: '', answer: '' }],
+    }));
+    hasUnsavedChanges.current = true;
+    scheduleAutoSave();
+  };
+
+  const updateFaqItem = (index: number, field: 'question' | 'answer', value: string) => {
+    setForm(prev => ({
+      ...prev,
+      faqItems: prev.faqItems.map((item, i) => i === index ? { ...item, [field]: value } : item),
+    }));
+    hasUnsavedChanges.current = true;
+    scheduleAutoSave();
+  };
+
+  const removeFaqItem = (index: number) => {
+    setForm(prev => ({
+      ...prev,
+      faqItems: prev.faqItems.filter((_, i) => i !== index),
     }));
     hasUnsavedChanges.current = true;
     scheduleAutoSave();
@@ -362,6 +393,59 @@ const AdminSessionForm: React.FC = () => {
           </div>
         </div>
       )}
+
+      {/* FAQ Section */}
+      <div className="pt-2 border-t border-white/5">
+        <div className="flex items-center justify-between mb-1.5">
+          <span className="sf-label !mb-0">FAQ</span>
+          <button
+            type="button"
+            onClick={addFaqItem}
+            className="flex items-center gap-1 px-1.5 py-0.5 rounded text-[10px] font-medium text-indigo-400 hover:text-indigo-300 hover:bg-indigo-500/10 transition-colors"
+          >
+            <iconify-icon icon="solar:add-circle-linear" width="12"></iconify-icon>
+            Add
+          </button>
+        </div>
+        {form.faqItems.length === 0 ? (
+          <p className="text-[10px] text-zinc-600 italic">No FAQ items yet</p>
+        ) : (
+          <div className="space-y-2">
+            {form.faqItems.map((faq, i) => (
+              <div key={i} className="rounded-md border border-white/5 bg-zinc-900/50 p-2 space-y-1.5">
+                <div className="flex items-start gap-1">
+                  <div className="flex-1">
+                    <span className="sf-label">Q{i + 1}</span>
+                    <input
+                      value={faq.question}
+                      onChange={e => updateFaqItem(i, 'question', e.target.value)}
+                      placeholder="Question..."
+                      className="sf-input !text-xs"
+                    />
+                  </div>
+                  <button
+                    type="button"
+                    onClick={() => removeFaqItem(i)}
+                    className="flex-none mt-3 w-6 h-6 rounded flex items-center justify-center text-zinc-600 hover:text-rose-400 hover:bg-rose-500/10 transition-colors"
+                  >
+                    <iconify-icon icon="solar:trash-bin-minimalistic-linear" width="12"></iconify-icon>
+                  </button>
+                </div>
+                <div>
+                  <span className="sf-label">Answer</span>
+                  <textarea
+                    value={faq.answer}
+                    onChange={e => updateFaqItem(i, 'answer', e.target.value)}
+                    placeholder="Answer..."
+                    rows={2}
+                    className="sf-input resize-none !text-xs"
+                  />
+                </div>
+              </div>
+            ))}
+          </div>
+        )}
+      </div>
 
       {/* Published info */}
       {publishedAt && (

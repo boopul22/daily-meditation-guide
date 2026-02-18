@@ -1,4 +1,4 @@
-import React, { useEffect, useRef, useState, useMemo } from 'react';
+import React, { useEffect, useRef, useState } from 'react';
 import { useParams, useNavigate, Link } from 'react-router-dom';
 import { Session } from '../types';
 import { fetchSessionBySlug, fetchPublicSessions } from '../lib/api';
@@ -11,6 +11,33 @@ interface DetailViewProps {
   currentTrackId?: string;
   isPlaying: boolean;
 }
+
+const FAQAccordion: React.FC<{ question: string; answer: string }> = ({ question, answer }) => {
+  const [open, setOpen] = useState(false);
+  return (
+    <div className="rounded-xl border border-white/5 bg-zinc-900/30 overflow-hidden transition-colors hover:border-white/10">
+      <button
+        type="button"
+        onClick={() => setOpen(!open)}
+        className="w-full flex items-center justify-between gap-4 px-5 py-4 text-left"
+      >
+        <span className="text-sm font-medium text-zinc-200">{question}</span>
+        <iconify-icon
+          icon="solar:alt-arrow-down-linear"
+          width="16"
+          class={`flex-none text-zinc-500 transition-transform duration-200 ${open ? 'rotate-180' : ''}`}
+        ></iconify-icon>
+      </button>
+      <div
+        className={`grid transition-all duration-200 ease-in-out ${open ? 'grid-rows-[1fr] opacity-100' : 'grid-rows-[0fr] opacity-0'}`}
+      >
+        <div className="overflow-hidden">
+          <p className="px-5 pb-4 text-sm text-zinc-400 leading-relaxed">{answer}</p>
+        </div>
+      </div>
+    </div>
+  );
+};
 
 const DetailView: React.FC<DetailViewProps> = ({ onPlay, currentTrackId, isPlaying }) => {
   const { slug } = useParams<{ slug: string }>();
@@ -105,6 +132,7 @@ const DetailView: React.FC<DetailViewProps> = ({ onPlay, currentTrackId, isPlayi
           publishedAt={session.publishedAt ?? undefined}
           updatedAt={session.updatedAt}
           articleSection={session.category}
+          faqItems={session.faqItems}
         />
       )}
       {/* Back Button */}
@@ -205,6 +233,21 @@ const DetailView: React.FC<DetailViewProps> = ({ onPlay, currentTrackId, isPlayi
             className="prose prose-invert max-w-none"
             dangerouslySetInnerHTML={{ __html: processedHtml || session.fullContent }}
           />
+
+          {/* FAQ Section */}
+          {session.faqItems && session.faqItems.length > 0 && (
+            <section className="pt-8 border-t border-white/5">
+              <h2 className="text-xl font-medium text-zinc-100 mb-6 flex items-center gap-2">
+                <iconify-icon icon="solar:chat-round-dots-linear" width="22" class="text-indigo-400"></iconify-icon>
+                Frequently Asked Questions
+              </h2>
+              <div className="space-y-3">
+                {session.faqItems.map((faq, i) => (
+                  <FAQAccordion key={i} question={faq.question} answer={faq.answer} />
+                ))}
+              </div>
+            </section>
+          )}
 
           {/* Mobile Related Sessions (moved to bottom of content on mobile) */}
           <div className="lg:hidden pt-8 border-t border-white/5">

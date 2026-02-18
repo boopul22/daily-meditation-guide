@@ -8,6 +8,11 @@ export interface User {
   isAdmin: boolean;
 }
 
+export interface FAQItem {
+  question: string;
+  answer: string;
+}
+
 export interface Session {
   id: string;
   slug: string;
@@ -23,6 +28,7 @@ export interface Session {
   audioUrl: string;
   fullContent: string;
   relatedSessions: string[];
+  faqItems: FAQItem[];
   status: 'draft' | 'published';
   publishedAt?: string | null;
   createdAt?: string;

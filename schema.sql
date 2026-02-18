@@ -15,6 +15,7 @@ CREATE TABLE sessions (
   audio_url TEXT NOT NULL DEFAULT '',
   full_content TEXT NOT NULL DEFAULT '',
   related_sessions TEXT NOT NULL DEFAULT '[]',
+  faq_items TEXT NOT NULL DEFAULT '[]',
   status TEXT NOT NULL DEFAULT 'draft',
   published_at TEXT,
   created_at TEXT NOT NULL DEFAULT (datetime('now')),

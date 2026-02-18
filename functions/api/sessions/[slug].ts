@@ -59,11 +59,18 @@ export const onRequestPut: PagesFunction<Env> = async ({ params, request, env })
       publishedAt = null;
     }
 
+    let existingFaq: any[] = [];
+    try {
+      existingFaq = existing.faq_items ? JSON.parse(existing.faq_items) : [];
+    } catch {
+      existingFaq = [];
+    }
+
     await env.DB.prepare(
       `UPDATE sessions SET
         slug = ?, title = ?, author = ?, role = ?, duration = ?, duration_sec = ?,
         category = ?, color = ?, description = ?, featured_image = ?, audio_url = ?,
-        full_content = ?, related_sessions = ?, status = ?, published_at = ?, updated_at = ?
+        full_content = ?, related_sessions = ?, faq_items = ?, status = ?, published_at = ?, updated_at = ?
        WHERE id = ?`
     ).bind(
       body.slug ?? existing.slug,
@@ -79,6 +86,7 @@ export const onRequestPut: PagesFunction<Env> = async ({ params, request, env })
       body.audioUrl ?? existing.audio_url ?? '',
       body.fullContent ?? existing.full_content ?? '',
       JSON.stringify(body.relatedSessions ?? existingRelated),
+      JSON.stringify(body.faqItems ?? existingFaq),
       newStatus,
       publishedAt,
       now,

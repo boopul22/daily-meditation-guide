@@ -2,6 +2,11 @@
 import React from 'react';
 import { Helmet } from 'react-helmet-async';
 
+interface FAQItem {
+    question: string;
+    answer: string;
+}
+
 interface SEOProps {
     title?: string;
     description?: string;
@@ -15,6 +20,7 @@ interface SEOProps {
     publishedAt?: string | null;
     updatedAt?: string | null;
     articleSection?: string;
+    faqItems?: FAQItem[];
 }
 
 const SEO: React.FC<SEOProps> = ({
@@ -30,9 +36,25 @@ const SEO: React.FC<SEOProps> = ({
     publishedAt,
     updatedAt,
     articleSection,
+    faqItems,
 }) => {
     const siteTitle = title === "Daily Meditation Guide" ? title : `${title} | Daily Meditation Guide`;
     const canonicalUrl = canonical || url;
+
+    const hasFaq = faqItems && faqItems.length > 0 && faqItems.some(f => f.question && f.answer);
+
+    const faqJsonLd = hasFaq ? {
+        "@context": "https://schema.org",
+        "@type": "FAQPage",
+        "mainEntity": faqItems!.filter(f => f.question && f.answer).map(f => ({
+            "@type": "Question",
+            "name": f.question,
+            "acceptedAnswer": {
+                "@type": "Answer",
+                "text": f.answer
+            }
+        }))
+    } : null;
 
     const isArticle = type === 'article';
 
@@ -104,6 +126,13 @@ const SEO: React.FC<SEOProps> = ({
             <script type="application/ld+json">
                 {JSON.stringify(jsonLd)}
             </script>
+
+            {/* FAQ Structured Data (JSON-LD) */}
+            {faqJsonLd && (
+                <script type="application/ld+json">
+                    {JSON.stringify(faqJsonLd)}
+                </script>
+            )}
         </Helmet>
     );
 };
