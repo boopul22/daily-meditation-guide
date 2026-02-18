@@ -87,8 +87,8 @@ const TableOfContents: React.FC<TableOfContentsProps> = ({ headings }) => {
                 </div>
             </div>
 
-            {/* Desktop Sticky Sidebar */}
-            <div className="hidden lg:block sticky top-24">
+            {/* Desktop Sticky Sidebar - Sticky is now handled by parent in DetailView */}
+            <div className="hidden lg:block">
                 <div className="pl-4 border-l border-white/10 relative">
                     {/* Active Indicator Line - simplistic implementation */}
                     <div

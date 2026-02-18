@@ -35,9 +35,8 @@ const Navbar: React.FC = () => {
           {/* Desktop Menu */}
           <div className="hidden md:flex items-center gap-8">
             <Link to="/" className="text-sm font-medium text-zinc-400 hover:text-zinc-100 transition-colors">Practice</Link>
-            <button className="text-sm font-medium text-zinc-400 hover:text-zinc-100 transition-colors">Sounds</button>
-            <button className="text-sm font-medium text-zinc-400 hover:text-zinc-100 transition-colors">Journal</button>
-            <button className="text-sm font-medium text-zinc-400 hover:text-zinc-100 transition-colors">About</button>
+            <Link to="/sessions" className="text-sm font-medium text-zinc-400 hover:text-zinc-100 transition-colors">Sessions</Link>
+            <Link to="/about" className="text-sm font-medium text-zinc-400 hover:text-zinc-100 transition-colors">About</Link>
           </div>
 
           <div className="flex items-center gap-4">
@@ -103,9 +102,8 @@ const Navbar: React.FC = () => {
         <div className="fixed inset-0 z-40 bg-[#030303] pt-24 px-6 md:hidden animate-[fade-enter_0.2s_ease-out]">
           <div className="flex flex-col gap-6 text-lg font-medium text-zinc-300">
             <Link to="/" onClick={() => setIsMobileMenuOpen(false)} className="border-b border-white/5 pb-4">Practice</Link>
-            <button className="text-left border-b border-white/5 pb-4">Sounds</button>
-            <button className="text-left border-b border-white/5 pb-4">Journal</button>
-            <button className="text-left border-b border-white/5 pb-4">About</button>
+            <Link to="/sessions" onClick={() => setIsMobileMenuOpen(false)} className="border-b border-white/5 pb-4">Sessions</Link>
+            <Link to="/about" onClick={() => setIsMobileMenuOpen(false)} className="border-b border-white/5 pb-4">About</Link>
 
             <div className="flex items-center gap-4 mt-4">
               <button className="p-3 bg-white/5 rounded-full text-zinc-400">

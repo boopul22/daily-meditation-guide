@@ -5,8 +5,8 @@ const AboutView: React.FC = () => {
     return (
         <div className="min-h-screen animate-[fade-enter_0.5s_ease-out]">
             <SEO
-                title="About Bipul Kumar - Daily Meditation Guide"
-                description="Hi, I'm Bipul Kumar. I'm an indie developer and designer from India, building tools for mindfulness and creativity."
+                title="About - Daily Meditation Guide"
+                description="Learn about Daily Meditation Guide - your daily source for guided meditations, ambient soundscapes, and mindfulness resources, created by Bipul Kumar."
                 canonical="/about"
             />
 
@@ -23,7 +23,7 @@ const AboutView: React.FC = () => {
                 <section className="text-center space-y-8">
                     <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full border border-white/10 bg-white/5 text-zinc-400 text-xs font-medium tracking-wide">
                         <span className="w-1.5 h-1.5 rounded-full bg-indigo-500"></span>
-                        ABOUT ME
+                        ABOUT
                     </div>
 
                     <h1 className="text-5xl md:text-7xl font-medium text-zinc-100 tracking-tight leading-[1.1]">
@@ -33,6 +33,22 @@ const AboutView: React.FC = () => {
                     <p className="text-xl text-zinc-400 max-w-2xl mx-auto leading-relaxed font-light">
                         I'm an indie developer and designer from India. I believe that consistency beats talent and action beats intention.
                     </p>
+                </section>
+
+                {/* About the Site */}
+                <section className="space-y-8">
+                    <h2 className="text-3xl font-medium text-zinc-100 tracking-tight">About Daily Meditation Guide</h2>
+                    <div className="p-8 rounded-3xl border border-white/5 bg-zinc-900/40 backdrop-blur-sm space-y-6">
+                        <p className="text-zinc-400 leading-relaxed text-lg">
+                            Daily Meditation Guide is a curated platform offering guided meditation sessions, ambient soundscapes, and mindfulness resources designed to help you find focus, calm, and clarity in your everyday life.
+                        </p>
+                        <p className="text-zinc-400 leading-relaxed text-lg">
+                            Whether you're looking to manage stress, improve sleep, sharpen your focus, or simply take a moment to breathe, our sessions are crafted to support your personal wellness journey. From short 5-minute breathing exercises to deep 30-minute guided meditations, there's something for everyone.
+                        </p>
+                        <p className="text-zinc-400 leading-relaxed text-lg">
+                            Our mission is simple: <span className="text-zinc-200">make mindfulness and mental clarity accessible to everyone</span>, regardless of experience level or background. New sessions are added regularly to keep your practice fresh and engaging.
+                        </p>
+                    </div>
                 </section>
 
                 {/* My Story */}

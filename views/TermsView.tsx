@@ -1,4 +1,5 @@
 import React from 'react';
+import { Link } from 'react-router-dom';
 import SEO from '../components/SEO';
 
 const TermsView: React.FC = () => {
@@ -22,73 +23,128 @@ const TermsView: React.FC = () => {
                 <div className="mb-12 text-center space-y-4">
                     <h1 className="text-4xl md:text-5xl font-medium text-zinc-100 tracking-tight">Terms of Service</h1>
                     <div className="inline-block px-4 py-1.5 rounded-full border border-white/10 bg-zinc-900/50 text-zinc-400 text-sm">
-                        Last Updated: {new Date().toLocaleDateString()}
+                        Last Updated: February 18, 2026
                     </div>
                 </div>
 
                 {/* Content Container */}
                 <div className="p-8 md:p-12 rounded-3xl border border-white/5 bg-zinc-900/40 backdrop-blur-sm">
-                    <div className="prose prose-invert prose-zinc max-w-none 
-              prose-headings:font-medium prose-headings:text-zinc-200 
+                    <div className="prose prose-invert prose-zinc max-w-none
+              prose-headings:font-medium prose-headings:text-zinc-200
               prose-p:text-zinc-400 prose-p:leading-relaxed
               prose-li:text-zinc-400
               prose-a:text-indigo-400 prose-a:no-underline hover:prose-a:text-indigo-300
               prose-strong:text-zinc-300">
 
-                        <h3>1. Terms</h3>
+                        <h3>1. Acceptance of Terms</h3>
                         <p>
-                            By accessing this Website, accessible from dailymeditationguide.com, you are agreeing to be bound by these Website Terms and Conditions of Use and agree that you are responsible for the agreement with any applicable local laws. If you disagree with any of these terms, you are prohibited from accessing this site. The materials contained in this Website are protected by copyright and trade mark law.
+                            By accessing and using Daily Meditation Guide (dailymeditationguide.com), you agree to be bound by these Terms of Service and all applicable laws and regulations. If you do not agree with any of these terms, you are prohibited from using or accessing this site.
                         </p>
 
-                        <h3>2. Use License</h3>
+                        <h3>2. Description of Service</h3>
                         <p>
-                            Permission is granted to temporarily download one copy of the materials on Daily Meditation Guide's Website for personal, non-commercial transitory viewing only. This is the grant of a license, not a transfer of title, and under this license you may not:
+                            Daily Meditation Guide provides curated meditation sessions, guided audio content, ambient soundscapes, and wellness resources. All content is provided for informational and educational purposes to support your personal mindfulness and relaxation practice.
+                        </p>
+
+                        <h3>3. Health and Medical Disclaimer</h3>
+                        <p>
+                            <strong>The content on this website is not intended to be a substitute for professional medical advice, diagnosis, or treatment.</strong> The meditation sessions, guided practices, and wellness content provided on Daily Meditation Guide are for general informational and educational purposes only.
                         </p>
                         <ul>
-                            <li>modify or copy the materials;</li>
-                            <li>use the materials for any commercial purpose or for any public display;</li>
-                            <li>attempt to reverse engineer any software contained on Daily Meditation Guide's Website;</li>
-                            <li>remove any copyright or other proprietary notations from the materials; or</li>
-                            <li>transfer the materials to another person or "mirror" the materials on any other server.</li>
+                            <li>Always seek the advice of a qualified healthcare provider with any questions you may have regarding a medical or mental health condition.</li>
+                            <li>Never disregard professional medical advice or delay in seeking it because of something you have read or heard on this website.</li>
+                            <li>If you are experiencing a medical emergency, call your local emergency services immediately.</li>
+                            <li>Meditation and mindfulness practices may not be suitable for everyone. If you have existing medical or mental health conditions (such as PTSD, severe anxiety, or psychosis), please consult a healthcare professional before beginning any new wellness practice.</li>
+                            <li>Daily Meditation Guide does not claim that its content can cure, treat, or prevent any disease or medical condition.</li>
                         </ul>
                         <p>
-                            This will let Daily Meditation Guide to terminate upon violations of any of these restrictions. Upon termination, your viewing right will also be terminated and you should destroy any downloaded materials in your possession whether it is printed or electronic format.
+                            For a complete disclaimer, please visit our <Link to="/disclaimer" className="text-indigo-400 hover:text-indigo-300">Disclaimer page</Link>.
                         </p>
 
-                        <h3>3. Disclaimer</h3>
+                        <h3>4. User Conduct</h3>
+                        <p>By using this website, you agree not to:</p>
+                        <ul>
+                            <li>Use the website for any unlawful purpose or in violation of any applicable laws</li>
+                            <li>Attempt to gain unauthorized access to any part of the website or its systems</li>
+                            <li>Distribute, reproduce, or create derivative works from our content without written permission</li>
+                            <li>Use the content for any commercial purpose without authorization</li>
+                            <li>Use automated tools to scrape, crawl, or extract data from the website</li>
+                            <li>Interfere with or disrupt the website's functionality or servers</li>
+                        </ul>
+
+                        <h3>5. Intellectual Property</h3>
                         <p>
-                            All the materials on Daily Meditation Guide's Website are provided "as is". Daily Meditation Guide makes no warranties, may it be expressed or implied, therefore negates all other warranties. Furthermore, Daily Meditation Guide does not make any representations concerning the accuracy or likely results of the use of the materials on its Website or otherwise relating to such materials or on any sites linked to this Website.
+                            All content on Daily Meditation Guide, including but not limited to audio sessions, written content, images, design elements, and logos, is the property of Daily Meditation Guide or its content creators and is protected by applicable copyright and intellectual property laws. You may not reproduce, distribute, modify, or create derivative works from our content without prior written consent.
                         </p>
 
-                        <h3>4. Limitations</h3>
+                        <h3>6. Use License</h3>
                         <p>
-                            Daily Meditation Guide or its suppliers will not be hold accountable for any damages that will arise with the use or inability to use the materials on Daily Meditation Guide's Website, even if Daily Meditation Guide or an authorize representative of this Website has been notified, orally or written, of the possibility of such damage. Some jurisdiction does not allow limitations on implied warranties or limitations of liability for incidental damages, these limitations may not apply to you.
+                            Permission is granted to temporarily access and use the materials on Daily Meditation Guide for personal, non-commercial purposes only. This is the grant of a license, not a transfer of title. Under this license, you may not:
+                        </p>
+                        <ul>
+                            <li>Modify or copy the materials for distribution</li>
+                            <li>Use the materials for any commercial purpose or public display</li>
+                            <li>Attempt to reverse engineer any software on the website</li>
+                            <li>Remove any copyright or proprietary notations from the materials</li>
+                            <li>Transfer the materials to another person or mirror them on another server</li>
+                        </ul>
+                        <p>
+                            This license will automatically terminate if you violate any of these restrictions.
                         </p>
 
-                        <h3>5. Revisions and Errata</h3>
+                        <h3>7. User-Generated Content</h3>
                         <p>
-                            The materials appearing on Daily Meditation Guide's Website may include technical, typographical, or photographic errors. Daily Meditation Guide will not promise that any of the materials in this Website are accurate, complete, or current. Daily Meditation Guide may change the materials contained on its Website at any time without notice. Daily Meditation Guide does not make any commitment to update the materials.
+                            If you submit feedback, suggestions, or other content through our contact form or other channels, you grant Daily Meditation Guide a non-exclusive, royalty-free license to use, reproduce, and display such content for the purpose of improving our services. You retain ownership of your submitted content.
                         </p>
 
-                        <h3>6. Links</h3>
+                        <h3>8. Third-Party Content and Links</h3>
                         <p>
-                            Daily Meditation Guide has not reviewed all of the sites linked to its Website and is not responsible for the contents of any such linked site. The presence of any link does not imply endorsement by Daily Meditation Guide of the site. The use of any linked website is at the user's own risk.
+                            Our website may contain links to third-party websites and services. Daily Meditation Guide is not responsible for the content, accuracy, or practices of third-party sites. The inclusion of any link does not imply endorsement. Your use of any linked website is at your own risk.
                         </p>
 
-                        <h3>7. Site Terms of Use Modifications</h3>
+                        <h3>9. Advertising</h3>
                         <p>
-                            Daily Meditation Guide may revise these Terms of Use for its Website at any time without prior notice. By using this Website, you are agreeing to be bound by the current version of these Terms and Conditions of Use.
+                            Daily Meditation Guide displays third-party advertisements, including ads served by Google AdSense. Any interaction with advertisers, including the purchase of goods or services, is solely between you and the advertiser. Daily Meditation Guide is not responsible for any advertiser's content, products, or services.
                         </p>
 
-                        <h3>8. Your Privacy</h3>
+                        <h3>10. Disclaimer of Warranties</h3>
                         <p>
-                            Please read our Privacy Policy.
+                            All materials on Daily Meditation Guide are provided "as is" without warranties of any kind, either express or implied. Daily Meditation Guide makes no warranties regarding the accuracy, completeness, reliability, or fitness for a particular purpose of the content on this website. We do not warrant that the website will be uninterrupted, error-free, or free of harmful components.
                         </p>
 
-                        <h3>9. Governing Law</h3>
+                        <h3>11. Limitation of Liability</h3>
                         <p>
-                            Any claim related to Daily Meditation Guide's Website shall be governed by the laws of our jurisdiction without regards to its conflict of law provisions.
+                            In no event shall Daily Meditation Guide, its owner (Bipul Kumar), or its contributors be liable for any direct, indirect, incidental, consequential, special, or punitive damages arising from your use of or inability to use the website or its content, including but not limited to damages for loss of data, health-related outcomes, or other intangible losses.
                         </p>
+
+                        <h3>12. Indemnification</h3>
+                        <p>
+                            You agree to indemnify and hold harmless Daily Meditation Guide and its owner from any claims, damages, losses, or expenses (including legal fees) arising from your use of the website, violation of these terms, or infringement of any third-party rights.
+                        </p>
+
+                        <h3>13. Privacy</h3>
+                        <p>
+                            Your use of Daily Meditation Guide is also governed by our <Link to="/privacy" className="text-indigo-400 hover:text-indigo-300">Privacy Policy</Link>, which explains how we collect, use, and protect your data. By using this website, you consent to the practices described in our Privacy Policy.
+                        </p>
+
+                        <h3>14. Changes to Terms</h3>
+                        <p>
+                            Daily Meditation Guide reserves the right to revise these Terms of Service at any time without prior notice. Changes will be posted on this page with an updated "Last Updated" date. By continuing to use the website after changes are posted, you agree to be bound by the revised terms.
+                        </p>
+
+                        <h3>15. Governing Law</h3>
+                        <p>
+                            These Terms of Service are governed by and construed in accordance with the laws of India. Any disputes arising from or relating to these terms shall be subject to the exclusive jurisdiction of the courts in India.
+                        </p>
+
+                        <h3>16. Contact</h3>
+                        <p>
+                            If you have any questions about these Terms of Service, please contact us at:
+                        </p>
+                        <ul>
+                            <li><strong>Email:</strong> <a href="mailto:blog.boopul@gmail.com">blog.boopul@gmail.com</a></li>
+                            <li><strong>Website:</strong> <a href="https://dailymeditationguide.com/contact">dailymeditationguide.com/contact</a></li>
+                        </ul>
                     </div>
                 </div>
             </div>

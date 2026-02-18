@@ -13,6 +13,9 @@ import AboutView from './views/AboutView';
 import ContactView from './views/ContactView';
 import PrivacyPolicyView from './views/PrivacyPolicyView';
 import TermsView from './views/TermsView';
+import DisclaimerView from './views/DisclaimerView';
+import SessionsView from './views/SessionsView';
+import CookieConsent from './components/CookieConsent';
 
 const App: React.FC = () => {
   const navigate = useNavigate();
@@ -100,6 +103,7 @@ const App: React.FC = () => {
         <main className="flex-1 pt-24 px-6 relative max-w-6xl mx-auto w-full">
           <Routes>
             <Route path="/" element={<HomeView />} />
+            <Route path="/sessions" element={<SessionsView />} />
             <Route
               path="/session/:slug"
               element={
@@ -118,6 +122,7 @@ const App: React.FC = () => {
             <Route path="/contact" element={<ContactView />} />
             <Route path="/privacy" element={<PrivacyPolicyView />} />
             <Route path="/terms" element={<TermsView />} />
+            <Route path="/disclaimer" element={<DisclaimerView />} />
           </Routes>
         </main>
         {!isAdminRoute && <Footer />}
@@ -133,6 +138,8 @@ const App: React.FC = () => {
           onSeek={handleSeek}
         />
       )}
+
+      {!isAdminRoute && <CookieConsent />}
     </>
   );
 };
