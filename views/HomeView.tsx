@@ -59,8 +59,8 @@ const HomeView: React.FC = () => {
 
           <div className="relative z-10 text-center space-y-2 backdrop-blur-sm p-8 rounded-2xl border border-white/5 bg-black/20">
             <iconify-icon icon="solar:meditation-round-linear" width="48" class="text-zinc-200 mb-2"></iconify-icon>
-            <p className="text-zinc-200 font-medium tracking-tight">Afternoon Reset</p>
-            <p className="text-zinc-500 text-xs uppercase tracking-widest">15 Min • Focus</p>
+            <p className="text-zinc-200 font-medium tracking-tight">{sessions[0]?.title || 'Afternoon Reset'}</p>
+            <p className="text-zinc-500 text-xs uppercase tracking-widest">{sessions[0] ? `${sessions[0].duration || '5 Min'} • ${sessions[0].category}` : '15 Min • Focus'}</p>
           </div>
         </div>
       </section>

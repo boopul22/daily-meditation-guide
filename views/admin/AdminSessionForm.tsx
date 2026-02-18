@@ -553,14 +553,14 @@ const AdminSessionForm: React.FC = () => {
       </div>
 
       {/* Body */}
-      <div className="flex-1 flex min-h-0">
+      <div className="flex-1 flex min-h-0 relative">
         {/* Desktop: Left Sidebar */}
         <div className="hidden md:block flex-none w-72 xl:w-80 border-r border-white/5 overflow-y-auto p-3 space-y-2.5 no-scrollbar">
           {metadataFields}
         </div>
 
         {/* Mobile: Details */}
-        <div className={`md:hidden flex-1 overflow-y-auto p-3 space-y-3 ${mobileTab === 'details' ? '' : 'hidden'}`}>
+        <div className={`md:hidden flex-1 overflow-y-auto p-3 space-y-3 ${mobileTab === 'details' ? '' : 'tab-panel-hidden'}`}>
           {metadataFields}
         </div>
 
@@ -576,32 +576,29 @@ const AdminSessionForm: React.FC = () => {
               </button>
             ))}
           </div>
-          <div className="flex-1 min-h-0 overflow-hidden">
-            {rightTab === 'editor' ? (
-              <div className="h-full flex flex-col">
-                <RichTextEditor key={slug || 'new'} content={form.fullContent} onChange={(html) => handleChange('fullContent', html)} />
-              </div>
-            ) : (
-              <div className="h-full overflow-y-auto p-8">
-                {form.fullContent ? (
-                  <div className="prose prose-invert max-w-3xl mx-auto" dangerouslySetInnerHTML={{ __html: form.fullContent }} />
-                ) : (
-                  <p className="text-zinc-600 text-sm italic text-center mt-20">Preview will appear here...</p>
-                )}
-              </div>
-            )}
+          <div className="flex-1 min-h-0 overflow-hidden relative">
+            <div className={`absolute inset-0 flex flex-col ${rightTab === 'editor' ? '' : 'tab-panel-hidden'}`}>
+              <RichTextEditor key={slug || 'new'} content={form.fullContent} onChange={(html) => handleChange('fullContent', html)} />
+            </div>
+            <div className={`absolute inset-0 overflow-y-auto p-8 ${rightTab === 'preview' ? '' : 'tab-panel-hidden'}`}>
+              {form.fullContent ? (
+                <div className="prose prose-invert max-w-3xl mx-auto" dangerouslySetInnerHTML={{ __html: form.fullContent }} />
+              ) : (
+                <p className="text-zinc-600 text-sm italic text-center mt-20">Preview will appear here...</p>
+              )}
+            </div>
           </div>
         </div>
 
         {/* Mobile: Editor */}
-        <div className={`md:hidden flex-1 flex flex-col min-w-0 ${mobileTab === 'editor' ? '' : 'hidden'}`}>
+        <div className={`md:hidden flex-1 flex flex-col min-w-0 ${mobileTab === 'editor' ? '' : 'tab-panel-hidden'}`}>
           <div className="h-full flex flex-col">
             <RichTextEditor key={(slug || 'new') + '-mobile'} content={form.fullContent} onChange={(html) => handleChange('fullContent', html)} />
           </div>
         </div>
 
         {/* Mobile: Preview */}
-        <div className={`md:hidden flex-1 overflow-y-auto p-4 ${mobileTab === 'preview' ? '' : 'hidden'}`}>
+        <div className={`md:hidden flex-1 overflow-y-auto p-4 ${mobileTab === 'preview' ? '' : 'tab-panel-hidden'}`}>
           {form.fullContent ? (
             <div className="prose prose-invert max-w-none text-sm" dangerouslySetInnerHTML={{ __html: form.fullContent }} />
           ) : (
@@ -646,6 +643,14 @@ const AdminSessionForm: React.FC = () => {
             font-size: 0.6875rem;
             margin-bottom: 0.25rem;
           }
+        }
+        .tab-panel-hidden {
+          visibility: hidden !important;
+          position: absolute !important;
+          inset: 0 !important;
+          overflow: hidden !important;
+          z-index: -1 !important;
+          pointer-events: none !important;
         }
       `}</style>
     </form>
