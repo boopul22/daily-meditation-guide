@@ -6,9 +6,11 @@ const DisclaimerView: React.FC = () => {
     return (
         <div className="min-h-screen animate-[fade-enter_0.5s_ease-out]">
             <SEO
-                title="Disclaimer - Daily Meditation Guide"
-                description="Important disclaimers regarding the content on Daily Meditation Guide. This website does not provide medical advice."
+                title="Disclaimer"
+                description="Important disclaimers regarding the content on Daily Meditation Guide. Our meditation content is for informational purposes only and does not constitute medical advice."
+                keywords="disclaimer, medical disclaimer, health disclaimer, daily meditation guide"
                 url="https://dailymeditationguide.com/disclaimer"
+                noindex={true}
             />
 
             {/* Background Ambience */}

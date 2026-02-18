@@ -10,19 +10,73 @@ interface SEOProps {
     url?: string;
     type?: string;
     canonical?: string;
+    noindex?: boolean;
+    author?: string;
+    publishedAt?: string | null;
+    updatedAt?: string | null;
+    articleSection?: string;
 }
 
 const SEO: React.FC<SEOProps> = ({
     title = "Daily Meditation Guide",
     description = "Your daily guide to mindfulness and meditation.",
     keywords = "meditation, mindfulness, wellness, mental health, daily guide",
-    image = "/og-image.jpg", // Ensure this image exists in public folder or use a remote URL
+    image = "/og-image.jpg",
     url = "https://dailymeditationguide.com",
     type = "website",
     canonical,
+    noindex = false,
+    author,
+    publishedAt,
+    updatedAt,
+    articleSection,
 }) => {
     const siteTitle = title === "Daily Meditation Guide" ? title : `${title} | Daily Meditation Guide`;
     const canonicalUrl = canonical || url;
+
+    const isArticle = type === 'article';
+
+    const jsonLd = isArticle
+        ? {
+            "@context": "https://schema.org",
+            "@type": "Article",
+            "headline": siteTitle,
+            "description": description,
+            "url": url,
+            "image": image,
+            ...(articleSection && { "articleSection": articleSection }),
+            ...(author && {
+                "author": {
+                    "@type": "Person",
+                    "name": author
+                }
+            }),
+            ...(publishedAt && { "datePublished": publishedAt }),
+            ...(updatedAt && { "dateModified": updatedAt }),
+            "publisher": {
+                "@type": "Organization",
+                "name": "Daily Meditation Guide",
+                "logo": {
+                    "@type": "ImageObject",
+                    "url": "https://dailymeditationguide.com/logo.png"
+                }
+            }
+        }
+        : {
+            "@context": "https://schema.org",
+            "@type": "WebSite",
+            "name": "Daily Meditation Guide",
+            "description": description,
+            "url": "https://dailymeditationguide.com",
+            "potentialAction": {
+                "@type": "SearchAction",
+                "target": {
+                    "@type": "EntryPoint",
+                    "urlTemplate": "https://dailymeditationguide.com/?q={search_term_string}"
+                },
+                "query-input": "required name=search_term_string"
+            }
+        };
 
     return (
         <Helmet>
@@ -31,6 +85,7 @@ const SEO: React.FC<SEOProps> = ({
             <meta name="description" content={description} />
             <meta name="keywords" content={keywords} />
             <link rel="canonical" href={canonicalUrl} />
+            {noindex && <meta name="robots" content="noindex, nofollow" />}
 
             {/* Open Graph tags */}
             <meta property="og:title" content={siteTitle} />
@@ -47,22 +102,7 @@ const SEO: React.FC<SEOProps> = ({
 
             {/* Structured Data (JSON-LD) */}
             <script type="application/ld+json">
-                {JSON.stringify({
-                    "@context": "https://schema.org",
-                    "@type": type === 'article' ? 'Article' : 'WebSite',
-                    "name": siteTitle,
-                    "description": description,
-                    "url": url,
-                    "image": image,
-                    "publisher": {
-                        "@type": "Organization",
-                        "name": "Daily Meditation Guide",
-                        "logo": {
-                            "@type": "ImageObject",
-                            "url": "https://dailymeditationguide.com/logo.png"
-                        }
-                    }
-                })}
+                {JSON.stringify(jsonLd)}
             </script>
         </Helmet>
     );

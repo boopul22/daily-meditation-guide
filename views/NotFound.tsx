@@ -9,6 +9,7 @@ const NotFound: React.FC = () => {
                 title="Page Not Found"
                 description="The page you are looking for does not exist."
                 type="website"
+                noindex={true}
             />
 
             <div className="relative">

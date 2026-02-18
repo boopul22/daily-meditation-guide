@@ -9,8 +9,9 @@ const SessionsView: React.FC = () => {
     return (
         <div className="space-y-12 animate-[fade-enter_0.5s_ease-out]">
             <SEO
-                title="Guided Sessions | Daily Meditation Guide"
-                description="Explore our library of guided meditation sessions and visual journeys."
+                title="Guided Sessions"
+                description="Explore our library of guided meditation sessions and visual journeys. Immerse yourself in curated meditations designed to help you find peace and clarity."
+                keywords="guided meditation, meditation sessions, mindfulness videos, visual journeys, meditation library"
                 url="https://dailymeditationguide.com/sessions"
             />
 

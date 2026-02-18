@@ -5,8 +5,9 @@ const AboutView: React.FC = () => {
     return (
         <div className="min-h-screen animate-[fade-enter_0.5s_ease-out]">
             <SEO
-                title="About - Daily Meditation Guide"
-                description="Learn about Daily Meditation Guide - your daily source for guided meditations, ambient soundscapes, and mindfulness resources, created by Bipul Kumar."
+                title="About"
+                description="Learn about Daily Meditation Guide — your daily source for guided meditations, ambient soundscapes, and mindfulness resources, created by Bipul Kumar."
+                keywords="about daily meditation guide, Bipul Kumar, meditation creator, mindfulness platform, wellness"
                 url="https://dailymeditationguide.com/about"
             />
 

@@ -96,10 +96,15 @@ const DetailView: React.FC<DetailViewProps> = ({ onPlay, currentTrackId, isPlayi
       {session && (
         <SEO
           title={session.title}
-          description={`Listen to ${session.title} by ${session.author}. ${session.category} meditation session.`}
+          description={session.description || `Listen to ${session.title} by ${session.author}. A ${session.duration} ${session.category} meditation session.`}
+          keywords={`${session.category}, meditation, ${session.author}, mindfulness, ${session.category.toLowerCase()} meditation, guided meditation`}
           image={session.featuredImage || '/og-image.jpg'}
           url={`https://dailymeditationguide.com/session/${session.slug}`}
           type="article"
+          author={session.author}
+          publishedAt={session.publishedAt ?? undefined}
+          updatedAt={session.updatedAt}
+          articleSection={session.category}
         />
       )}
       {/* Back Button */}

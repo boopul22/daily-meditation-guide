@@ -6,9 +6,11 @@ const TermsView: React.FC = () => {
     return (
         <div className="min-h-screen animate-[fade-enter_0.5s_ease-out]">
             <SEO
-                title="Terms of Service - Daily Meditation Guide"
-                description="Terms and Conditions for using Daily Meditation Guide. Please read these terms carefully before using our website."
+                title="Terms of Service"
+                description="Terms and Conditions for using Daily Meditation Guide. Please read these terms carefully before using our meditation sessions and wellness content."
+                keywords="terms of service, terms and conditions, usage policy, daily meditation guide"
                 url="https://dailymeditationguide.com/terms"
+                noindex={true}
             />
 
             {/* Background Ambience */}

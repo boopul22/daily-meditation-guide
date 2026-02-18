@@ -5,9 +5,11 @@ const PrivacyPolicyView: React.FC = () => {
     return (
         <div className="min-h-screen animate-[fade-enter_0.5s_ease-out]">
             <SEO
-                title="Privacy Policy - Daily Meditation Guide"
-                description="Our commitment to protecting your privacy. Read our Privacy Policy to understand how we collect and use your data."
+                title="Privacy Policy"
+                description="Our commitment to protecting your privacy. Read our Privacy Policy to understand how we collect, use, and protect your data at Daily Meditation Guide."
+                keywords="privacy policy, data protection, cookies, GDPR, CCPA, daily meditation guide"
                 url="https://dailymeditationguide.com/privacy"
+                noindex={true}
             />
 
             {/* Background Ambience */}

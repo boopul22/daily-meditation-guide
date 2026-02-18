@@ -17,8 +17,9 @@ const ContactView: React.FC = () => {
     return (
         <div className="min-h-screen animate-[fade-enter_0.5s_ease-out]">
             <SEO
-                title="Contact Us - Daily Meditation Guide"
-                description="Get in touch with the Daily Meditation Guide team. We're here to help with any questions or feedback."
+                title="Contact Us"
+                description="Get in touch with the Daily Meditation Guide team. We're here to help with any questions, suggestions, or feedback about our meditation sessions."
+                keywords="contact daily meditation guide, meditation support, feedback, get in touch"
                 url="https://dailymeditationguide.com/contact"
             />
 
