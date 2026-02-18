@@ -42,6 +42,7 @@ const AdminSessionForm: React.FC = () => {
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
   const [publishing, setPublishing] = useState(false);
+  const [updating, setUpdating] = useState(false);
   const [error, setError] = useState('');
   const [uploadingFeatured, setUploadingFeatured] = useState(false);
   const featuredFileRef = useRef<HTMLInputElement>(null);
@@ -227,6 +228,23 @@ const AdminSessionForm: React.FC = () => {
     finally { setSaving(false); }
   };
 
+  // Update — save changes to an already-published session without changing published_at
+  const handleUpdate = async () => {
+    if (!savedSlug) return;
+    if (autoSaveTimer.current) clearTimeout(autoSaveTimer.current);
+    setUpdating(true);
+    setError('');
+    try {
+      const payload = { ...form, durationSec: parseDurationToSec(form.duration), status: 'published' as const };
+      await updateSession(savedSlug, payload);
+      if (form.slug !== savedSlug) setSavedSlug(form.slug);
+      hasUnsavedChanges.current = false;
+      setAutoSaveStatus('saved');
+      setTimeout(() => setAutoSaveStatus('idle'), 2000);
+    } catch (err: any) { setError(err.message); }
+    finally { setUpdating(false); }
+  };
+
   // Prevent accidental form submit — all actions are via buttons
   const handleFormSubmit = (e: React.FormEvent) => {
     e.preventDefault();
@@ -238,7 +256,7 @@ const AdminSessionForm: React.FC = () => {
   const relatedOptions = allSessions.filter(s => s.slug !== form.slug);
   const existingAuthors = [...new Set(allSessions.map(s => s.author).filter(Boolean))];
   const existingRoles = [...new Set(allSessions.map(s => s.role).filter(Boolean))];
-  const isBusy = saving || publishing;
+  const isBusy = saving || publishing || updating;
 
   const statusBadge = status === 'published' ? (
     <span className="px-2 py-0.5 rounded-full text-[10px] font-medium bg-emerald-500/20 text-emerald-400 border border-emerald-500/30">Published</span>
@@ -376,38 +394,55 @@ const AdminSessionForm: React.FC = () => {
         <div className="flex items-center gap-1.5 md:gap-2">
           {error && <span className="text-red-400 text-xs max-w-32 truncate hidden lg:inline">{error}</span>}
 
-          {/* Save Draft button */}
-          <button
-            type="button"
-            onClick={handleSaveDraft}
-            disabled={isBusy}
-            className="px-2.5 md:px-3 py-1.5 border border-white/10 hover:border-white/20 hover:bg-white/5 text-zinc-400 hover:text-zinc-200 rounded-lg font-medium text-xs transition-colors disabled:opacity-50 flex items-center gap-1.5"
-          >
-            {saving && <span className="w-3 h-3 border-2 border-zinc-500 border-t-zinc-200 rounded-full animate-spin"></span>}
-            <span className="hidden sm:inline">{saving ? 'Saving...' : 'Save Draft'}</span>
-            <span className="sm:hidden">{saving ? '...' : 'Draft'}</span>
-          </button>
-
-          {/* Publish / Unpublish */}
           {status === 'published' ? (
-            <button
-              type="button"
-              onClick={handleUnpublish}
-              disabled={isBusy}
-              className="px-2.5 md:px-3 py-1.5 border border-amber-500/30 hover:border-amber-500/50 hover:bg-amber-500/10 text-amber-400 rounded-lg font-medium text-xs transition-colors disabled:opacity-50"
-            >
-              Unpublish
-            </button>
+            <>
+              {/* Unpublish — revert to draft */}
+              <button
+                type="button"
+                onClick={handleUnpublish}
+                disabled={isBusy}
+                className="px-2.5 md:px-3 py-1.5 border border-amber-500/30 hover:border-amber-500/50 hover:bg-amber-500/10 text-amber-400 rounded-lg font-medium text-xs transition-colors disabled:opacity-50"
+              >
+                Unpublish
+              </button>
+
+              {/* Update — save changes, keep published status & date */}
+              <button
+                type="button"
+                onClick={handleUpdate}
+                disabled={isBusy}
+                className="px-2.5 md:px-3 py-1.5 bg-blue-600 hover:bg-blue-500 text-white rounded-lg font-medium text-xs transition-colors disabled:opacity-50 flex items-center gap-1.5"
+              >
+                {updating && <span className="w-3 h-3 border-2 border-blue-300 border-t-white rounded-full animate-spin"></span>}
+                <span className="hidden sm:inline">{updating ? 'Updating...' : 'Update'}</span>
+                <span className="sm:hidden">{updating ? '...' : 'Update'}</span>
+              </button>
+            </>
           ) : (
-            <button
-              type="button"
-              onClick={handlePublish}
-              disabled={isBusy}
-              className="px-2.5 md:px-3 py-1.5 bg-emerald-600 hover:bg-emerald-500 text-white rounded-lg font-medium text-xs transition-colors disabled:opacity-50 flex items-center gap-1.5"
-            >
-              {publishing && <span className="w-3 h-3 border-2 border-emerald-300 border-t-white rounded-full animate-spin"></span>}
-              Publish
-            </button>
+            <>
+              {/* Save Draft button */}
+              <button
+                type="button"
+                onClick={handleSaveDraft}
+                disabled={isBusy}
+                className="px-2.5 md:px-3 py-1.5 border border-white/10 hover:border-white/20 hover:bg-white/5 text-zinc-400 hover:text-zinc-200 rounded-lg font-medium text-xs transition-colors disabled:opacity-50 flex items-center gap-1.5"
+              >
+                {saving && <span className="w-3 h-3 border-2 border-zinc-500 border-t-zinc-200 rounded-full animate-spin"></span>}
+                <span className="hidden sm:inline">{saving ? 'Saving...' : 'Save Draft'}</span>
+                <span className="sm:hidden">{saving ? '...' : 'Draft'}</span>
+              </button>
+
+              {/* Publish */}
+              <button
+                type="button"
+                onClick={handlePublish}
+                disabled={isBusy}
+                className="px-2.5 md:px-3 py-1.5 bg-emerald-600 hover:bg-emerald-500 text-white rounded-lg font-medium text-xs transition-colors disabled:opacity-50 flex items-center gap-1.5"
+              >
+                {publishing && <span className="w-3 h-3 border-2 border-emerald-300 border-t-white rounded-full animate-spin"></span>}
+                Publish
+              </button>
+            </>
           )}
         </div>
       </div>

@@ -33,7 +33,14 @@ export const onRequestPost: PagesFunction<Env> = async (context) => {
       });
     }
 
-    const ext = file.name.split('.').pop() || 'png';
+    const MIME_TO_EXT: Record<string, string> = {
+      'image/jpeg': 'jpg',
+      'image/png': 'png',
+      'image/gif': 'gif',
+      'image/webp': 'webp',
+      'image/svg+xml': 'svg',
+    };
+    const ext = MIME_TO_EXT[file.type] || file.name.split('.').pop() || 'png';
     const key = `uploads/${Date.now()}-${Math.random().toString(36).slice(2, 8)}.${ext}`;
 
     await context.env.R2.put(key, file.stream(), {

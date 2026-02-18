@@ -1,4 +1,5 @@
 import { Session } from '../types';
+import { convertToWebP } from './convertToWebP';
 
 const API_BASE = '/api';
 
@@ -78,8 +79,11 @@ export function isLoggedIn(): boolean {
 }
 
 export async function uploadImage(file: File): Promise<string> {
+  // Convert JPEG/PNG to WebP client-side before uploading
+  const processedFile = await convertToWebP(file);
+
   const formData = new FormData();
-  formData.append('file', file);
+  formData.append('file', processedFile);
 
   const res = await fetch(`${API_BASE}/upload`, {
     method: 'POST',
