@@ -1,7 +1,8 @@
 import React, { useEffect, useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { useAdminAuth } from '../../lib/useAdminAuth';
-import { fetchSessions, deleteSession, logout } from '../../lib/api';
+import { useAuth } from '../../lib/AuthContext';
+import { fetchSessions, deleteSession } from '../../lib/api';
 import { Session } from '../../types';
 
 type StatusFilter = 'all' | 'published' | 'draft';
@@ -13,7 +14,8 @@ const StatusBadge: React.FC<{ status: string }> = ({ status }) => (
 );
 
 const AdminDashboard: React.FC = () => {
-  const isAuth = useAdminAuth();
+  const { isAdmin: isAuth, loading: authLoading } = useAdminAuth();
+  const { logout } = useAuth();
   const navigate = useNavigate();
   const [sessions, setSessions] = useState<Session[]>([]);
   const [loading, setLoading] = useState(true);
@@ -38,8 +40,8 @@ const AdminDashboard: React.FC = () => {
     }
   };
 
-  const handleLogout = () => {
-    logout();
+  const handleLogout = async () => {
+    await logout();
     navigate('/admin');
   };
 

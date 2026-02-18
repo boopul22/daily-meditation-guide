@@ -3,7 +3,7 @@ import { requireAuth } from '../lib/auth';
 
 // POST /api/upload — upload image to R2
 export const onRequestPost: PagesFunction<Env> = async (context) => {
-  const authError = requireAuth(context.request, context.env);
+  const authError = await requireAuth(context.request, context.env);
   if (authError) return authError;
 
   try {

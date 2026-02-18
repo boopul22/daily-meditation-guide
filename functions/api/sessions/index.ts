@@ -3,7 +3,7 @@ import { requireAuth, isAdmin } from '../../lib/auth';
 import { rowToAPI } from '../../lib/db';
 
 export const onRequestGet: PagesFunction<Env> = async ({ request, env }) => {
-  const admin = isAdmin(request, env);
+  const admin = await isAdmin(request, env);
 
   let query: string;
   if (admin) {
@@ -19,7 +19,7 @@ export const onRequestGet: PagesFunction<Env> = async ({ request, env }) => {
 };
 
 export const onRequestPost: PagesFunction<Env> = async ({ request, env }) => {
-  const authError = requireAuth(request, env);
+  const authError = await requireAuth(request, env);
   if (authError) return authError;
 
   const body = await request.json<any>();

@@ -14,7 +14,7 @@ export const onRequestGet: PagesFunction<Env> = async ({ params, request, env })
   }
 
   // Non-admin users can only see published sessions
-  if (row.status !== 'published' && !isAdmin(request, env)) {
+  if (row.status !== 'published' && !(await isAdmin(request, env))) {
     return Response.json({ error: 'Session not found' }, { status: 404 });
   }
 
@@ -22,7 +22,7 @@ export const onRequestGet: PagesFunction<Env> = async ({ params, request, env })
 };
 
 export const onRequestPut: PagesFunction<Env> = async ({ params, request, env }) => {
-  const authError = requireAuth(request, env);
+  const authError = await requireAuth(request, env);
   if (authError) return authError;
 
   const slug = params.slug as string;
@@ -96,7 +96,7 @@ export const onRequestPut: PagesFunction<Env> = async ({ params, request, env })
 };
 
 export const onRequestDelete: PagesFunction<Env> = async ({ params, request, env }) => {
-  const authError = requireAuth(request, env);
+  const authError = await requireAuth(request, env);
   if (authError) return authError;
 
   const slug = params.slug as string;

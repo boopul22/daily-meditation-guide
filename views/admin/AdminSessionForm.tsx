@@ -33,7 +33,7 @@ interface FormData {
 }
 
 const AdminSessionForm: React.FC = () => {
-  const isAuth = useAdminAuth();
+  const { isAdmin: isAuth, loading: authLoading } = useAdminAuth();
   const { slug } = useParams<{ slug: string }>();
   const navigate = useNavigate();
   const isEdit = !!slug;

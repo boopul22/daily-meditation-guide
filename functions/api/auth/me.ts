@@ -17,12 +17,12 @@ export const onRequestGet: PagesFunction<Env> = async ({ request, env }) => {
   if (!user) {
     const id = crypto.randomUUID();
     await env.DB.prepare(
-      'INSERT INTO users (id, email, name, picture, created_at, last_login) VALUES (?, ?, ?, ?, ?, ?)'
+      'INSERT INTO users (id, email, name, picture, is_admin, created_at, last_login) VALUES (?, ?, ?, ?, 0, ?, ?)'
     )
       .bind(id, email, name, '', now, now)
       .run();
 
-    user = { id, email, name, picture: '', created_at: now, last_login: now };
+    user = { id, email, name, picture: '', is_admin: 0, created_at: now, last_login: now };
   } else {
     await env.DB.prepare('UPDATE users SET last_login = ?, name = ? WHERE email = ?')
       .bind(now, name, email)
@@ -36,6 +36,7 @@ export const onRequestGet: PagesFunction<Env> = async ({ request, env }) => {
       email: user.email,
       name: user.name,
       picture: user.picture,
+      isAdmin: !!user.is_admin,
     },
   });
 };

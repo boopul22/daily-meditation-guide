@@ -3,16 +3,11 @@ import { convertToWebP } from './convertToWebP';
 
 const API_BASE = '/api';
 
-function authHeaders(): HeadersInit {
-  const token = sessionStorage.getItem('admin_token');
-  return token ? { Authorization: `Bearer ${token}` } : {};
-}
-
 async function request<T>(path: string, options?: RequestInit): Promise<T> {
   const res = await fetch(`${API_BASE}${path}`, {
+    credentials: 'include',
     headers: {
       'Content-Type': 'application/json',
-      ...authHeaders(),
       ...options?.headers,
     },
     ...options,
@@ -61,23 +56,6 @@ export async function deleteSession(slug: string): Promise<void> {
   await request(`/sessions/${slug}`, { method: 'DELETE' });
 }
 
-export async function login(password: string): Promise<string> {
-  const { token } = await request<{ token: string }>('/auth/login', {
-    method: 'POST',
-    body: JSON.stringify({ password }),
-  });
-  sessionStorage.setItem('admin_token', token);
-  return token;
-}
-
-export function logout(): void {
-  sessionStorage.removeItem('admin_token');
-}
-
-export function isLoggedIn(): boolean {
-  return !!sessionStorage.getItem('admin_token');
-}
-
 export async function uploadImage(file: File): Promise<string> {
   // Convert JPEG/PNG to WebP client-side before uploading
   const processedFile = await convertToWebP(file);
@@ -87,7 +65,7 @@ export async function uploadImage(file: File): Promise<string> {
 
   const res = await fetch(`${API_BASE}/upload`, {
     method: 'POST',
-    headers: authHeaders(),
+    credentials: 'include',
     body: formData,
   });
 
