@@ -32,6 +32,19 @@ export const onRequestPost: PagesFunction<Env> = async ({ request, env }) => {
   const id = crypto.randomUUID();
   // Sanitize slug: lowercase, replace non-alphanumeric with hyphens, collapse multiples, trim
   const slug = (body.slug || '').toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/(^-|-$)/g, '');
+
+  if (!slug) {
+    return Response.json({ error: 'Slug is required' }, { status: 400 });
+  }
+
+  // Check for duplicate slug
+  const existingBySlug = await env.DB.prepare('SELECT id FROM sessions WHERE slug = ?')
+    .bind(slug)
+    .first();
+  if (existingBySlug) {
+    return Response.json({ error: `A session with slug "${slug}" already exists` }, { status: 409 });
+  }
+
   const now = new Date().toISOString();
   const status = body.status === 'published' ? 'published' : 'draft';
   const publishedAt = status === 'published' ? now : null;

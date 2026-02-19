@@ -56,6 +56,24 @@ export const onRequestPut: PagesFunction<Env> = async ({ params, request, env })
     const jwtPayload = await verifyCFAccessJWT(request, env);
     const updaterEmail = jwtPayload?.email || null;
 
+    // Sanitize and validate slug if being changed
+    let newSlug = existing.slug;
+    if (body.slug !== undefined && body.slug !== null) {
+      newSlug = (body.slug || '').toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/(^-|-$)/g, '');
+      if (!newSlug) {
+        return Response.json({ error: 'Slug is required' }, { status: 400 });
+      }
+      // Check for duplicate slug (only if slug is changing)
+      if (newSlug !== existing.slug) {
+        const conflicting = await env.DB.prepare('SELECT id FROM sessions WHERE slug = ? AND id != ?')
+          .bind(newSlug, existing.id)
+          .first();
+        if (conflicting) {
+          return Response.json({ error: `A session with slug "${newSlug}" already exists` }, { status: 409 });
+        }
+      }
+    }
+
     let existingRelated: string[] = [];
     try {
       existingRelated = existing.related_sessions ? JSON.parse(existing.related_sessions) : [];
@@ -93,7 +111,7 @@ export const onRequestPut: PagesFunction<Env> = async ({ params, request, env })
         updated_at = ?, version = ?, last_updated_by = ?
        WHERE id = ?`
     ).bind(
-      body.slug ?? existing.slug,
+      newSlug,
       body.title ?? existing.title,
       body.author ?? existing.author,
       body.role ?? existing.role,
