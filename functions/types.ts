@@ -4,6 +4,7 @@ export interface Env {
   CF_ACCESS_TEAM_NAME: string;
   CF_ACCESS_AUD: string;
   R2_PUBLIC_URL: string;
+  SESSION_ROOMS: DurableObjectNamespace;
 }
 
 export interface SessionRow {
@@ -26,6 +27,8 @@ export interface SessionRow {
   published_at: string | null;
   created_at: string;
   updated_at: string;
+  version: number;
+  last_updated_by: string | null;
 }
 
 export interface UserRow {

@@ -22,7 +22,7 @@ export interface Session {
   duration: string;
   durationSec: number; // For progress bar logic
   category: string;
-  color: 'indigo' | 'teal' | 'orange' | 'rose' | 'blue' | 'emerald' | 'purple';
+  color: string;
   description: string;
   featuredImage: string;
   audioUrl: string;
@@ -33,6 +33,8 @@ export interface Session {
   publishedAt?: string | null;
   createdAt?: string;
   updatedAt?: string;
+  version?: number;
+  lastUpdatedBy?: string | null;
 }
 
 // Global augmentation

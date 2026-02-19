@@ -1,5 +1,6 @@
 import { Env, SessionRow } from '../../types';
 import { requireAuth, isAdmin } from '../../lib/auth';
+import { verifyCFAccessJWT } from '../../lib/cfaccess';
 import { rowToAPI } from '../../lib/db';
 
 export const onRequestGet: PagesFunction<Env> = async ({ params, request, env }) => {
@@ -39,6 +40,22 @@ export const onRequestPut: PagesFunction<Env> = async ({ params, request, env })
       return Response.json({ error: 'Session not found' }, { status: 404 });
     }
 
+    // Optimistic locking: check version unless force-saving
+    const incomingVersion = body.version;
+    if (incomingVersion !== undefined && incomingVersion !== null && !body.forceSave) {
+      if (existing.version !== incomingVersion) {
+        return Response.json({
+          error: 'Conflict: this session was modified by another admin',
+          conflict: true,
+          currentData: rowToAPI(existing),
+        }, { status: 409 });
+      }
+    }
+
+    // Get current user email for audit
+    const jwtPayload = await verifyCFAccessJWT(request, env);
+    const updaterEmail = jwtPayload?.email || null;
+
     let existingRelated: string[] = [];
     try {
       existingRelated = existing.related_sessions ? JSON.parse(existing.related_sessions) : [];
@@ -66,11 +83,14 @@ export const onRequestPut: PagesFunction<Env> = async ({ params, request, env })
       existingFaq = [];
     }
 
+    const newVersion = (existing.version ?? 1) + 1;
+
     await env.DB.prepare(
       `UPDATE sessions SET
         slug = ?, title = ?, author = ?, role = ?, duration = ?, duration_sec = ?,
         category = ?, color = ?, description = ?, featured_image = ?, audio_url = ?,
-        full_content = ?, related_sessions = ?, faq_items = ?, status = ?, published_at = ?, updated_at = ?
+        full_content = ?, related_sessions = ?, faq_items = ?, status = ?, published_at = ?,
+        updated_at = ?, version = ?, last_updated_by = ?
        WHERE id = ?`
     ).bind(
       body.slug ?? existing.slug,
@@ -90,6 +110,8 @@ export const onRequestPut: PagesFunction<Env> = async ({ params, request, env })
       newStatus,
       publishedAt,
       now,
+      newVersion,
+      updaterEmail,
       existing.id
     ).run();
 

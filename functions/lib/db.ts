@@ -21,5 +21,7 @@ export function rowToAPI(row: SessionRow) {
     publishedAt: row.published_at || null,
     createdAt: row.created_at,
     updatedAt: row.updated_at,
+    version: row.version ?? 1,
+    lastUpdatedBy: row.last_updated_by || null,
   };
 }

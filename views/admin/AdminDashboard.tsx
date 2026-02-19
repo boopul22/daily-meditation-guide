@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useState, useRef, useCallback } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { useAdminAuth } from '../../lib/useAdminAuth';
 import { useAuth } from '../../lib/AuthContext';
@@ -6,6 +6,8 @@ import { fetchSessions, deleteSession } from '../../lib/api';
 import { Session } from '../../types';
 
 type StatusFilter = 'all' | 'published' | 'draft';
+
+const REFRESH_INTERVAL = 30000; // 30 seconds
 
 const StatusBadge: React.FC<{ status: string }> = ({ status }) => (
   status === 'published'
@@ -21,14 +23,31 @@ const AdminDashboard: React.FC = () => {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
   const [filter, setFilter] = useState<StatusFilter>('all');
+  const refreshTimer = useRef<ReturnType<typeof setInterval> | null>(null);
+
+  const loadSessions = useCallback(async (showLoading = false) => {
+    if (showLoading) setLoading(true);
+    try {
+      const data = await fetchSessions();
+      setSessions(data);
+      setError('');
+    } catch (err: any) {
+      setError(err.message);
+    } finally {
+      if (showLoading) setLoading(false);
+    }
+  }, []);
 
   useEffect(() => {
     if (!isAuth) return;
-    fetchSessions()
-      .then(setSessions)
-      .catch(err => setError(err.message))
-      .finally(() => setLoading(false));
-  }, [isAuth]);
+    loadSessions(true);
+
+    // Periodic refresh for multi-admin sync
+    refreshTimer.current = setInterval(() => loadSessions(false), REFRESH_INTERVAL);
+    return () => {
+      if (refreshTimer.current) clearInterval(refreshTimer.current);
+    };
+  }, [isAuth, loadSessions]);
 
   const handleDelete = async (slug: string, title: string) => {
     if (!window.confirm(`Delete "${title}"? This cannot be undone.`)) return;
@@ -82,16 +101,14 @@ const AdminDashboard: React.FC = () => {
             <button
               key={tab.key}
               onClick={() => setFilter(tab.key)}
-              className={`px-3 py-1.5 rounded-lg text-xs font-medium transition-colors flex items-center gap-1.5 ${
-                filter === tab.key
+              className={`px-3 py-1.5 rounded-lg text-xs font-medium transition-colors flex items-center gap-1.5 ${filter === tab.key
                   ? 'bg-white/10 text-zinc-100'
                   : 'text-zinc-500 hover:text-zinc-300 hover:bg-white/5'
-              }`}
+                }`}
             >
               {tab.label}
-              <span className={`text-[10px] px-1.5 py-0.5 rounded-full ${
-                filter === tab.key ? 'bg-white/10 text-zinc-300' : 'bg-white/5 text-zinc-600'
-              }`}>{tab.count}</span>
+              <span className={`text-[10px] px-1.5 py-0.5 rounded-full ${filter === tab.key ? 'bg-white/10 text-zinc-300' : 'bg-white/5 text-zinc-600'
+                }`}>{tab.count}</span>
             </button>
           ))}
         </div>
@@ -111,6 +128,7 @@ const AdminDashboard: React.FC = () => {
                   <th className="px-4 py-3 text-xs font-medium text-zinc-500 uppercase tracking-wider">Status</th>
                   <th className="px-4 py-3 text-xs font-medium text-zinc-500 uppercase tracking-wider">Category</th>
                   <th className="px-4 py-3 text-xs font-medium text-zinc-500 uppercase tracking-wider">Author</th>
+                  <th className="px-4 py-3 text-xs font-medium text-zinc-500 uppercase tracking-wider">Last Edit By</th>
                   <th className="px-4 py-3 text-xs font-medium text-zinc-500 uppercase tracking-wider text-right">Actions</th>
                 </tr>
               </thead>
@@ -126,6 +144,15 @@ const AdminDashboard: React.FC = () => {
                     <td className="px-4 py-3"><StatusBadge status={session.status} /></td>
                     <td className="px-4 py-3 text-sm text-zinc-400">{session.category}</td>
                     <td className="px-4 py-3 text-sm text-zinc-400">{session.author}</td>
+                    <td className="px-4 py-3">
+                      {session.lastUpdatedBy ? (
+                        <span className="text-[11px] text-zinc-500" title={session.lastUpdatedBy}>
+                          {session.lastUpdatedBy.split('@')[0]}
+                        </span>
+                      ) : (
+                        <span className="text-[11px] text-zinc-600">—</span>
+                      )}
+                    </td>
                     <td className="px-4 py-3 text-right">
                       <div className="flex items-center justify-end gap-2">
                         <Link
@@ -167,6 +194,9 @@ const AdminDashboard: React.FC = () => {
                       <span className="text-[10px] px-1.5 py-0.5 bg-white/5 rounded text-zinc-500">{session.category}</span>
                       {session.duration && <span className="text-[10px] text-zinc-600">{session.duration}</span>}
                       <span className="text-[10px] text-zinc-600">{session.author}</span>
+                      {session.lastUpdatedBy && (
+                        <span className="text-[10px] text-zinc-500">• {session.lastUpdatedBy.split('@')[0]}</span>
+                      )}
                     </div>
                   </div>
                   <div className="flex items-center gap-1.5 flex-none">

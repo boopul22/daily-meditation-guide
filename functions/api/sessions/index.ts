@@ -1,5 +1,6 @@
 import { Env, SessionRow } from '../../types';
 import { requireAuth, isAdmin } from '../../lib/auth';
+import { verifyCFAccessJWT } from '../../lib/cfaccess';
 import { rowToAPI } from '../../lib/db';
 
 export const onRequestGet: PagesFunction<Env> = async ({ request, env }) => {
@@ -24,6 +25,10 @@ export const onRequestPost: PagesFunction<Env> = async ({ request, env }) => {
 
   const body = await request.json<any>();
 
+  // Get current user email for audit
+  const jwtPayload = await verifyCFAccessJWT(request, env);
+  const creatorEmail = jwtPayload?.email || null;
+
   const id = crypto.randomUUID();
   const slug = body.slug;
   const now = new Date().toISOString();
@@ -31,8 +36,8 @@ export const onRequestPost: PagesFunction<Env> = async ({ request, env }) => {
   const publishedAt = status === 'published' ? now : null;
 
   await env.DB.prepare(
-    `INSERT INTO sessions (id, slug, title, author, role, duration, duration_sec, category, color, description, featured_image, audio_url, full_content, related_sessions, faq_items, status, published_at, created_at, updated_at)
-     VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`
+    `INSERT INTO sessions (id, slug, title, author, role, duration, duration_sec, category, color, description, featured_image, audio_url, full_content, related_sessions, faq_items, status, published_at, created_at, updated_at, version, last_updated_by)
+     VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`
   ).bind(
     id,
     slug,
@@ -52,7 +57,9 @@ export const onRequestPost: PagesFunction<Env> = async ({ request, env }) => {
     status,
     publishedAt,
     now,
-    now
+    now,
+    1,
+    creatorEmail
   ).run();
 
   const row = await env.DB.prepare('SELECT * FROM sessions WHERE id = ?')

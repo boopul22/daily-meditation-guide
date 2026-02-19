@@ -1,7 +1,8 @@
 import React, { useCallback, useEffect, useRef, useState } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { useAdminAuth } from '../../lib/useAdminAuth';
-import { fetchSessions, fetchSessionBySlug, createSession, updateSession, uploadImage } from '../../lib/api';
+import { useAuth } from '../../lib/AuthContext';
+import { fetchSessions, fetchSessionBySlug, createSession, updateSession, uploadImage, ConflictError } from '../../lib/api';
 import { Session, FAQItem } from '../../types';
 import RichTextEditor from '../../components/admin/RichTextEditor';
 
@@ -33,8 +34,15 @@ interface FormData {
   faqItems: FAQItem[];
 }
 
+interface ConflictInfo {
+  message: string;
+  updatedBy: string | null;
+  serverData: Session;
+}
+
 const AdminSessionForm: React.FC = () => {
   const { isAdmin: isAuth, loading: authLoading } = useAdminAuth();
+  const { user } = useAuth();
   const { slug } = useParams<{ slug: string }>();
   const navigate = useNavigate();
   const isEdit = !!slug;
@@ -53,11 +61,15 @@ const AdminSessionForm: React.FC = () => {
   // Draft/publish state
   const [status, setStatus] = useState<'draft' | 'published'>('draft');
   const [publishedAt, setPublishedAt] = useState<string | null>(null);
-  const [savedSlug, setSavedSlug] = useState<string | null>(null); // Track the slug after first save for auto-save
+  const [savedSlug, setSavedSlug] = useState<string | null>(null);
   const [autoSaveStatus, setAutoSaveStatus] = useState<'idle' | 'saving' | 'saved' | 'error'>('idle');
   const autoSaveTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
   const hasUnsavedChanges = useRef(false);
   const formRef = useRef<FormData | null>(null);
+
+  // Version tracking for optimistic locking
+  const [version, setVersion] = useState<number>(1);
+  const [conflict, setConflict] = useState<ConflictInfo | null>(null);
 
   const [form, setForm] = useState<FormData>({
     title: '', slug: '', author: '', role: '', duration: '',
@@ -89,6 +101,7 @@ const AdminSessionForm: React.FC = () => {
           setStatus(session.status || 'draft');
           setPublishedAt(session.publishedAt || null);
           setSavedSlug(session.slug);
+          setVersion(session.version ?? 1);
         }
       } catch (err: any) { setError(err.message); }
       finally { setLoading(false); }
@@ -149,32 +162,101 @@ const AdminSessionForm: React.FC = () => {
     scheduleAutoSave();
   };
 
+  // Handle conflict errors
+  const handleConflictError = (err: ConflictError) => {
+    setConflict({
+      message: err.message,
+      updatedBy: err.currentData.lastUpdatedBy || null,
+      serverData: err.currentData,
+    });
+  };
+
+  // Reload from server (resolve conflict by accepting server version)
+  const handleReload = async () => {
+    if (!savedSlug) return;
+    try {
+      const session = await fetchSessionBySlug(savedSlug);
+      setForm({
+        title: session.title, slug: session.slug, author: session.author,
+        role: session.role, duration: session.duration, category: session.category,
+        color: session.color, description: session.description,
+        featuredImage: session.featuredImage || '', audioUrl: session.audioUrl || '',
+        fullContent: session.fullContent, relatedSessions: session.relatedSessions,
+        faqItems: session.faqItems || [],
+      });
+      setStatus(session.status || 'draft');
+      setPublishedAt(session.publishedAt || null);
+      setVersion(session.version ?? 1);
+      setConflict(null);
+      hasUnsavedChanges.current = false;
+    } catch (err: any) {
+      setError(err.message);
+    }
+  };
+
+  // Force save (resolve conflict by overwriting)
+  const handleForceSave = async () => {
+    if (!savedSlug || !conflict) return;
+    setConflict(null);
+    setSaving(true);
+    setError('');
+    try {
+      const payload = {
+        ...form,
+        durationSec: parseDurationToSec(form.duration),
+        status,
+        version: conflict.serverData.version,
+        forceSave: true,
+      };
+      const updated = await updateSession(savedSlug, payload);
+      if (form.slug !== savedSlug) setSavedSlug(form.slug);
+      setVersion(updated.version ?? version + 1);
+      hasUnsavedChanges.current = false;
+      setAutoSaveStatus('saved');
+      setTimeout(() => setAutoSaveStatus('idle'), 2000);
+    } catch (err: any) {
+      if (err instanceof ConflictError) {
+        handleConflictError(err);
+      } else {
+        setError(err.message);
+      }
+    } finally {
+      setSaving(false);
+    }
+  };
+
   // Auto-save logic — save as draft after 3s of inactivity
   const doAutoSave = useCallback(async () => {
     const currentForm = formRef.current;
     if (!currentForm || !hasUnsavedChanges.current) return;
-    if (!currentForm.title || !currentForm.slug) return; // Need at least title+slug
+    if (!currentForm.title || !currentForm.slug) return;
 
     hasUnsavedChanges.current = false;
     setAutoSaveStatus('saving');
     try {
-      const payload = { ...currentForm, durationSec: parseDurationToSec(currentForm.duration), status: status };
+      const payload = { ...currentForm, durationSec: parseDurationToSec(currentForm.duration), status: status, version };
       if (savedSlug) {
-        await updateSession(savedSlug, payload);
-        // If slug changed, update savedSlug
+        const updated = await updateSession(savedSlug, payload);
         if (currentForm.slug !== savedSlug) setSavedSlug(currentForm.slug);
+        setVersion(updated.version ?? version + 1);
       } else {
         const created = await createSession({ ...payload, status: 'draft' });
         setSavedSlug(created.slug);
         setStatus('draft');
+        setVersion(created.version ?? 1);
       }
       setAutoSaveStatus('saved');
       setTimeout(() => setAutoSaveStatus('idle'), 2000);
-    } catch {
-      setAutoSaveStatus('error');
-      hasUnsavedChanges.current = true; // Retry on next change
+    } catch (err: any) {
+      if (err instanceof ConflictError) {
+        handleConflictError(err);
+        setAutoSaveStatus('idle');
+      } else {
+        setAutoSaveStatus('error');
+        hasUnsavedChanges.current = true;
+      }
     }
-  }, [savedSlug, status]);
+  }, [savedSlug, status, version]);
 
   const scheduleAutoSave = useCallback(() => {
     if (autoSaveTimer.current) clearTimeout(autoSaveTimer.current);
@@ -207,19 +289,27 @@ const AdminSessionForm: React.FC = () => {
     setSaving(true);
     setError('');
     try {
-      const payload = { ...form, durationSec: parseDurationToSec(form.duration), status: 'draft' as const };
+      const payload = { ...form, durationSec: parseDurationToSec(form.duration), status: 'draft' as const, version };
       if (savedSlug) {
-        await updateSession(savedSlug, payload);
+        const updated = await updateSession(savedSlug, payload);
         if (form.slug !== savedSlug) setSavedSlug(form.slug);
+        setVersion(updated.version ?? version + 1);
       } else {
         const created = await createSession(payload);
         setSavedSlug(created.slug);
+        setVersion(created.version ?? 1);
       }
       setStatus('draft');
       hasUnsavedChanges.current = false;
       setAutoSaveStatus('saved');
       setTimeout(() => setAutoSaveStatus('idle'), 2000);
-    } catch (err: any) { setError(err.message); }
+    } catch (err: any) {
+      if (err instanceof ConflictError) {
+        handleConflictError(err);
+      } else {
+        setError(err.message);
+      }
+    }
     finally { setSaving(false); }
   };
 
@@ -229,19 +319,27 @@ const AdminSessionForm: React.FC = () => {
     setPublishing(true);
     setError('');
     try {
-      const payload = { ...form, durationSec: parseDurationToSec(form.duration), status: 'published' as const };
+      const payload = { ...form, durationSec: parseDurationToSec(form.duration), status: 'published' as const, version };
       if (savedSlug) {
         const updated = await updateSession(savedSlug, payload);
         if (form.slug !== savedSlug) setSavedSlug(form.slug);
         setPublishedAt(updated.publishedAt || null);
+        setVersion(updated.version ?? version + 1);
       } else {
         const created = await createSession(payload);
         setSavedSlug(created.slug);
         setPublishedAt(created.publishedAt || null);
+        setVersion(created.version ?? 1);
       }
       setStatus('published');
       hasUnsavedChanges.current = false;
-    } catch (err: any) { setError(err.message); }
+    } catch (err: any) {
+      if (err instanceof ConflictError) {
+        handleConflictError(err);
+      } else {
+        setError(err.message);
+      }
+    }
     finally { setPublishing(false); }
   };
 
@@ -251,11 +349,18 @@ const AdminSessionForm: React.FC = () => {
     setSaving(true);
     setError('');
     try {
-      await updateSession(savedSlug, { ...form, durationSec: parseDurationToSec(form.duration), status: 'draft' } as any);
+      const updated = await updateSession(savedSlug, { ...form, durationSec: parseDurationToSec(form.duration), status: 'draft', version } as any);
       setStatus('draft');
       setPublishedAt(null);
+      setVersion(updated.version ?? version + 1);
       hasUnsavedChanges.current = false;
-    } catch (err: any) { setError(err.message); }
+    } catch (err: any) {
+      if (err instanceof ConflictError) {
+        handleConflictError(err);
+      } else {
+        setError(err.message);
+      }
+    }
     finally { setSaving(false); }
   };
 
@@ -266,13 +371,20 @@ const AdminSessionForm: React.FC = () => {
     setUpdating(true);
     setError('');
     try {
-      const payload = { ...form, durationSec: parseDurationToSec(form.duration), status: 'published' as const };
-      await updateSession(savedSlug, payload);
+      const payload = { ...form, durationSec: parseDurationToSec(form.duration), status: 'published' as const, version };
+      const updated = await updateSession(savedSlug, payload);
       if (form.slug !== savedSlug) setSavedSlug(form.slug);
+      setVersion(updated.version ?? version + 1);
       hasUnsavedChanges.current = false;
       setAutoSaveStatus('saved');
       setTimeout(() => setAutoSaveStatus('idle'), 2000);
-    } catch (err: any) { setError(err.message); }
+    } catch (err: any) {
+      if (err instanceof ConflictError) {
+        handleConflictError(err);
+      } else {
+        setError(err.message);
+      }
+    }
     finally { setUpdating(false); }
   };
 
@@ -459,6 +571,35 @@ const AdminSessionForm: React.FC = () => {
 
   return (
     <form onSubmit={handleFormSubmit} className="fixed inset-0 flex flex-col bg-[#030303] z-50">
+      {/* Conflict Banner */}
+      {conflict && (
+        <div className="flex-none px-3 md:px-5 py-2.5 bg-amber-500/10 border-b border-amber-500/30 flex items-center justify-between gap-3">
+          <div className="flex items-center gap-2 min-w-0">
+            <iconify-icon icon="solar:danger-triangle-linear" width="18" className="text-amber-400 flex-none"></iconify-icon>
+            <p className="text-xs text-amber-300 truncate">
+              <span className="font-medium">Conflict:</span> {conflict.updatedBy ? `${conflict.updatedBy.split('@')[0]} modified this session` : 'This session was modified by another admin'}.
+            </p>
+          </div>
+          <div className="flex items-center gap-1.5 flex-none">
+            <button
+              type="button"
+              onClick={handleReload}
+              className="px-2.5 py-1 text-xs font-medium rounded-md border border-amber-500/30 text-amber-300 hover:bg-amber-500/20 transition-colors"
+            >
+              Reload
+            </button>
+            <button
+              type="button"
+              onClick={handleForceSave}
+              disabled={saving}
+              className="px-2.5 py-1 text-xs font-medium rounded-md bg-amber-500/20 border border-amber-500/30 text-amber-200 hover:bg-amber-500/30 transition-colors disabled:opacity-50"
+            >
+              Force Save
+            </button>
+          </div>
+        </div>
+      )}
+
       {/* Top Bar */}
       <div className="flex-none flex items-center justify-between px-3 md:px-5 py-2 md:py-2.5 border-b border-white/5 bg-zinc-950/80 backdrop-blur-sm">
         <div className="flex items-center gap-2 md:gap-3 min-w-0">
@@ -578,7 +719,13 @@ const AdminSessionForm: React.FC = () => {
           </div>
           <div className="flex-1 min-h-0 overflow-hidden relative">
             <div className={`absolute inset-0 flex flex-col ${rightTab === 'editor' ? '' : 'tab-panel-hidden'}`}>
-              <RichTextEditor key={slug || 'new'} content={form.fullContent} onChange={(html) => handleChange('fullContent', html)} />
+              <RichTextEditor
+                key={slug || 'new'}
+                content={form.fullContent}
+                onChange={(html) => handleChange('fullContent', html)}
+                sessionSlug={savedSlug || undefined}
+                currentUser={user || undefined}
+              />
             </div>
             <div className={`absolute inset-0 overflow-y-auto p-8 ${rightTab === 'preview' ? '' : 'tab-panel-hidden'}`}>
               {form.fullContent ? (
@@ -593,7 +740,13 @@ const AdminSessionForm: React.FC = () => {
         {/* Mobile: Editor */}
         <div className={`md:hidden flex-1 flex flex-col min-w-0 ${mobileTab === 'editor' ? '' : 'tab-panel-hidden'}`}>
           <div className="h-full flex flex-col">
-            <RichTextEditor key={(slug || 'new') + '-mobile'} content={form.fullContent} onChange={(html) => handleChange('fullContent', html)} />
+            <RichTextEditor
+              key={(slug || 'new') + '-mobile'}
+              content={form.fullContent}
+              onChange={(html) => handleChange('fullContent', html)}
+              sessionSlug={savedSlug || undefined}
+              currentUser={user || undefined}
+            />
           </div>
         </div>
 

@@ -3,6 +3,16 @@ import { convertToWebP } from './convertToWebP';
 
 const API_BASE = '/api';
 
+// Custom error for version conflicts
+export class ConflictError extends Error {
+  currentData: Session;
+  constructor(message: string, currentData: Session) {
+    super(message);
+    this.name = 'ConflictError';
+    this.currentData = currentData;
+  }
+}
+
 async function request<T>(path: string, options?: RequestInit): Promise<T> {
   const res = await fetch(`${API_BASE}${path}`, {
     credentials: 'include',
@@ -15,6 +25,15 @@ async function request<T>(path: string, options?: RequestInit): Promise<T> {
 
   if (!res.ok) {
     const body = await res.json().catch(() => ({}));
+
+    // Handle 409 Conflict specifically
+    if (res.status === 409 && (body as any).conflict) {
+      throw new ConflictError(
+        (body as any).error || 'Conflict detected',
+        (body as any).currentData
+      );
+    }
+
     throw new Error((body as any).error || `Request failed: ${res.status}`);
   }
 
@@ -45,7 +64,7 @@ export async function createSession(data: Partial<Session>): Promise<Session> {
   });
 }
 
-export async function updateSession(slug: string, data: Partial<Session>): Promise<Session> {
+export async function updateSession(slug: string, data: Partial<Session> & { version?: number; forceSave?: boolean }): Promise<Session> {
   return request(`/sessions/${slug}`, {
     method: 'PUT',
     body: JSON.stringify(data),

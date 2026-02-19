@@ -15,3 +15,13 @@ database_id = "8a669091-365a-4bb1-9ec5-bace5e4c440a"
 [[r2_buckets]]
 binding = "R2"
 bucket_name = "imgtourl"
+
+[durable_objects]
+bindings = [
+  { name = "SESSION_ROOMS", class_name = "SessionRoom" }
+]
+
+[[migrations]]
+tag = "v1"
+new_classes = ["SessionRoom"]
+
