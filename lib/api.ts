@@ -54,7 +54,7 @@ export async function fetchPublicSessions(): Promise<Session[]> {
 }
 
 export async function fetchSessionBySlug(slug: string): Promise<Session> {
-  return request(`/sessions/${slug}`);
+  return request(`/sessions/${encodeURIComponent(slug)}`);
 }
 
 export async function createSession(data: Partial<Session>): Promise<Session> {
@@ -65,14 +65,14 @@ export async function createSession(data: Partial<Session>): Promise<Session> {
 }
 
 export async function updateSession(slug: string, data: Partial<Session> & { version?: number; forceSave?: boolean }): Promise<Session> {
-  return request(`/sessions/${slug}`, {
+  return request(`/sessions/${encodeURIComponent(slug)}`, {
     method: 'PUT',
     body: JSON.stringify(data),
   });
 }
 
 export async function deleteSession(slug: string): Promise<void> {
-  await request(`/sessions/${slug}`, { method: 'DELETE' });
+  await request(`/sessions/${encodeURIComponent(slug)}`, { method: 'DELETE' });
 }
 
 export async function uploadImage(file: File): Promise<string> {

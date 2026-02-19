@@ -30,7 +30,8 @@ export const onRequestPost: PagesFunction<Env> = async ({ request, env }) => {
   const creatorEmail = jwtPayload?.email || null;
 
   const id = crypto.randomUUID();
-  const slug = body.slug;
+  // Sanitize slug: lowercase, replace non-alphanumeric with hyphens, collapse multiples, trim
+  const slug = (body.slug || '').toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/(^-|-$)/g, '');
   const now = new Date().toISOString();
   const status = body.status === 'published' ? 'published' : 'draft';
   const publishedAt = status === 'published' ? now : null;
