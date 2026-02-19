@@ -18,10 +18,5 @@ bucket_name = "imgtourl"
 
 [durable_objects]
 bindings = [
-  { name = "SESSION_ROOMS", class_name = "SessionRoom" }
+  { name = "SESSION_ROOMS", class_name = "SessionRoom", script_name = "dmg-collab-worker" }
 ]
-
-[[migrations]]
-tag = "v1"
-new_classes = ["SessionRoom"]
-
