@@ -1,12 +1,9 @@
-import React, { useCallback, useEffect, useRef, useState } from 'react';
+import React, { useCallback, useRef, useState } from 'react';
 import { useEditor, EditorContent } from '@tiptap/react';
 import StarterKit from '@tiptap/starter-kit';
 import Link from '@tiptap/extension-link';
 import Image from '@tiptap/extension-image';
 import Placeholder from '@tiptap/extension-placeholder';
-import Collaboration from '@tiptap/extension-collaboration';
-import CollaborationCursor from '@tiptap/extension-collaboration-cursor';
-import * as Y from 'yjs';
 import { uploadImage } from '../../lib/api';
 import { User } from '../../types';
 
@@ -35,17 +32,6 @@ function preprocessContent(html: string): string {
   return doc.body.innerHTML;
 }
 
-const CURSOR_COLORS = [
-  '#6366f1', '#14b8a6', '#f97316', '#f43f5e',
-  '#3b82f6', '#10b981', '#a855f7', '#ec4899',
-];
-
-interface CollaboratorInfo {
-  email: string;
-  name: string;
-  color: string;
-}
-
 const ToolbarButton: React.FC<{
   onClick: () => void;
   active?: boolean;
@@ -70,163 +56,14 @@ const ToolbarButton: React.FC<{
 
 const Divider = () => <div className="w-px h-6 bg-white/10 mx-1 self-center" />;
 
-/**
- * Custom WebSocket provider for Yjs that connects to our Durable Object
- */
-class CollabWSProvider {
-  private ws: WebSocket | null = null;
-  private doc: Y.Doc;
-  private slug: string;
-  private reconnectTimer: ReturnType<typeof setTimeout> | null = null;
-  private connected = false;
-  public awareness: Map<string, CollaboratorInfo> = new Map();
-  public onPresenceChange?: (users: CollaboratorInfo[]) => void;
-
-  constructor(doc: Y.Doc, slug: string) {
-    this.doc = doc;
-    this.slug = slug;
-  }
-
-  connect() {
-    if (this.ws) return;
-
-    const protocol = window.location.protocol === 'https:' ? 'wss:' : 'ws:';
-    const wsUrl = `${protocol}//${window.location.host}/api/collab/${this.slug}`;
-
-    try {
-      this.ws = new WebSocket(wsUrl);
-
-      this.ws.onopen = () => {
-        this.connected = true;
-      };
-
-      this.ws.onmessage = (event) => {
-        try {
-          const data = JSON.parse(event.data);
-          this.handleMessage(data);
-        } catch {
-          // Ignore parse errors
-        }
-      };
-
-      this.ws.onclose = () => {
-        this.connected = false;
-        this.ws = null;
-        // Reconnect after 2 seconds
-        this.reconnectTimer = setTimeout(() => this.connect(), 2000);
-      };
-
-      this.ws.onerror = () => {
-        this.ws?.close();
-      };
-
-      // Listen for local Yjs updates and broadcast them
-      this.doc.on('update', (update: Uint8Array, origin: any) => {
-        if (origin === 'remote') return; // Don't re-broadcast remote updates
-        this.send({
-          type: 'yjs-update',
-          data: Array.from(update),
-        });
-      });
-    } catch {
-      // WebSocket construction failed — retry
-      this.reconnectTimer = setTimeout(() => this.connect(), 2000);
-    }
-  }
-
-  private handleMessage(data: any) {
-    switch (data.type) {
-      case 'sync-init': {
-        const update = new Uint8Array(data.data);
-        Y.applyUpdate(this.doc, update, 'remote');
-        break;
-      }
-      case 'yjs-update': {
-        const update = new Uint8Array(data.data);
-        Y.applyUpdate(this.doc, update, 'remote');
-        break;
-      }
-      case 'presence-init': {
-        this.awareness.clear();
-        (data.users as CollaboratorInfo[]).forEach(u => {
-          this.awareness.set(u.email, u);
-        });
-        this.onPresenceChange?.(Array.from(this.awareness.values()));
-        break;
-      }
-      case 'presence-join': {
-        const user = data.user as CollaboratorInfo;
-        this.awareness.set(user.email, user);
-        this.onPresenceChange?.(Array.from(this.awareness.values()));
-        break;
-      }
-      case 'presence-leave': {
-        const user = data.user as CollaboratorInfo;
-        this.awareness.delete(user.email);
-        this.onPresenceChange?.(Array.from(this.awareness.values()));
-        break;
-      }
-    }
-  }
-
-  private send(data: any) {
-    if (this.ws && this.connected && this.ws.readyState === WebSocket.OPEN) {
-      this.ws.send(JSON.stringify(data));
-    }
-  }
-
-  destroy() {
-    if (this.reconnectTimer) clearTimeout(this.reconnectTimer);
-    this.doc.off('update', () => { });
-    if (this.ws) {
-      this.ws.onclose = null; // Prevent reconnect
-      this.ws.close();
-      this.ws = null;
-    }
-  }
-}
-
 const RichTextEditor: React.FC<RichTextEditorProps> = ({ content, onChange, sessionSlug, currentUser }) => {
   const fileInputRef = useRef<HTMLInputElement>(null);
   const [uploading, setUploading] = useState(false);
-  const [collaborators, setCollaborators] = useState<CollaboratorInfo[]>([]);
-  const providerRef = useRef<CollabWSProvider | null>(null);
-  const ydocRef = useRef<Y.Doc | null>(null);
-  const isCollabMode = !!sessionSlug;
 
-  // Create Yjs doc and provider for collaborative mode
-  useEffect(() => {
-    if (!isCollabMode) return;
-
-    const ydoc = new Y.Doc();
-    ydocRef.current = ydoc;
-
-    const provider = new CollabWSProvider(ydoc, sessionSlug);
-    providerRef.current = provider;
-
-    provider.onPresenceChange = (users) => {
-      // Filter out self
-      const others = currentUser
-        ? users.filter(u => u.email !== currentUser.email)
-        : users;
-      setCollaborators(others);
-    };
-
-    provider.connect();
-
-    return () => {
-      provider.destroy();
-      ydoc.destroy();
-      providerRef.current = null;
-      ydocRef.current = null;
-    };
-  }, [isCollabMode, sessionSlug, currentUser]);
-
-  const editorExtensions = (() => {
-    const base = [
+  const editor = useEditor({
+    extensions: [
       StarterKit.configure({
         heading: { levels: [2, 3] },
-        ...(isCollabMode ? { history: false } : {}), // Disable history in collab mode (Yjs handles undo/redo)
       }),
       Link.configure({
         openOnClick: false,
@@ -240,33 +77,12 @@ const RichTextEditor: React.FC<RichTextEditorProps> = ({ content, onChange, sess
       Placeholder.configure({
         placeholder: 'Start writing your session content...',
       }),
-    ];
-
-    if (isCollabMode && ydocRef.current) {
-      base.push(
-        Collaboration.configure({
-          document: ydocRef.current,
-        }) as any,
-        CollaborationCursor.configure({
-          provider: providerRef.current as any,
-          user: currentUser ? {
-            name: currentUser.name || currentUser.email.split('@')[0],
-            color: CURSOR_COLORS[Math.floor(Math.random() * CURSOR_COLORS.length)],
-          } : { name: 'Anonymous', color: '#6366f1' },
-        }) as any,
-      );
-    }
-
-    return base;
-  })();
-
-  const editor = useEditor({
-    extensions: editorExtensions,
-    content: isCollabMode ? undefined : preprocessContent(content),
+    ],
+    content: preprocessContent(content),
     onUpdate: ({ editor }) => {
       onChange(editor.getHTML());
     },
-  }, [isCollabMode, ydocRef.current]);
+  });
 
   const setLink = useCallback(() => {
     if (!editor) return;
@@ -409,28 +225,6 @@ const RichTextEditor: React.FC<RichTextEditorProps> = ({ content, onChange, sess
         >
           <iconify-icon icon="solar:undo-right-linear" width="16"></iconify-icon>
         </ToolbarButton>
-
-        {/* Collaborator avatars */}
-        {collaborators.length > 0 && (
-          <>
-            <Divider />
-            <div className="flex items-center gap-1 ml-1">
-              {collaborators.map(collab => (
-                <div
-                  key={collab.email}
-                  title={`${collab.name} (${collab.email})`}
-                  className="w-6 h-6 md:w-5 md:h-5 rounded-full flex items-center justify-center text-[9px] font-bold text-white uppercase ring-2 ring-zinc-900"
-                  style={{ backgroundColor: collab.color }}
-                >
-                  {collab.name.charAt(0)}
-                </div>
-              ))}
-              <span className="text-[9px] text-zinc-500 ml-0.5">
-                {collaborators.length} editing
-              </span>
-            </div>
-          </>
-        )}
       </div>
 
       {/* Editor Content */}
@@ -516,30 +310,6 @@ const RichTextEditor: React.FC<RichTextEditorProps> = ({ content, onChange, sess
           pointer-events: none;
           float: left;
           height: 0;
-        }
-        /* Collaboration cursor styles */
-        .collaboration-cursor__caret {
-          border-left: 2px solid;
-          border-right: none;
-          margin-left: -1px;
-          margin-right: -1px;
-          pointer-events: none;
-          position: relative;
-          word-break: normal;
-        }
-        .collaboration-cursor__label {
-          border-radius: 3px 3px 3px 0;
-          color: #fff;
-          font-size: 10px;
-          font-weight: 600;
-          font-style: normal;
-          left: -1px;
-          line-height: normal;
-          padding: 1px 4px;
-          position: absolute;
-          top: -1.4em;
-          user-select: none;
-          white-space: nowrap;
         }
       `}</style>
     </div>
