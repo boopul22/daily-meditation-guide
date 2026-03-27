@@ -20,7 +20,7 @@ const Navbar: React.FC = () => {
 
   return (
     <>
-      <nav className="fixed top-0 w-full z-50 border-b border-white/5 bg-[#030303]/80 backdrop-blur-xl">
+      <nav className="fixed top-0 w-full z-50 border-b border-white/[0.06] bg-[#080706]/80 backdrop-blur-xl">
         <div className="max-w-6xl mx-auto px-6 h-16 flex items-center justify-between">
           <Link
             to="/"
@@ -99,7 +99,7 @@ const Navbar: React.FC = () => {
 
       {/* Mobile Menu Overlay */}
       {isMobileMenuOpen && (
-        <div className="fixed inset-0 z-40 bg-[#030303] pt-24 px-6 md:hidden animate-[fade-enter_0.2s_ease-out]">
+        <div className="fixed inset-0 z-40 bg-[#080706] pt-24 px-6 md:hidden animate-[fade-enter_0.2s_ease-out]">
           <div className="flex flex-col gap-6 text-lg font-medium text-zinc-300">
             <Link to="/" onClick={() => setIsMobileMenuOpen(false)} className="border-b border-white/5 pb-4">Practice</Link>
             <Link to="/sessions" onClick={() => setIsMobileMenuOpen(false)} className="border-b border-white/5 pb-4">Sessions</Link>

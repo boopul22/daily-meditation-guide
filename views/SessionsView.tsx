@@ -16,7 +16,7 @@ const SessionsView: React.FC = () => {
             />
 
             <header className="space-y-4">
-                <h1 className="text-3xl md:text-5xl font-medium text-zinc-100 tracking-tight">
+                <h1 className="font-display text-3xl md:text-5xl font-medium text-zinc-100 tracking-tight">
                     Guided Sessions
                 </h1>
                 <p className="text-zinc-500 max-w-2xl text-lg">

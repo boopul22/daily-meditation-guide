@@ -22,7 +22,7 @@ const PlayerBar: React.FC<PlayerBarProps> = ({ currentTrack, isPlaying, onPlayPa
   const progress = duration > 0 ? (currentTime / duration) * 100 : 0;
 
   return (
-    <div className="fixed bottom-0 w-full z-40 border-t border-white/10 bg-[#0a0a0a]/90 backdrop-blur-xl supports-[backdrop-filter]:bg-[#0a0a0a]/60 transition-all duration-500 fade-enter-active pb-safe">
+    <div className="fixed bottom-0 w-full z-40 border-t border-white/[0.08] bg-[#0d0b09]/90 backdrop-blur-xl supports-[backdrop-filter]:bg-[#0d0b09]/60 transition-all duration-500 pb-safe animate-[fade-enter_0.3s_ease-out]">
       <div className="max-w-6xl mx-auto px-4 md:px-6 py-3 flex items-center justify-between gap-4 md:gap-6">
 
         {/* Track Info */}

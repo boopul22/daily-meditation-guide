@@ -24,7 +24,7 @@ const SessionCard: React.FC<SessionCardProps> = ({ session }) => {
   return (
     <Link
       to={`/session/${session.slug}`}
-      className="cursor-pointer group relative bg-zinc-900/40 border border-white/5 hover:border-white/10 rounded-2xl p-4 transition-all duration-300 hover:bg-zinc-800/40"
+      className="cursor-pointer group relative bg-zinc-900/40 border border-white/[0.06] hover:border-white/[0.12] rounded-2xl p-4 transition-all duration-300 hover:bg-zinc-800/40 hover:-translate-y-1 hover:shadow-lg hover:shadow-black/20"
     >
       <div className="relative h-48 w-full rounded-xl overflow-hidden mb-4 bg-zinc-800">
         {session.featuredImage ? (
@@ -42,7 +42,7 @@ const SessionCard: React.FC<SessionCardProps> = ({ session }) => {
         </div>
       </div>
       <div className="space-y-1">
-        <h3 className={`text-zinc-200 font-medium tracking-tight ${textClass} transition-colors`}>
+        <h3 className={`font-display text-zinc-200 font-medium tracking-tight ${textClass} transition-colors`}>
           {session.title}
         </h3>
         <p className="text-xs text-zinc-500 line-clamp-2">

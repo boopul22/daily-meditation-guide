@@ -39,7 +39,7 @@ const ContactView: React.FC = () => {
                                 <span className="w-1.5 h-1.5 rounded-full bg-teal-500"></span>
                                 SUPPORT
                             </div>
-                            <h1 className="text-5xl md:text-6xl font-medium text-zinc-100 tracking-tight leading-tight">
+                            <h1 className="font-display text-5xl md:text-6xl font-medium text-zinc-100 tracking-tight leading-tight">
                                 We'd love to <br />
                                 <span className="text-transparent bg-clip-text bg-gradient-to-r from-teal-200 to-indigo-300">hear from you.</span>
                             </h1>

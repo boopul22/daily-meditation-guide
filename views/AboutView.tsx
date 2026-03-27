@@ -27,8 +27,8 @@ const AboutView: React.FC = () => {
                         ABOUT
                     </div>
 
-                    <h1 className="text-5xl md:text-7xl font-medium text-zinc-100 tracking-tight leading-[1.1]">
-                        Hi, I'm <span className="text-transparent bg-clip-text bg-gradient-to-r from-indigo-300 via-purple-300 to-indigo-300 animate-shine bg-[length:200%_auto]">Bipul Kumar</span> 👋
+                    <h1 className="font-display text-5xl md:text-7xl font-medium text-zinc-100 tracking-tight leading-[1.1]">
+                        Hi, I'm <span className="text-transparent bg-clip-text bg-gradient-to-r from-indigo-300 via-purple-300 to-indigo-300 animate-shimmer bg-[length:200%_auto]">Bipul Kumar</span>
                     </h1>
 
                     <p className="text-xl text-zinc-400 max-w-2xl mx-auto leading-relaxed font-light">
@@ -38,7 +38,7 @@ const AboutView: React.FC = () => {
 
                 {/* About the Site */}
                 <section className="space-y-8">
-                    <h2 className="text-3xl font-medium text-zinc-100 tracking-tight">About Daily Meditation Guide</h2>
+                    <h2 className="font-display text-3xl font-medium text-zinc-100 tracking-tight">About Daily Meditation Guide</h2>
                     <div className="p-8 rounded-3xl border border-white/5 bg-zinc-900/40 backdrop-blur-sm space-y-6">
                         <p className="text-zinc-400 leading-relaxed text-lg">
                             Daily Meditation Guide is a curated platform offering guided meditation sessions, ambient soundscapes, and mindfulness resources designed to help you find focus, calm, and clarity in your everyday life.
@@ -54,7 +54,7 @@ const AboutView: React.FC = () => {
 
                 {/* My Story */}
                 <section className="space-y-8">
-                    <h2 className="text-3xl font-medium text-zinc-100 tracking-tight">My Story</h2>
+                    <h2 className="font-display text-3xl font-medium text-zinc-100 tracking-tight">My Story</h2>
                     <div className="p-8 rounded-3xl border border-white/5 bg-zinc-900/40 backdrop-blur-sm">
                         <p className="text-zinc-400 leading-relaxed text-lg mb-6">
                             My journey hasn't been smooth or privileged. I grew up with limited resources, struggled academically in my early years, and paid my own college fees through persistence and self-learning. Those experiences shaped how I think, work, and build today — with clarity, resilience, and focus on long-term growth.
@@ -68,7 +68,7 @@ const AboutView: React.FC = () => {
                 {/* Core Values */}
                 <section className="space-y-12">
                     <div className="text-center max-w-2xl mx-auto space-y-4">
-                        <h2 className="text-3xl font-medium text-zinc-100 tracking-tight">Core Values</h2>
+                        <h2 className="font-display text-3xl font-medium text-zinc-100 tracking-tight">Core Values</h2>
                         <p className="text-zinc-500">The principles that guide my work and life.</p>
                     </div>
 
@@ -95,7 +95,7 @@ const AboutView: React.FC = () => {
                 {/* What I Do */}
                 <section className="space-y-8">
                     <div className="text-center max-w-2xl mx-auto space-y-4">
-                        <h2 className="text-3xl font-medium text-zinc-100 tracking-tight">What I Do</h2>
+                        <h2 className="font-display text-3xl font-medium text-zinc-100 tracking-tight">What I Do</h2>
                         <p className="text-zinc-500">I enjoy working at the intersection of AI, no-code tools, design, automation, and personal development</p>
                     </div>
 
@@ -122,7 +122,7 @@ const AboutView: React.FC = () => {
 
                 {/* Philosophy */}
                 <section className="py-12 border-y border-white/5">
-                    <h2 className="text-center text-2xl font-medium text-zinc-200 mb-12">Personal Philosophy</h2>
+                    <h2 className="font-display text-center text-2xl font-medium text-zinc-200 mb-12">Personal Philosophy</h2>
                     <div className="grid grid-cols-2 md:grid-cols-4 gap-8 text-center">
                         {["Start small", "Stay consistent", "Build quietly", "Let results make the noise"].map((text, i) => (
                             <div key={i} className="space-y-4 group">
@@ -135,7 +135,7 @@ const AboutView: React.FC = () => {
 
                 {/* Other Projects */}
                 <section className="space-y-8">
-                    <h2 className="text-3xl font-medium text-zinc-100 tracking-tight">My Other Projects</h2>
+                    <h2 className="font-display text-3xl font-medium text-zinc-100 tracking-tight">My Other Projects</h2>
                     <div className="grid md:grid-cols-2 gap-6">
                         {[
                             { name: "ExtractPics", desc: "Extract and download images from any website instantly. Supports batch processing and smart filtering.", link: "#" },
@@ -156,7 +156,7 @@ const AboutView: React.FC = () => {
 
                 {/* Let's Connect */}
                 <section className="space-y-8">
-                    <h2 className="text-3xl font-medium text-zinc-100 tracking-tight">Let's Connect</h2>
+                    <h2 className="font-display text-3xl font-medium text-zinc-100 tracking-tight">Let's Connect</h2>
                     <p className="text-zinc-400">If you're interested in AI, no-code tools, creative technology, fitness discipline, or personal growth — welcome, you're in the right place.</p>
 
                     <div className="grid md:grid-cols-2 gap-4">

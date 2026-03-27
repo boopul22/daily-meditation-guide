@@ -14,13 +14,13 @@ const NotFound: React.FC = () => {
 
             <div className="relative">
                 <div className="absolute inset-0 bg-indigo-500/20 blur-[60px] rounded-full animate-breathe"></div>
-                <h1 className="relative text-9xl font-bold text-transparent bg-clip-text bg-gradient-to-b from-zinc-200 to-zinc-800 tracking-tighter">
+                <h1 className="font-display relative text-9xl font-bold text-transparent bg-clip-text bg-gradient-to-b from-zinc-200 to-zinc-800 tracking-tighter">
                     404
                 </h1>
             </div>
 
             <div className="space-y-4 max-w-md mx-auto">
-                <h2 className="text-2xl font-medium text-zinc-200">
+                <h2 className="font-display text-2xl font-medium text-zinc-200">
                     Lost in the void?
                 </h2>
                 <p className="text-zinc-500">

@@ -161,7 +161,7 @@ const DetailView: React.FC<DetailViewProps> = ({ onPlay, currentTrackId, isPlayi
               </div>
             </div>
 
-            <h1 className="text-4xl md:text-5xl font-medium text-zinc-100 tracking-tight leading-tight">
+            <h1 className="font-display text-4xl md:text-5xl font-medium text-zinc-100 tracking-tight leading-tight">
               {session.title}
             </h1>
 
@@ -242,7 +242,7 @@ const DetailView: React.FC<DetailViewProps> = ({ onPlay, currentTrackId, isPlayi
           {/* FAQ Section */}
           {session.faqItems && session.faqItems.length > 0 && (
             <section className="pt-8 border-t border-white/5">
-              <h2 className="text-xl font-medium text-zinc-100 mb-6 flex items-center gap-2">
+              <h2 className="font-display text-xl font-medium text-zinc-100 mb-6 flex items-center gap-2">
                 <iconify-icon icon="solar:chat-round-dots-linear" width="22" class="text-indigo-400"></iconify-icon>
                 Frequently Asked Questions
               </h2>
@@ -304,7 +304,7 @@ const DetailView: React.FC<DetailViewProps> = ({ onPlay, currentTrackId, isPlayi
                   </span>
                 </div>
                 <div>
-                  <h3 className="text-lg font-medium text-zinc-100 tracking-tight leading-snug">{session.title}</h3>
+                  <h3 className="font-display text-lg font-medium text-zinc-100 tracking-tight leading-snug">{session.title}</h3>
                   <p className="text-zinc-500 text-xs mt-1">Guided Audio Session</p>
                 </div>
 

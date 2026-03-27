@@ -34,7 +34,7 @@ const HomeView: React.FC = () => {
             <span className="w-1.5 h-1.5 rounded-full bg-indigo-500 animate-pulse"></span>
             NEW SESSION ADDED
           </div>
-          <h1 className="text-5xl md:text-6xl lg:text-7xl font-medium text-zinc-100 tracking-tight leading-[1.1]">
+          <h1 className="font-display text-5xl md:text-6xl lg:text-7xl font-medium text-zinc-100 tracking-tight leading-[1.1]">
             Find stillness in <br /> <span className="text-transparent bg-clip-text bg-gradient-to-r from-zinc-200 to-zinc-500">the noise.</span>
           </h1>
           <p className="text-lg text-zinc-500 font-light max-w-md leading-relaxed">
@@ -52,14 +52,19 @@ const HomeView: React.FC = () => {
         </div>
 
         {/* Abstract Visual */}
-        <div className="relative w-full h-[400px] lg:h-[500px] rounded-3xl overflow-hidden border border-white/5 bg-zinc-900/50 flex items-center justify-center">
-          <div className="absolute inset-0 bg-[url('https://grainy-gradients.vercel.app/noise.svg')] opacity-20"></div>
-          <div className="absolute w-64 h-64 bg-indigo-500/20 rounded-full blur-[80px] top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 animate-breathe"></div>
-          <div className="absolute w-48 h-48 bg-teal-500/10 rounded-full blur-[60px] top-1/3 right-1/4 animate-breathe" style={{ animationDelay: '2s' }}></div>
+        <div className="relative w-full h-[400px] lg:h-[500px] rounded-3xl overflow-hidden border border-white/[0.06] bg-zinc-900/40 flex items-center justify-center">
+          <div className="absolute inset-0 bg-[url('https://grainy-gradients.vercel.app/noise.svg')] opacity-[0.15]"></div>
+          <div className="absolute w-72 h-72 bg-indigo-500/15 rounded-full blur-[100px] top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 animate-breathe"></div>
+          <div className="absolute w-56 h-56 bg-teal-500/10 rounded-full blur-[80px] top-1/4 right-1/4 animate-breathe" style={{ animationDelay: '2s' }}></div>
+          <div className="absolute w-40 h-40 bg-purple-500/[0.07] rounded-full blur-[60px] bottom-1/4 left-1/3 animate-breathe" style={{ animationDelay: '4s' }}></div>
 
-          <div className="relative z-10 text-center space-y-2 backdrop-blur-sm p-8 rounded-2xl border border-white/5 bg-black/20">
-            <iconify-icon icon="solar:meditation-round-linear" width="48" class="text-zinc-200 mb-2"></iconify-icon>
-            <p className="text-zinc-200 font-medium tracking-tight">{sessions[0]?.title || 'Afternoon Reset'}</p>
+          {/* Decorative rings */}
+          <div className="absolute w-48 h-48 rounded-full border border-white/[0.03] top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2"></div>
+          <div className="absolute w-80 h-80 rounded-full border border-white/[0.02] top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 animate-[gentle-spin_80s_linear_infinite]"></div>
+
+          <div className="relative z-10 text-center space-y-3 backdrop-blur-sm p-8 rounded-2xl border border-white/[0.06] bg-black/20 animate-float">
+            <iconify-icon icon="solar:meditation-round-linear" width="48" class="text-zinc-300 mb-2"></iconify-icon>
+            <p className="font-display text-zinc-200 font-medium tracking-tight text-lg">{sessions[0]?.title || 'Afternoon Reset'}</p>
             <p className="text-zinc-500 text-xs uppercase tracking-widest">{sessions[0] ? `${sessions[0].duration || '5 Min'} • ${sessions[0].category}` : '15 Min • Focus'}</p>
           </div>
         </div>
@@ -86,7 +91,7 @@ const HomeView: React.FC = () => {
       {/* Grid Content */}
       <section>
         <div className="flex justify-between items-end mb-8">
-          <h2 className="text-xl font-medium text-zinc-200 tracking-tight">Recent Sessions</h2>
+          <h2 className="font-display text-2xl font-medium text-zinc-200 tracking-tight">Recent Sessions</h2>
           <a href="#" className="text-xs text-zinc-500 hover:text-zinc-300 transition-colors flex items-center gap-1">
             View all <iconify-icon icon="solar:arrow-right-linear"></iconify-icon>
           </a>
@@ -99,7 +104,7 @@ const HomeView: React.FC = () => {
           </div>
         )}
 
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 stagger-children">
           {loading
             ? Array.from({ length: 6 }).map((_, i) => <SessionCardSkeleton key={i} />)
             : filteredSessions.map(session => (

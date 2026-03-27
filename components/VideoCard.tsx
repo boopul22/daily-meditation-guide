@@ -12,7 +12,7 @@ const VideoCard: React.FC<VideoCardProps> = ({ video, onClick }) => {
     return (
         <div
             onClick={() => onClick(video)}
-            className="cursor-pointer group relative bg-zinc-900/40 border border-white/5 hover:border-white/10 rounded-2xl p-4 transition-all duration-300 hover:bg-zinc-800/40"
+            className="cursor-pointer group relative bg-zinc-900/40 border border-white/[0.06] hover:border-white/[0.12] rounded-2xl p-4 transition-all duration-300 hover:bg-zinc-800/40 hover:-translate-y-1 hover:shadow-lg hover:shadow-black/20"
         >
             <div className="relative h-48 w-full rounded-xl overflow-hidden mb-4 bg-zinc-800">
                 <img
@@ -30,7 +30,7 @@ const VideoCard: React.FC<VideoCardProps> = ({ video, onClick }) => {
             </div>
 
             <div className="space-y-1">
-                <h3 className="text-zinc-200 font-medium tracking-tight h-12 line-clamp-2 group-hover:text-white transition-colors">
+                <h3 className="font-display text-zinc-200 font-medium tracking-tight h-12 line-clamp-2 group-hover:text-white transition-colors">
                     {video.title}
                 </h3>
             </div>
