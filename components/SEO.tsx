@@ -7,6 +7,11 @@ interface FAQItem {
     answer: string;
 }
 
+interface BreadcrumbItem {
+    name: string;
+    url: string;
+}
+
 interface SEOProps {
     title?: string;
     description?: string;
@@ -21,6 +26,7 @@ interface SEOProps {
     updatedAt?: string | null;
     articleSection?: string;
     faqItems?: FAQItem[];
+    breadcrumbs?: BreadcrumbItem[];
 }
 
 const SEO: React.FC<SEOProps> = ({
@@ -37,6 +43,7 @@ const SEO: React.FC<SEOProps> = ({
     updatedAt,
     articleSection,
     faqItems,
+    breadcrumbs,
 }) => {
     const siteTitle = title === "Daily Meditation Guide" ? title : `${title} | Daily Meditation Guide`;
     const canonicalUrl = canonical || url;
@@ -53,6 +60,17 @@ const SEO: React.FC<SEOProps> = ({
                 "@type": "Answer",
                 "text": f.answer
             }
+        }))
+    } : null;
+
+    const breadcrumbJsonLd = breadcrumbs && breadcrumbs.length > 0 ? {
+        "@context": "https://schema.org",
+        "@type": "BreadcrumbList",
+        "itemListElement": breadcrumbs.map((b, i) => ({
+            "@type": "ListItem",
+            "position": i + 1,
+            "name": b.name,
+            "item": b.url
         }))
     } : null;
 
@@ -80,7 +98,7 @@ const SEO: React.FC<SEOProps> = ({
                 "name": "Daily Meditation Guide",
                 "logo": {
                     "@type": "ImageObject",
-                    "url": "https://dailymeditationguide.com/logo.png"
+                    "url": "https://dailymeditationguide.com/favicon-192x192.png"
                 }
             }
         }
@@ -131,6 +149,13 @@ const SEO: React.FC<SEOProps> = ({
             {faqJsonLd && (
                 <script type="application/ld+json">
                     {JSON.stringify(faqJsonLd)}
+                </script>
+            )}
+
+            {/* Breadcrumb Structured Data (JSON-LD) */}
+            {breadcrumbJsonLd && (
+                <script type="application/ld+json">
+                    {JSON.stringify(breadcrumbJsonLd)}
                 </script>
             )}
         </Helmet>

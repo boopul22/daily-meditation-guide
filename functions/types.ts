@@ -1,6 +1,7 @@
 export interface Env {
   DB: D1Database;
   R2: R2Bucket;
+  ASSETS: Fetcher;
   CF_ACCESS_TEAM_NAME: string;
   CF_ACCESS_AUD: string;
   R2_PUBLIC_URL: string;

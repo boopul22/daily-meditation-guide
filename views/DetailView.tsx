@@ -133,6 +133,11 @@ const DetailView: React.FC<DetailViewProps> = ({ onPlay, currentTrackId, isPlayi
           updatedAt={session.updatedAt}
           articleSection={session.category}
           faqItems={session.faqItems}
+          breadcrumbs={[
+            { name: 'Home', url: 'https://dailymeditationguide.com/' },
+            { name: 'Sessions', url: 'https://dailymeditationguide.com/sessions' },
+            { name: session.title, url: `https://dailymeditationguide.com/session/${session.slug}` },
+          ]}
         />
       )}
       {/* Back Button */}
