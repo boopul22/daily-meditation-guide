@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from 'react';
+import { Link } from 'react-router-dom';
 import { FILTERS } from '../constants';
 import { fetchPublicSessions } from '../lib/api';
 import { Session } from '../types';
@@ -51,23 +52,28 @@ const HomeView: React.FC = () => {
           </div>
         </div>
 
-        {/* Abstract Visual */}
-        <div className="relative w-full h-[400px] lg:h-[500px] rounded-3xl overflow-hidden border border-white/[0.06] bg-zinc-900/40 flex items-center justify-center">
-          <div className="absolute inset-0 bg-[url('https://grainy-gradients.vercel.app/noise.svg')] opacity-[0.15]"></div>
-          <div className="absolute w-72 h-72 bg-indigo-500/15 rounded-full blur-[100px] top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 animate-breathe"></div>
-          <div className="absolute w-56 h-56 bg-teal-500/10 rounded-full blur-[80px] top-1/4 right-1/4 animate-breathe" style={{ animationDelay: '2s' }}></div>
-          <div className="absolute w-40 h-40 bg-purple-500/[0.07] rounded-full blur-[60px] bottom-1/4 left-1/3 animate-breathe" style={{ animationDelay: '4s' }}></div>
+        {/* Latest Blog Featured Image */}
+        <Link to={sessions[0]?.slug ? `/session/${sessions[0].slug}` : '#'} className="relative w-full h-[400px] lg:h-[500px] rounded-3xl overflow-hidden border border-white/[0.06] bg-zinc-900/40 flex items-center justify-center cursor-pointer group">
+          {sessions[0]?.featuredImage ? (
+            <img
+              src={sessions[0].featuredImage}
+              alt={sessions[0].title}
+              className="absolute inset-0 w-full h-full object-cover transition-transform duration-500 group-hover:scale-105"
+            />
+          ) : (
+            <>
+              <div className="absolute inset-0 bg-[url('/noise.svg')] opacity-[0.15]"></div>
+              <div className="absolute w-72 h-72 bg-indigo-500/15 rounded-full blur-[100px] top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 animate-breathe"></div>
+              <div className="absolute w-56 h-56 bg-teal-500/10 rounded-full blur-[80px] top-1/4 right-1/4 animate-breathe" style={{ animationDelay: '2s' }}></div>
+            </>
+          )}
+          <div className="absolute inset-0 bg-gradient-to-t from-black/70 via-black/20 to-transparent"></div>
 
-          {/* Decorative rings */}
-          <div className="absolute w-48 h-48 rounded-full border border-white/[0.03] top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2"></div>
-          <div className="absolute w-80 h-80 rounded-full border border-white/[0.02] top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 animate-[gentle-spin_80s_linear_infinite]"></div>
-
-          <div className="relative z-10 text-center space-y-3 backdrop-blur-sm p-8 rounded-2xl border border-white/[0.06] bg-black/20 animate-float">
-            <iconify-icon icon="solar:meditation-round-linear" width="48" class="text-zinc-300 mb-2"></iconify-icon>
-            <p className="font-display text-zinc-200 font-medium tracking-tight text-lg">{sessions[0]?.title || 'Afternoon Reset'}</p>
-            <p className="text-zinc-500 text-xs uppercase tracking-widest">{sessions[0] ? `${sessions[0].duration || '5 Min'} • ${sessions[0].category}` : '15 Min • Focus'}</p>
+          <div className="relative z-10 text-center space-y-3 mt-auto p-8">
+            <p className="font-display text-zinc-100 font-medium tracking-tight text-2xl drop-shadow-lg">{sessions[0]?.title || 'Afternoon Reset'}</p>
+            <p className="text-zinc-300 text-xs uppercase tracking-widest">{sessions[0] ? `${sessions[0].duration || '5 Min'} • ${sessions[0].category}` : '15 Min • Focus'}</p>
           </div>
-        </div>
+        </Link>
       </section>
 
       {/* Filters / Pills */}

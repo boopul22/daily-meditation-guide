@@ -15,7 +15,7 @@ const PrivacyPolicyView: React.FC = () => {
             {/* Background Ambience */}
             <div className="fixed inset-0 pointer-events-none overflow-hidden">
                 <div className="absolute top-0 left-1/2 -translate-x-1/2 w-[800px] h-[400px] bg-indigo-500/5 rounded-full blur-[100px]"></div>
-                <div className="absolute inset-0 bg-[url('https://grainy-gradients.vercel.app/noise.svg')] opacity-20"></div>
+                <div className="absolute inset-0 bg-[url('/noise.svg')] opacity-20"></div>
             </div>
 
             <div className="relative container mx-auto px-6 py-20 max-w-3xl">

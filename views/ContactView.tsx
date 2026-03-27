@@ -26,7 +26,7 @@ const ContactView: React.FC = () => {
             {/* Background Ambience */}
             <div className="fixed inset-0 pointer-events-none overflow-hidden">
                 <div className="absolute top-1/4 left-1/3 w-[600px] h-[600px] bg-indigo-500/5 rounded-full blur-[120px]"></div>
-                <div className="absolute inset-0 bg-[url('https://grainy-gradients.vercel.app/noise.svg')] opacity-20"></div>
+                <div className="absolute inset-0 bg-[url('/noise.svg')] opacity-20"></div>
             </div>
 
             <div className="relative container mx-auto px-6 py-20 max-w-5xl">

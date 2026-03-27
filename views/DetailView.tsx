@@ -191,7 +191,7 @@ const DetailView: React.FC<DetailViewProps> = ({ onPlay, currentTrackId, isPlayi
                   {session.featuredImage ? (
                     <img src={session.featuredImage} alt={session.title} className="absolute inset-0 w-full h-full object-cover" />
                   ) : (
-                    <div className="absolute inset-0 bg-[url('https://grainy-gradients.vercel.app/noise.svg')] opacity-40"></div>
+                    <div className="absolute inset-0 bg-[url('/noise.svg')] opacity-40"></div>
                   )}
                   <div className="absolute inset-0 flex items-center justify-center">
                     <button
@@ -284,7 +284,7 @@ const DetailView: React.FC<DetailViewProps> = ({ onPlay, currentTrackId, isPlayi
                 {session.featuredImage ? (
                   <img src={session.featuredImage} alt={session.title} className="absolute inset-0 w-full h-full object-cover" />
                 ) : (
-                  <div className="absolute inset-0 bg-[url('https://grainy-gradients.vercel.app/noise.svg')] opacity-40"></div>
+                  <div className="absolute inset-0 bg-[url('/noise.svg')] opacity-40"></div>
                 )}
                 <div className="absolute inset-0 flex items-center justify-center">
                   <button
