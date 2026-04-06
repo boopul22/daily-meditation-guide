@@ -1,0 +1,105 @@
+---
+import MainLayout from '../layouts/MainLayout.astro';
+import HomeContent from '../components/HomeContent';
+import { rowToSession } from '../lib/db';
+import type { Session } from '../types';
+
+const db = Astro.locals.runtime.env.DB;
+const { results } = await db.prepare(
+  "SELECT * FROM sessions WHERE status = 'published' ORDER BY published_at DESC"
+).all();
+
+const sessions: Session[] = (results || []).map((row: any) => rowToSession(row));
+const latestSession = sessions[0] || null;
+
+const websiteJsonLd = JSON.stringify({
+  "@context": "https://schema.org",
+  "@type": "WebSite",
+  "name": "Daily Meditation Guide",
+  "description": "Your daily guide to mindfulness and meditation. Curated audio journeys to help you focus, sleep, and reset.",
+  "url": "https://dailymeditationguide.com",
+  "potentialAction": {
+    "@type": "SearchAction",
+    "target": {
+      "@type": "EntryPoint",
+      "urlTemplate": "https://dailymeditationguide.com/?q={search_term_string}"
+    },
+    "query-input": "required name=search_term_string"
+  }
+});
+
+const extraHead = `<script type="application/ld+json">${websiteJsonLd}</script>`;
+---
+
+<MainLayout
+  title="Daily Meditation Guide"
+  description="Your daily guide to mindfulness and meditation. Curated audio journeys to help you focus, sleep, and reset."
+  canonical="https://dailymeditationguide.com/"
+  extraHead={extraHead}
+>
+  <div class="space-y-20 transition-all duration-500 ease-in-out animate-[fade-enter_0.5s_ease-out]">
+
+    {/* Hero Section */}
+    <section class="grid grid-cols-1 lg:grid-cols-2 gap-12 items-center">
+      <div class="space-y-8">
+        <div class="inline-flex items-center gap-2 px-3 py-1 rounded-full border border-indigo-500/20 bg-indigo-500/5 text-indigo-400 text-xs font-medium tracking-wide">
+          <span class="w-1.5 h-1.5 rounded-full bg-indigo-500 animate-pulse"></span>
+          NEW SESSION ADDED
+        </div>
+        <h1 class="font-display text-5xl md:text-6xl lg:text-7xl font-medium text-zinc-100 tracking-tight leading-[1.1]">
+          Find stillness in <br /> <span class="text-transparent bg-clip-text bg-gradient-to-r from-zinc-200 to-zinc-500">the noise.</span>
+        </h1>
+        <p class="text-lg text-zinc-500 font-light max-w-md leading-relaxed">
+          Curated audio journeys to help you focus, sleep, and reset. Start your daily practice with just five minutes.
+        </p>
+        <div class="flex flex-col sm:flex-row items-center gap-4 pt-2 w-full sm:w-auto">
+          <button class="group flex items-center justify-center gap-3 px-6 py-3 bg-zinc-100 hover:bg-white text-zinc-950 rounded-full font-medium text-sm transition-all hover:shadow-[0_0_20px_-5px_rgba(255,255,255,0.3)] w-full sm:w-auto">
+            <iconify-icon icon="solar:play-circle-linear" width="20" stroke-width="1.5" class="text-zinc-950"></iconify-icon>
+            Start Daily Calm
+          </button>
+          <button class="px-6 py-3 border border-white/10 hover:border-white/20 hover:bg-white/5 rounded-full text-zinc-300 text-sm font-medium transition-all w-full sm:w-auto">
+            Explore Library
+          </button>
+        </div>
+      </div>
+
+      {/* Latest Blog Featured Image */}
+      <a
+        href={latestSession?.slug ? `/session/${latestSession.slug}` : '#'}
+        class="relative w-full h-[400px] lg:h-[500px] rounded-3xl overflow-hidden border border-white/[0.06] bg-zinc-900/40 flex items-center justify-center cursor-pointer group"
+      >
+        {latestSession?.featuredImage ? (
+          <img
+            src={latestSession.featuredImage}
+            alt={latestSession.title}
+            loading="eager"
+            fetchpriority="high"
+            decoding="async"
+            width={600}
+            height={500}
+            class="absolute inset-0 w-full h-full object-cover transition-transform duration-500 group-hover:scale-105"
+          />
+        ) : (
+          <>
+            <div class="absolute inset-0 bg-[url('/noise.svg')] opacity-[0.15]"></div>
+            <div class="absolute w-72 h-72 bg-indigo-500/15 rounded-full blur-[100px] top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 animate-breathe"></div>
+            <div class="absolute w-56 h-56 bg-teal-500/10 rounded-full blur-[80px] top-1/4 right-1/4 animate-breathe" style="animation-delay: 2s"></div>
+          </>
+        )}
+        <div class="absolute inset-0 bg-gradient-to-t from-black/70 via-black/20 to-transparent"></div>
+
+        <div class="relative z-10 text-center space-y-3 mt-auto p-8">
+          <p class="font-display text-zinc-100 font-medium tracking-tight text-2xl drop-shadow-lg">
+            {latestSession?.title || 'Afternoon Reset'}
+          </p>
+          <p class="text-zinc-300 text-xs uppercase tracking-widest">
+            {latestSession ? `${latestSession.duration || '5 Min'} \u2022 ${latestSession.category}` : '15 Min \u2022 Focus'}
+          </p>
+        </div>
+      </a>
+    </section>
+
+    {/* Interactive content: filters + grid */}
+    <HomeContent client:load sessions={sessions} />
+  </div>
+</MainLayout>
