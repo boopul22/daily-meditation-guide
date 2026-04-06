@@ -58,6 +58,11 @@ const HomeView: React.FC = () => {
             <img
               src={sessions[0].featuredImage}
               alt={sessions[0].title}
+              loading="eager"
+              fetchPriority="high"
+              decoding="async"
+              width={600}
+              height={500}
               className="absolute inset-0 w-full h-full object-cover transition-transform duration-500 group-hover:scale-105"
             />
           ) : (
@@ -98,9 +103,9 @@ const HomeView: React.FC = () => {
       <section>
         <div className="flex justify-between items-end mb-8">
           <h2 className="font-display text-2xl font-medium text-zinc-200 tracking-tight">Recent Sessions</h2>
-          <a href="#" className="text-xs text-zinc-500 hover:text-zinc-300 transition-colors flex items-center gap-1">
+          <Link to="/sessions" className="text-xs text-zinc-500 hover:text-zinc-300 transition-colors flex items-center gap-1">
             View all <iconify-icon icon="solar:arrow-right-linear"></iconify-icon>
-          </a>
+          </Link>
         </div>
 
         {error && (

@@ -28,7 +28,7 @@ const SessionCard: React.FC<SessionCardProps> = ({ session }) => {
     >
       <div className="relative h-[19rem] w-full rounded-xl overflow-hidden mb-4 bg-zinc-800">
         {session.featuredImage ? (
-          <img src={session.featuredImage} alt={session.title} className="absolute inset-0 w-full h-full object-cover" />
+          <img src={session.featuredImage} alt={session.title} loading="lazy" decoding="async" width={400} height={304} className="absolute inset-0 w-full h-full object-cover" />
         ) : (
           <div className={`absolute inset-0 bg-gradient-to-br ${gradientClass} to-black/80`}></div>
         )}

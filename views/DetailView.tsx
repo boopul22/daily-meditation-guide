@@ -189,7 +189,7 @@ const DetailView: React.FC<DetailViewProps> = ({ onPlay, currentTrackId, isPlayi
               <div className="rounded-2xl overflow-hidden bg-zinc-900 border border-white/10 shadow-2xl shadow-black/50">
                 <div className={`h-52 bg-gradient-to-br ${gradientClass} to-zinc-900 relative transition-colors duration-500`}>
                   {session.featuredImage ? (
-                    <img src={session.featuredImage} alt={session.title} className="absolute inset-0 w-full h-full object-cover" />
+                    <img src={session.featuredImage} alt={session.title} loading="lazy" decoding="async" width={400} height={208} className="absolute inset-0 w-full h-full object-cover" />
                   ) : (
                     <div className="absolute inset-0 bg-[url('/noise.svg')] opacity-40"></div>
                   )}
@@ -282,7 +282,7 @@ const DetailView: React.FC<DetailViewProps> = ({ onPlay, currentTrackId, isPlayi
             <div className="mb-8 rounded-2xl overflow-hidden bg-zinc-900 border border-white/10 shadow-2xl shadow-black/50">
               <div className={`h-48 bg-gradient-to-br ${gradientClass} to-zinc-900 relative transition-colors duration-500`}>
                 {session.featuredImage ? (
-                  <img src={session.featuredImage} alt={session.title} className="absolute inset-0 w-full h-full object-cover" />
+                  <img src={session.featuredImage} alt={session.title} loading="lazy" decoding="async" width={400} height={192} className="absolute inset-0 w-full h-full object-cover" />
                 ) : (
                   <div className="absolute inset-0 bg-[url('/noise.svg')] opacity-40"></div>
                 )}

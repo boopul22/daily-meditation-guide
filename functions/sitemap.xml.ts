@@ -21,12 +21,9 @@ export const onRequestGet: PagesFunction<Env> = async ({ env }) => {
     "SELECT slug, updated_at FROM sessions WHERE status = 'published' ORDER BY published_at DESC"
   ).all<SitemapRow>();
 
-  const today = new Date().toISOString().split('T')[0];
-
   const staticEntries = STATIC_PAGES.map(
     p => `  <url>
     <loc>${SITE_URL}${p.path}</loc>
-    <lastmod>${today}</lastmod>
     <changefreq>${p.changefreq}</changefreq>
     <priority>${p.priority}</priority>
   </url>`
