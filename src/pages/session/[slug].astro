@@ -24,6 +24,9 @@ if (!row) {
 
 const session: Session = rowToSession(row);
 
+// CDN cache: serve cached for 1hr, revalidate in background
+Astro.response.headers.set('Cache-Control', 'public, max-age=300, s-maxage=3600, stale-while-revalidate=86400');
+
 // Process content for TOC (server-side with regex)
 const { processedContent, headings } = session.fullContent
   ? processContentForTOC(session.fullContent)

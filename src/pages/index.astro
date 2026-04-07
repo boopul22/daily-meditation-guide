@@ -12,6 +12,9 @@ const { results } = await db.prepare(
 const sessions: Session[] = (results || []).map((row: any) => rowToSession(row));
 const latestSession = sessions[0] || null;
 
+// CDN cache: serve cached for 1hr, revalidate in background
+Astro.response.headers.set('Cache-Control', 'public, max-age=300, s-maxage=3600, stale-while-revalidate=86400');
+
 const websiteJsonLd = JSON.stringify({
   "@context": "https://schema.org",
   "@type": "WebSite",
