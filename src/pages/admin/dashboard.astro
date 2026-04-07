@@ -1,0 +1,10 @@
+---
+import AdminLayout from '../../layouts/AdminLayout.astro';
+import AdminDashboard from '../../components/admin/AdminDashboard';
+---
+
+<AdminLayout title="Dashboard">
+  <div class="max-w-5xl mx-auto px-4 py-6 md:py-10">
+    <AdminDashboard client:load />
+  </div>
+</AdminLayout>

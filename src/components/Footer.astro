@@ -1,0 +1,49 @@
+---
+const year = new Date().getFullYear();
+---
+
+<footer class="w-full border-t border-white/[0.06] bg-[#080706] text-zinc-500 pt-12 pb-24 mt-20">
+  <div class="max-w-6xl mx-auto px-6 grid grid-cols-1 md:grid-cols-3 gap-8">
+
+    {/* Brand */}
+    <div class="space-y-4">
+      <a href="/" class="flex items-center gap-2 group cursor-pointer w-fit">
+        <div class="w-6 h-6 rounded-full border border-zinc-700 flex items-center justify-center bg-zinc-900 group-hover:border-zinc-500 transition-colors">
+          <div class="w-2 h-2 rounded-full bg-zinc-200"></div>
+        </div>
+        <span class="text-zinc-200 font-medium tracking-tighter text-sm">dailymeditationguide.com</span>
+      </a>
+      <p class="text-xs leading-relaxed max-w-xs">
+        Daily curation of guided meditations and ambient soundscapes to help you find focus and stillness.
+      </p>
+    </div>
+
+    {/* Links Column 1 */}
+    <div class="space-y-4">
+      <h4 class="font-display text-zinc-200 font-medium text-sm">Platform</h4>
+      <div class="flex flex-col gap-2 text-sm">
+        <a href="/" class="hover:text-zinc-300 transition-colors">Browse</a>
+        <a href="/sessions" class="hover:text-zinc-300 transition-colors">Sessions</a>
+        <a href="/about" class="hover:text-zinc-300 transition-colors">About</a>
+      </div>
+    </div>
+
+    {/* Links Column 2 */}
+    <div class="space-y-4">
+      <h4 class="font-display text-zinc-200 font-medium text-sm">Support</h4>
+      <div class="flex flex-col gap-2 text-sm">
+        <a href="/contact" class="hover:text-zinc-300 transition-colors">Contact Us</a>
+        <a href="/disclaimer" class="hover:text-zinc-300 transition-colors">Disclaimer</a>
+      </div>
+    </div>
+  </div>
+
+  <div class="max-w-6xl mx-auto px-6 mt-12 pt-8 border-t border-white/[0.06] flex flex-col md:flex-row justify-between items-center gap-4 text-xs">
+    <p>&copy; {year} dailymeditationguide.com. All rights reserved.</p>
+    <div class="flex gap-6">
+      <a href="/privacy" class="hover:text-zinc-300 transition-colors">Privacy Policy</a>
+      <a href="/terms" class="hover:text-zinc-300 transition-colors">Terms of Service</a>
+      <a href="/disclaimer" class="hover:text-zinc-300 transition-colors">Disclaimer</a>
+    </div>
+  </div>
+</footer>

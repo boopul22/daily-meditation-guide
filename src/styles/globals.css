@@ -1,0 +1,134 @@
+@import "tailwindcss";
+@plugin "@tailwindcss/typography";
+
+/* ── Custom Theme ── */
+@theme {
+  --font-display: 'Playfair Display', Georgia, serif;
+  --font-sans: 'Outfit', system-ui, sans-serif;
+  --font-serif: 'Source Serif 4', Georgia, serif;
+
+  --color-zinc-50: #faf8f5;
+  --color-zinc-100: #f2ede6;
+  --color-zinc-200: #e2d9ce;
+  --color-zinc-300: #cfc3b3;
+  --color-zinc-400: #a39787;
+  --color-zinc-500: #7a6e62;
+  --color-zinc-600: #5c544a;
+  --color-zinc-700: #47413a;
+  --color-zinc-800: #2a2520;
+  --color-zinc-900: #1c1815;
+  --color-zinc-950: #0d0b09;
+
+  --color-indigo-50: #fdf8f0;
+  --color-indigo-100: #f9edd8;
+  --color-indigo-200: #f0d8ae;
+  --color-indigo-300: #e4be7a;
+  --color-indigo-400: #d4a55c;
+  --color-indigo-500: #c49245;
+  --color-indigo-600: #a87838;
+  --color-indigo-700: #8c602e;
+  --color-indigo-800: #704c25;
+  --color-indigo-900: #4c351c;
+  --color-indigo-950: #2c1f12;
+
+  --color-purple-50: #f9f6f8;
+  --color-purple-100: #f0e6ed;
+  --color-purple-200: #dfc9d8;
+  --color-purple-300: #c9a4bc;
+  --color-purple-400: #af7d9c;
+  --color-purple-500: #965d80;
+  --color-purple-600: #7b4867;
+  --color-purple-700: #633a53;
+  --color-purple-800: #4d2e42;
+  --color-purple-900: #3a2333;
+  --color-purple-950: #23151f;
+
+  --color-teal-50: #f2f8f5;
+  --color-teal-100: #dfeee5;
+  --color-teal-200: #bddcca;
+  --color-teal-300: #90c4a6;
+  --color-teal-400: #5ea87e;
+  --color-teal-500: #3f8d62;
+  --color-teal-600: #30724e;
+  --color-teal-700: #285c3f;
+  --color-teal-800: #224a34;
+  --color-teal-900: #1c3c2b;
+  --color-teal-950: #0f2319;
+}
+
+.prose {
+  font-family: 'Source Serif 4', Georgia, serif;
+  --tw-prose-body: #a39787;
+  --tw-prose-headings: #e2d9ce;
+  --tw-prose-lead: #a39787;
+  --tw-prose-links: #d4a55c;
+  --tw-prose-bold: #cfc3b3;
+  --tw-prose-counters: #7a6e62;
+  --tw-prose-bullets: #5c544a;
+  --tw-prose-hr: rgb(255 248 240 / 0.08);
+  --tw-prose-quotes: #cfc3b3;
+  --tw-prose-quote-borders: #c49245;
+  --tw-prose-captions: #7a6e62;
+  --tw-prose-code: #cfc3b3;
+  --tw-prose-pre-code: #cfc3b3;
+  --tw-prose-pre-bg: rgb(28 24 21 / 0.8);
+  --tw-prose-th-borders: rgb(255 248 240 / 0.08);
+  --tw-prose-td-borders: rgb(255 248 240 / 0.04);
+  max-width: none;
+  font-size: 1.0625rem;
+  line-height: 1.85;
+}
+.prose p { margin-top: 1.25em; margin-bottom: 1.25em; }
+.prose :is(h1, h2, h3, h4, h5, h6) { font-family: 'Playfair Display', Georgia, serif; }
+.prose h2 { font-size: 1.5em; margin-top: 2em; margin-bottom: 0.75em; font-weight: 500; letter-spacing: -0.02em; }
+.prose h3 { font-size: 1.25em; margin-top: 1.75em; margin-bottom: 0.5em; font-weight: 500; letter-spacing: -0.01em; }
+.prose a { text-decoration: none; font-weight: 400; }
+.prose blockquote { font-style: italic; border-left-width: 2px; border-left-color: #c49245; background-color: rgb(28 24 21 / 0.5); padding: 1rem 1.5rem; border-radius: 0.75rem; quotes: none; }
+.prose ul { padding-left: 1.25em; }
+.prose ol { padding-left: 1.25em; }
+.prose li { margin-top: 0.5em; margin-bottom: 0.5em; }
+.prose img { border-radius: 0.75rem; border: 1px solid rgb(255 248 240 / 0.08); }
+.prose code { background-color: rgb(28 24 21 / 0.8); padding: 0.2em 0.4em; border-radius: 0.25rem; font-size: 0.875em; font-weight: 400; }
+.prose code::before, .prose code::after { content: ""; }
+.prose pre { background-color: rgb(28 24 21 / 0.8); border: 1px solid rgb(255 248 240 / 0.08); border-radius: 0.75rem; padding: 1rem 1.25rem; }
+
+body {
+  font-family: 'Outfit', system-ui, sans-serif;
+  background-color: #080706;
+  background-image:
+    radial-gradient(at 0% 0%, rgba(196, 146, 69, 0.04) 0px, transparent 50%),
+    radial-gradient(at 100% 0%, rgba(150, 93, 128, 0.03) 0px, transparent 50%),
+    radial-gradient(at 50% 100%, rgba(63, 141, 98, 0.02) 0px, transparent 50%);
+}
+
+.no-scrollbar::-webkit-scrollbar { display: none; }
+.no-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
+
+input[type=range] { -webkit-appearance: none; appearance: none; background: transparent; }
+input[type=range]::-webkit-slider-thumb { -webkit-appearance: none; height: 12px; width: 12px; border-radius: 50%; background: #e2d9ce; cursor: pointer; margin-top: -5px; box-shadow: 0 0 0 4px rgba(255, 248, 240, 0.1); }
+input[type=range]::-webkit-slider-runnable-track { width: 100%; height: 2px; background: rgba(255, 248, 240, 0.08); border-radius: 2px; }
+input[type=range]:focus { outline: none; }
+
+@keyframes pulse-glow { 0%, 100% { opacity: 0.3; transform: scale(1); } 50% { opacity: 0.5; transform: scale(1.08); } }
+@keyframes float { 0%, 100% { transform: translateY(0px); } 50% { transform: translateY(-12px); } }
+@keyframes shimmer { 0% { background-position: -200% center; } 100% { background-position: 200% center; } }
+@keyframes fade-enter { from { opacity: 0; transform: translateY(16px); } to { opacity: 1; transform: translateY(0); } }
+@keyframes fade-in { from { opacity: 0; } to { opacity: 1; } }
+@keyframes scale-in { from { opacity: 0; transform: scale(0.95); } to { opacity: 1; transform: scale(1); } }
+@keyframes gentle-spin { from { transform: rotate(0deg); } to { transform: rotate(360deg); } }
+
+.animate-breathe { animation: pulse-glow 6s ease-in-out infinite; }
+.animate-float { animation: float 6s ease-in-out infinite; }
+.animate-shimmer { background-size: 200% auto; animation: shimmer 3s linear infinite; }
+.mask-linear { mask-image: linear-gradient(to right, black 85%, transparent 100%); -webkit-mask-image: linear-gradient(to right, black 85%, transparent 100%); }
+
+.stagger-children > * { animation: fade-enter 0.5s ease-out both; }
+.stagger-children > *:nth-child(1) { animation-delay: 0s; }
+.stagger-children > *:nth-child(2) { animation-delay: 0.06s; }
+.stagger-children > *:nth-child(3) { animation-delay: 0.12s; }
+.stagger-children > *:nth-child(4) { animation-delay: 0.18s; }
+.stagger-children > *:nth-child(5) { animation-delay: 0.24s; }
+.stagger-children > *:nth-child(6) { animation-delay: 0.30s; }
+.stagger-children > *:nth-child(7) { animation-delay: 0.36s; }
+.stagger-children > *:nth-child(8) { animation-delay: 0.42s; }
+.stagger-children > *:nth-child(9) { animation-delay: 0.48s; }

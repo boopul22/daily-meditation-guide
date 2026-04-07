@@ -1,0 +1,32 @@
+---
+import { verifyCFAccessJWT } from '../../lib/cfaccess';
+import AdminLayout from '../../layouts/AdminLayout.astro';
+
+const env = Astro.locals.runtime.env;
+const jwtPayload = await verifyCFAccessJWT(Astro.request, env);
+
+if (!jwtPayload) {
+  const redirect = encodeURIComponent('/admin');
+  return Astro.redirect(`/auth/login?redirect=${redirect}`);
+}
+
+const email = jwtPayload.email;
+const user = await env.DB.prepare('SELECT is_admin FROM users WHERE email = ?')
+  .bind(email)
+  .first<{ is_admin: number }>();
+
+if (user?.is_admin) {
+  return Astro.redirect('/admin/dashboard');
+}
+---
+
+<AdminLayout title="Access Denied">
+  <div class="min-h-[60vh] flex items-center justify-center">
+    <div class="text-center space-y-4">
+      <h1 class="text-2xl font-medium text-zinc-100 tracking-tight">Access Denied</h1>
+      <p class="text-sm text-zinc-500">
+        You are signed in as <span class="text-zinc-300">{email}</span>, but this account does not have admin privileges.
+      </p>
+    </div>
+  </div>
+</AdminLayout>
