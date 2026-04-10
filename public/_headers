@@ -1,0 +1,38 @@
+# Security and SEO headers for all pages
+/*
+  X-Content-Type-Options: nosniff
+  X-Frame-Options: SAMEORIGIN
+  Referrer-Policy: strict-origin-when-cross-origin
+  Permissions-Policy: camera=(), microphone=(), geolocation=()
+
+# Ensure static assets are cached aggressively
+/_astro/*
+  Cache-Control: public, max-age=31536000, immutable
+
+# Public pages must NOT have X-Robots-Tag noindex
+/
+  X-Robots-Tag: index, follow
+
+/session/*
+  X-Robots-Tag: index, follow
+
+/sessions
+  X-Robots-Tag: index, follow
+
+/about
+  X-Robots-Tag: index, follow
+
+/contact
+  X-Robots-Tag: index, follow
+
+# Block admin pages from indexing at edge level
+/admin/*
+  X-Robots-Tag: noindex, nofollow
+
+# Sitemap and feeds should be cacheable
+/sitemap.xml
+  Cache-Control: public, max-age=3600, s-maxage=86400
+  X-Robots-Tag: noindex
+
+/feed.xml
+  Cache-Control: public, max-age=3600, s-maxage=86400

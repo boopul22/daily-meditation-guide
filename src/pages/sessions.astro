@@ -1,14 +1,54 @@
 ---
-export const prerender = true;
-
 import MainLayout from '../layouts/MainLayout.astro';
 import SessionsContent from '../components/SessionsContent';
+import { rowToSession } from '../lib/db';
+import type { Session } from '../types';
+
+const db = Astro.locals.runtime.env.DB;
+const { results } = await db.prepare(
+  "SELECT * FROM sessions WHERE status = 'published' ORDER BY published_at DESC"
+).all();
+const sessions: Session[] = (results || []).map((row: any) => rowToSession(row));
+
+Astro.response.headers.set('Cache-Control', 'public, max-age=300, s-maxage=3600, stale-while-revalidate=86400');
+
+const siteUrl = 'https://dailymeditationguide.com';
+
+const itemListJsonLd = JSON.stringify({
+  "@context": "https://schema.org",
+  "@type": "CollectionPage",
+  "name": "Guided Meditation Sessions",
+  "description": "Explore our library of guided meditation sessions and visual journeys.",
+  "url": `${siteUrl}/sessions`,
+  "mainEntity": {
+    "@type": "ItemList",
+    "numberOfItems": sessions.length,
+    "itemListElement": sessions.slice(0, 30).map((session, i) => ({
+      "@type": "ListItem",
+      "position": i + 1,
+      "url": `${siteUrl}/session/${session.slug}`,
+      "name": session.title,
+    }))
+  }
+});
+
+const breadcrumbJsonLd = JSON.stringify({
+  "@context": "https://schema.org",
+  "@type": "BreadcrumbList",
+  "itemListElement": [
+    { "@type": "ListItem", "position": 1, "name": "Home", "item": `${siteUrl}/` },
+    { "@type": "ListItem", "position": 2, "name": "Sessions", "item": `${siteUrl}/sessions` },
+  ]
+});
+
+const extraHead = `<script type="application/ld+json">${itemListJsonLd}</script><script type="application/ld+json">${breadcrumbJsonLd}</script>`;
 ---
 
 <MainLayout
   title="Guided Sessions"
   description="Explore our library of guided meditation sessions and visual journeys. Immerse yourself in curated meditations designed to help you find peace and clarity."
   canonical="https://dailymeditationguide.com/sessions"
+  extraHead={extraHead}
 >
   <div class="space-y-12 animate-[fade-enter_0.5s_ease-out]">
     <header class="space-y-4">
@@ -20,6 +60,51 @@ import SessionsContent from '../components/SessionsContent';
       </p>
     </header>
 
-    <SessionsContent client:load />
+    {/* Server-rendered session links for SEO crawlability */}
+    {sessions.length > 0 && (
+      <section class="space-y-6">
+        <h2 class="font-display text-2xl font-medium text-zinc-100 tracking-tight">Meditation Sessions</h2>
+        <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+          {sessions.map((session) => (
+            <a
+              href={`/session/${session.slug}`}
+              class="group block bg-zinc-900/40 border border-white/[0.06] hover:border-white/[0.12] rounded-2xl overflow-hidden transition-all duration-300 hover:bg-zinc-800/40 hover:-translate-y-1"
+            >
+              {session.featuredImage && (
+                <div class="relative h-48 w-full bg-zinc-800 overflow-hidden">
+                  <img
+                    src={session.featuredImage}
+                    alt={session.title}
+                    loading="lazy"
+                    decoding="async"
+                    width={400}
+                    height={192}
+                    class="w-full h-full object-cover transition-transform duration-500 group-hover:scale-105"
+                  />
+                </div>
+              )}
+              <div class="p-5 space-y-2">
+                <h3 class="font-display text-zinc-200 font-medium tracking-tight line-clamp-2 group-hover:text-white transition-colors">
+                  {session.title}
+                </h3>
+                {session.description && (
+                  <p class="text-zinc-500 text-sm line-clamp-2">{session.description}</p>
+                )}
+                <div class="flex items-center gap-3 text-xs text-zinc-500 pt-1">
+                  {session.category && <span class="px-2 py-0.5 rounded-full bg-white/5 border border-white/5">{session.category}</span>}
+                  {session.duration && <span>{session.duration}</span>}
+                </div>
+              </div>
+            </a>
+          ))}
+        </div>
+      </section>
+    )}
+
+    {/* YouTube video sessions */}
+    <section class="space-y-6">
+      <h2 class="font-display text-2xl font-medium text-zinc-100 tracking-tight">Video Sessions</h2>
+      <SessionsContent client:load />
+    </section>
   </div>
 </MainLayout>

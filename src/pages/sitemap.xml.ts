@@ -7,13 +7,13 @@ interface SitemapRow {
 }
 
 const STATIC_PAGES = [
-  { path: '/', changefreq: 'daily', priority: '1.0' },
-  { path: '/sessions', changefreq: 'weekly', priority: '0.9' },
-  { path: '/about', changefreq: 'monthly', priority: '0.7' },
-  { path: '/contact', changefreq: 'monthly', priority: '0.5' },
-  { path: '/privacy', changefreq: 'yearly', priority: '0.3' },
-  { path: '/terms', changefreq: 'yearly', priority: '0.3' },
-  { path: '/disclaimer', changefreq: 'yearly', priority: '0.3' },
+  { path: '/', changefreq: 'daily', priority: '1.0', lastmod: '2026-04-07' },
+  { path: '/sessions', changefreq: 'weekly', priority: '0.9', lastmod: '2026-04-07' },
+  { path: '/about', changefreq: 'monthly', priority: '0.7', lastmod: '2026-04-07' },
+  { path: '/contact', changefreq: 'monthly', priority: '0.5', lastmod: '2026-04-07' },
+  { path: '/privacy', changefreq: 'yearly', priority: '0.3', lastmod: '2026-04-07' },
+  { path: '/terms', changefreq: 'yearly', priority: '0.3', lastmod: '2026-04-07' },
+  { path: '/disclaimer', changefreq: 'yearly', priority: '0.3', lastmod: '2026-04-07' },
 ];
 
 export async function GET(context: APIContext) {
@@ -23,9 +23,15 @@ export async function GET(context: APIContext) {
     "SELECT slug, updated_at FROM sessions WHERE status = 'published' ORDER BY published_at DESC"
   ).all<SitemapRow>();
 
+  // Use the most recent session date or current date for homepage lastmod
+  const latestSessionDate = results.length > 0
+    ? toW3CDate(results[0].updated_at).split('T')[0]
+    : STATIC_PAGES[0].lastmod;
+
   const staticEntries = STATIC_PAGES.map(
     p => `  <url>
     <loc>${SITE_URL}${p.path}</loc>
+    <lastmod>${p.path === '/' ? latestSessionDate : p.lastmod}</lastmod>
     <changefreq>${p.changefreq}</changefreq>
     <priority>${p.priority}</priority>
   </url>`

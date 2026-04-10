@@ -1,6 +1,10 @@
+# Daily Meditation Guide - Robots.txt
+# https://dailymeditationguide.com
+
 User-agent: *
 Allow: /
 Disallow: /admin
 Disallow: /admin/
+Disallow: /api/
 
 Sitemap: https://dailymeditationguide.com/sitemap.xml
