@@ -109,7 +109,7 @@ export default function DetailInteractive({ session, processedContent, headings,
                 {session.featuredImage ? (
                   <img src={session.featuredImage} alt={session.title} loading="lazy" decoding="async" width={400} height={208} className="absolute inset-0 w-full h-full object-cover" />
                 ) : (
-                  <div className="absolute inset-0 bg-[url('/noise.svg')] opacity-40"></div>
+                  <div className="absolute inset-0"></div>
                 )}
                 <div className="absolute inset-0 flex items-center justify-center">
                   <button
