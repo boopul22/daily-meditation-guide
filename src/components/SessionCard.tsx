@@ -32,6 +32,7 @@ export default function SessionCard({ session }: SessionCardProps) {
             decoding="async"
             width={400}
             height={304}
+            sizes="(max-width: 640px) calc(100vw - 48px), (max-width: 1024px) calc(50vw - 48px), 370px"
             className="absolute inset-0 w-full h-full object-cover"
           />
         ) : (

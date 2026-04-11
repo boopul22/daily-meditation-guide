@@ -9,6 +9,23 @@ export const onRequest = defineMiddleware(async (context, next) => {
   response.headers.set('X-Content-Type-Options', 'nosniff');
   response.headers.set('X-Frame-Options', 'SAMEORIGIN');
   response.headers.set('Referrer-Policy', 'strict-origin-when-cross-origin');
+  response.headers.set('Strict-Transport-Security', 'max-age=31536000; includeSubDomains; preload');
+  response.headers.set('Cross-Origin-Opener-Policy', 'same-origin');
+
+  // Content Security Policy
+  response.headers.set('Content-Security-Policy', [
+    "default-src 'self'",
+    "script-src 'self' 'unsafe-inline' https://code.iconify.design https://static.cloudflareinsights.com",
+    "style-src 'self' 'unsafe-inline' https://fonts.googleapis.com",
+    "font-src 'self' https://fonts.gstatic.com",
+    "img-src 'self' https://pub-141831e61e69445289222976a15b6fb3.r2.dev https://img.youtube.com data:",
+    "connect-src 'self' https://api.iconify.design https://cloudflareinsights.com",
+    "frame-src 'none'",
+    "object-src 'none'",
+    "base-uri 'self'",
+    "form-action 'self'",
+    "require-trusted-types-for 'script'",
+  ].join('; '));
 
   // Ensure public pages are explicitly indexable
   if (!path.startsWith('/admin') && !path.startsWith('/api/')) {

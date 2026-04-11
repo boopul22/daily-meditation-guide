@@ -78,6 +78,7 @@ if (latestSession?.featuredImage) {
             decoding="async"
             width={600}
             height={500}
+            sizes="(max-width: 1024px) calc(100vw - 48px), 50vw"
             class="absolute inset-0 w-full h-full object-cover transition-transform duration-500 group-hover:scale-105"
           />
         ) : (

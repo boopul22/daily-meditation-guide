@@ -47,10 +47,10 @@ const Navbar: React.FC = () => {
           </div>
 
           <div className="flex items-center gap-4">
-            <button className="hidden md:block p-2 hover:bg-white/5 rounded-full transition-colors text-zinc-400 hover:text-white">
+            <button aria-label="Search" className="hidden md:block p-2 hover:bg-white/5 rounded-full transition-colors text-zinc-400 hover:text-white">
               <iconify-icon icon="solar:magnifer-linear" width="20" stroke-width="1.5"></iconify-icon>
             </button>
-            <button className="hidden md:block p-2 hover:bg-white/5 rounded-full transition-colors text-zinc-400 hover:text-white relative">
+            <button aria-label="Notifications" className="hidden md:block p-2 hover:bg-white/5 rounded-full transition-colors text-zinc-400 hover:text-white relative">
               <div className="absolute top-2 right-2 w-1.5 h-1.5 bg-indigo-500 rounded-full"></div>
               <iconify-icon icon="solar:bell-linear" width="20" stroke-width="1.5"></iconify-icon>
             </button>
@@ -62,6 +62,9 @@ const Navbar: React.FC = () => {
               <div className="hidden md:block relative" ref={dropdownRef}>
                 <button
                   onClick={() => setIsDropdownOpen(!isDropdownOpen)}
+                  aria-label="User menu"
+                  aria-haspopup="menu"
+                  aria-expanded={isDropdownOpen}
                   className="w-8 h-8 rounded-full bg-gradient-to-tr from-indigo-600 to-purple-600 border border-white/10 flex items-center justify-center text-white text-xs font-medium hover:opacity-90 transition-opacity"
                 >
                   {user.name.charAt(0).toUpperCase()}
@@ -97,6 +100,8 @@ const Navbar: React.FC = () => {
             <button
               className="md:hidden p-2 text-zinc-400 hover:text-white"
               onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)}
+              aria-label={isMobileMenuOpen ? "Close menu" : "Open menu"}
+              aria-expanded={isMobileMenuOpen}
             >
               <iconify-icon icon={isMobileMenuOpen ? "solar:close-linear" : "solar:hamburger-menu-linear"} width="24"></iconify-icon>
             </button>
@@ -114,10 +119,10 @@ const Navbar: React.FC = () => {
             <a href="/contact" onClick={() => setIsMobileMenuOpen(false)} className="border-b border-white/5 pb-4">Contact</a>
 
             <div className="flex items-center gap-4 mt-4">
-              <button className="p-3 bg-white/5 rounded-full text-zinc-400">
+              <button aria-label="Search" className="p-3 bg-white/5 rounded-full text-zinc-400">
                 <iconify-icon icon="solar:magnifer-linear" width="24"></iconify-icon>
               </button>
-              <button className="p-3 bg-white/5 rounded-full text-zinc-400 relative">
+              <button aria-label="Notifications" className="p-3 bg-white/5 rounded-full text-zinc-400 relative">
                 <div className="absolute top-3 right-3 w-2 h-2 bg-indigo-500 rounded-full"></div>
                 <iconify-icon icon="solar:bell-linear" width="24"></iconify-icon>
               </button>
