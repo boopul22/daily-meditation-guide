@@ -24,7 +24,6 @@ export const onRequest = defineMiddleware(async (context, next) => {
     "object-src 'none'",
     "base-uri 'self'",
     "form-action 'self'",
-    "require-trusted-types-for 'script'",
   ].join('; '));
 
   // Ensure public pages are explicitly indexable
