@@ -38,9 +38,32 @@ const philosophy = ["Start small", "Stay consistent", "Build quietly", "Let resu
 ---
 
 <MainLayout
-  title="About"
+  title="About | Meditation & Mindfulness"
   description="Learn about Daily Meditation Guide — your daily source for guided meditations, ambient soundscapes, and mindfulness resources, created by Bipul Kumar."
   canonical="https://dailymeditationguide.com/about"
+  extraHead={`<script type="application/ld+json">${JSON.stringify({
+    "@context": "https://schema.org",
+    "@type": "ProfilePage",
+    "mainEntity": {
+      "@type": "Person",
+      "name": "Bipul Kumar",
+      "description": "Indie developer, designer, and mindfulness advocate from India. Founder of Daily Meditation Guide.",
+      "jobTitle": "Founder & Developer",
+      "url": "https://dailymeditationguide.com/about",
+      "worksFor": {
+        "@type": "Organization",
+        "name": "Daily Meditation Guide",
+        "url": "https://dailymeditationguide.com"
+      }
+    }
+  })}</script><script type="application/ld+json">${JSON.stringify({
+    "@context": "https://schema.org",
+    "@type": "BreadcrumbList",
+    "itemListElement": [
+      { "@type": "ListItem", "position": 1, "name": "Home", "item": "https://dailymeditationguide.com/" },
+      { "@type": "ListItem", "position": 2, "name": "About", "item": "https://dailymeditationguide.com/about" }
+    ]
+  })}</script>`}
 >
   <div class="min-h-screen animate-[fade-enter_0.5s_ease-out]">
 

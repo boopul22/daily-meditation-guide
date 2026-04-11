@@ -6,35 +6,37 @@ import { processContentForTOC } from '../../utils/tocUtils';
 import type { Session } from '../../types';
 
 const { slug } = Astro.params;
-
-if (!slug) {
-  return Astro.redirect('/404');
-}
-
 const db = Astro.locals.runtime.env.DB;
 
-// Fetch session by slug
-const row = await db.prepare(
-  "SELECT * FROM sessions WHERE slug = ? AND status = 'published'"
-).bind(slug).first();
+let session: Session | null = null;
 
-if (!row) {
-  return Astro.redirect('/404');
+if (slug) {
+  const row = await db.prepare(
+    "SELECT * FROM sessions WHERE slug = ? AND status = 'published'"
+  ).bind(slug).first();
+  if (row) {
+    session = rowToSession(row);
+  }
 }
 
-const session: Session = rowToSession(row);
+if (!session) {
+  Astro.response.status = 404;
+  Astro.response.headers.set('X-Robots-Tag', 'noindex, nofollow');
+}
 
-// CDN cache: serve cached for 1hr, revalidate in background
-Astro.response.headers.set('Cache-Control', 'public, max-age=300, s-maxage=3600, stale-while-revalidate=86400');
+// CDN cache only for valid sessions
+if (session) {
+  Astro.response.headers.set('Cache-Control', 'public, max-age=300, s-maxage=3600, stale-while-revalidate=86400');
+}
 
 // Process content for TOC (server-side with regex)
-const { processedContent, headings } = session.fullContent
+const { processedContent, headings } = session?.fullContent
   ? processContentForTOC(session.fullContent)
   : { processedContent: '', headings: [] };
 
 // Fetch related sessions
 let relatedSessions: Session[] = [];
-if (session.relatedSessions && session.relatedSessions.length > 0) {
+if (session?.relatedSessions && session.relatedSessions.length > 0) {
   const placeholders = session.relatedSessions.map(() => '?').join(',');
   const { results } = await db.prepare(
     `SELECT * FROM sessions WHERE id IN (${placeholders}) AND status = 'published'`
@@ -44,93 +46,123 @@ if (session.relatedSessions && session.relatedSessions.length > 0) {
 
 // Build SEO meta
 const siteUrl = 'https://dailymeditationguide.com';
-const pageUrl = `${siteUrl}/session/${session.slug}`;
-const pageTitle = session.title;
-const pageDescription = session.description || `Listen to ${session.title} by ${session.author}. A ${session.duration} ${session.category} meditation session.`;
-const pageImage = session.featuredImage || '/og-image.jpg';
+const pageUrl = session ? `${siteUrl}/session/${session.slug}` : siteUrl;
+const pageTitle = session?.title || 'Session Not Found';
+const pageDescription = session
+  ? (session.description || `Listen to ${session.title} by ${session.author}. A ${session.duration} ${session.category} meditation session.`)
+  : 'The meditation session you are looking for could not be found.';
+const pageImage = session?.featuredImage || '/og-image.jpg';
 
-// Article JSON-LD
-const articleJsonLd = JSON.stringify({
-  "@context": "https://schema.org",
-  "@type": "Article",
-  "headline": pageTitle,
-  "description": pageDescription,
-  "url": pageUrl,
-  "image": pageImage.startsWith('http') ? pageImage : `${siteUrl}${pageImage}`,
-  ...(session.category && { "articleSection": session.category }),
-  ...(session.author && {
-    "author": {
-      "@type": "Person",
-      "name": session.author
-    }
-  }),
-  ...(session.publishedAt && { "datePublished": session.publishedAt }),
-  ...(session.updatedAt && { "dateModified": session.updatedAt }),
-  "publisher": {
-    "@type": "Organization",
-    "name": "Daily Meditation Guide",
-    "logo": {
-      "@type": "ImageObject",
-      "url": `${siteUrl}/favicon-192x192.png`
-    }
+// Build JSON-LD only for valid sessions
+let extraHead = '';
+if (session) {
+  // Hero image preload for LCP
+  if (session.featuredImage) {
+    extraHead += `<link rel="preload" as="image" href="${session.featuredImage}" fetchpriority="high" />`;
   }
-});
 
-// Breadcrumb JSON-LD
-const breadcrumbJsonLd = JSON.stringify({
-  "@context": "https://schema.org",
-  "@type": "BreadcrumbList",
-  "itemListElement": [
-    { "@type": "ListItem", "position": 1, "name": "Home", "item": siteUrl + "/" },
-    { "@type": "ListItem", "position": 2, "name": "Sessions", "item": siteUrl + "/sessions" },
-    { "@type": "ListItem", "position": 3, "name": session.title, "item": pageUrl }
-  ]
-});
+  // Article JSON-LD with AudioObject
+  const articleJsonLd = JSON.stringify({
+    "@context": "https://schema.org",
+    "@type": "Article",
+    "headline": pageTitle,
+    "description": pageDescription,
+    "url": pageUrl,
+    "mainEntityOfPage": pageUrl,
+    "image": pageImage.startsWith('http') ? pageImage : `${siteUrl}${pageImage}`,
+    ...(session.category && { "articleSection": session.category }),
+    ...(session.author && {
+      "author": {
+        "@type": "Person",
+        "name": session.author
+      }
+    }),
+    "datePublished": session.publishedAt || session.createdAt || new Date().toISOString(),
+    ...(session.updatedAt && { "dateModified": session.updatedAt }),
+    "publisher": {
+      "@type": "Organization",
+      "name": "Daily Meditation Guide",
+      "logo": {
+        "@type": "ImageObject",
+        "url": `${siteUrl}/favicon-192x192.png`
+      }
+    },
+    ...(session.audioUrl && {
+      "audio": {
+        "@type": "AudioObject",
+        "contentUrl": session.audioUrl.startsWith('http') ? session.audioUrl : `${siteUrl}${session.audioUrl}`,
+        "name": session.title,
+        "description": pageDescription,
+        ...(session.durationSec && { "duration": `PT${Math.floor(session.durationSec / 60)}M${session.durationSec % 60}S` }),
+        "encodingFormat": "audio/mpeg"
+      }
+    })
+  });
 
-// FAQ JSON-LD (optional)
-const hasFaq = session.faqItems && session.faqItems.length > 0 && session.faqItems.some(f => f.question && f.answer);
-const faqJsonLd = hasFaq ? JSON.stringify({
-  "@context": "https://schema.org",
-  "@type": "FAQPage",
-  "mainEntity": session.faqItems.filter(f => f.question && f.answer).map(f => ({
-    "@type": "Question",
-    "name": f.question,
-    "acceptedAnswer": {
-      "@type": "Answer",
-      "text": f.answer
-    }
-  }))
-}) : '';
+  // Breadcrumb JSON-LD
+  const breadcrumbJsonLd = JSON.stringify({
+    "@context": "https://schema.org",
+    "@type": "BreadcrumbList",
+    "itemListElement": [
+      { "@type": "ListItem", "position": 1, "name": "Home", "item": siteUrl + "/" },
+      { "@type": "ListItem", "position": 2, "name": "Sessions", "item": siteUrl + "/sessions" },
+      { "@type": "ListItem", "position": 3, "name": session.title, "item": pageUrl }
+    ]
+  });
 
-// Combine all JSON-LD scripts
-let extraHead = `<script type="application/ld+json">${articleJsonLd}</script>`;
-extraHead += `<script type="application/ld+json">${breadcrumbJsonLd}</script>`;
-if (faqJsonLd) {
-  extraHead += `<script type="application/ld+json">${faqJsonLd}</script>`;
+  extraHead += `<script type="application/ld+json">${articleJsonLd}</script>`;
+  extraHead += `<script type="application/ld+json">${breadcrumbJsonLd}</script>`;
 }
 ---
 
 <MainLayout
   title={pageTitle}
   description={pageDescription}
-  canonical={pageUrl}
-  ogType="article"
-  ogImage={pageImage.startsWith('http') ? pageImage : `${siteUrl}${pageImage}`}
+  canonical={session ? pageUrl : undefined}
+  ogType={session ? "article" : undefined}
+  ogImage={session ? (pageImage.startsWith('http') ? pageImage : `${siteUrl}${pageImage}`) : undefined}
+  noindex={!session}
   extraHead={extraHead}
 >
-  <div class="animate-[fade-enter_0.5s_ease-out]">
-    {/* Back Button */}
-    <a href="/" class="group flex items-center gap-2 text-zinc-500 hover:text-zinc-200 mb-8 transition-colors">
-      <iconify-icon icon="solar:arrow-left-linear" class="group-hover:-translate-x-1 transition-transform"></iconify-icon>
-      <span class="text-sm font-medium">Back to Sessions</span>
-    </a>
+  {session ? (
+    <div class="animate-[fade-enter_0.5s_ease-out]">
+      {/* Visible Breadcrumb Navigation */}
+      <nav aria-label="Breadcrumb" class="mb-6 text-sm">
+        <ol class="flex items-center gap-2 text-zinc-500">
+          <li><a href="/" class="hover:text-zinc-300 transition-colors">Home</a></li>
+          <li><span class="text-zinc-600">/</span></li>
+          <li><a href="/sessions" class="hover:text-zinc-300 transition-colors">Sessions</a></li>
+          <li><span class="text-zinc-600">/</span></li>
+          <li class="text-zinc-400 truncate max-w-[200px]">{session.title}</li>
+        </ol>
+      </nav>
 
-    <DetailInteractive
-      client:load
-      session={session}
-      processedContent={processedContent}
-      headings={headings}
-      relatedSessions={relatedSessions}
-    />
-  </div>
+      <DetailInteractive
+        client:idle
+        session={session}
+        processedContent={processedContent}
+        headings={headings}
+        relatedSessions={relatedSessions}
+      />
+    </div>
+  ) : (
+    <div class="flex flex-col items-center justify-center min-h-[60vh] text-center space-y-8 animate-[fade-enter_0.5s_ease-out]">
+      <div class="relative">
+        <div class="absolute inset-0 bg-indigo-500/20 blur-[60px] rounded-full animate-breathe"></div>
+        <h1 class="font-display relative text-9xl font-bold text-transparent bg-clip-text bg-gradient-to-b from-zinc-200 to-zinc-800 tracking-tighter">
+          404
+        </h1>
+      </div>
+      <div class="space-y-4 max-w-md mx-auto">
+        <h2 class="font-display text-2xl font-medium text-zinc-200">Session not found</h2>
+        <p class="text-zinc-500">The meditation session you're looking for doesn't exist or has been removed.</p>
+      </div>
+      <a
+        href="/sessions"
+        class="group flex items-center gap-2 px-6 py-3 bg-zinc-100 hover:bg-white text-zinc-950 rounded-full font-medium text-sm transition-all hover:shadow-[0_0_20px_-5px_rgba(255,255,255,0.3)]"
+      >
+        Browse Sessions
+      </a>
+    </div>
+  )}
 </MainLayout>

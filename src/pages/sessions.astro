@@ -51,13 +51,21 @@ const extraHead = `<script type="application/ld+json">${itemListJsonLd}</script>
   extraHead={extraHead}
 >
   <div class="space-y-12 animate-[fade-enter_0.5s_ease-out]">
-    <header class="space-y-4">
+    <header class="space-y-6">
       <h1 class="font-display text-3xl md:text-5xl font-medium text-zinc-100 tracking-tight">
-        Guided Sessions
+        Guided Meditation Sessions
       </h1>
       <p class="text-zinc-500 max-w-2xl text-lg">
         Immerse yourself in our curated collection of guided meditations and visual journeys designed to help you find peace and clarity.
       </p>
+      <div class="text-zinc-400 max-w-3xl space-y-4 text-sm leading-relaxed border-t border-white/5 pt-6">
+        <p>
+          Our meditation library covers a range of practices to support your daily wellness routine. Whether you need help winding down for sleep, managing anxiety, sharpening focus, or simply finding a moment of calm, each session is crafted with care to guide you through a meaningful experience.
+        </p>
+        <p>
+          Browse audio sessions led by experienced guides, or explore our collection of visual meditation videos featuring ambient soundscapes and nature imagery. Sessions range from quick 5-minute breathing exercises to immersive 30-minute guided practices, so you can find the right fit for your schedule and goals.
+        </p>
+      </div>
     </header>
 
     {/* Server-rendered session links for SEO crawlability */}
@@ -104,7 +112,7 @@ const extraHead = `<script type="application/ld+json">${itemListJsonLd}</script>
     {/* YouTube video sessions */}
     <section class="space-y-6">
       <h2 class="font-display text-2xl font-medium text-zinc-100 tracking-tight">Video Sessions</h2>
-      <SessionsContent client:load />
+      <SessionsContent client:idle />
     </section>
   </div>
 </MainLayout>

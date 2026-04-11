@@ -21,17 +21,15 @@ const websiteJsonLd = JSON.stringify({
   "name": "Daily Meditation Guide",
   "description": "Your daily guide to mindfulness and meditation. Curated audio journeys to help you focus, sleep, and reset.",
   "url": "https://dailymeditationguide.com",
-  "potentialAction": {
-    "@type": "SearchAction",
-    "target": {
-      "@type": "EntryPoint",
-      "urlTemplate": "https://dailymeditationguide.com/?q={search_term_string}"
-    },
-    "query-input": "required name=search_term_string"
-  }
+  "inLanguage": "en"
 });
 
-const extraHead = `<script type="application/ld+json">${websiteJsonLd}</script>`;
+let extraHead = `<script type="application/ld+json">${websiteJsonLd}</script>`;
+
+// Preload hero LCP image
+if (latestSession?.featuredImage) {
+  extraHead += `<link rel="preload" as="image" href="${latestSession.featuredImage}" fetchpriority="high" />`;
+}
 ---
 
 <MainLayout
@@ -50,19 +48,19 @@ const extraHead = `<script type="application/ld+json">${websiteJsonLd}</script>`
           NEW SESSION ADDED
         </div>
         <h1 class="font-display text-5xl md:text-6xl lg:text-7xl font-medium text-zinc-100 tracking-tight leading-[1.1]">
-          Find stillness in <br /> <span class="text-transparent bg-clip-text bg-gradient-to-r from-zinc-200 to-zinc-500">the noise.</span>
+          Daily Meditation <br /> <span class="text-transparent bg-clip-text bg-gradient-to-r from-zinc-200 to-zinc-500">& Mindfulness Guide</span>
         </h1>
         <p class="text-lg text-zinc-500 font-light max-w-md leading-relaxed">
-          Curated audio journeys to help you focus, sleep, and reset. Start your daily practice with just five minutes.
+          Guided audio sessions for sleep, anxiety relief, and focus. Start your daily meditation practice with just five minutes.
         </p>
         <div class="flex flex-col sm:flex-row items-center gap-4 pt-2 w-full sm:w-auto">
           <button class="group flex items-center justify-center gap-3 px-6 py-3 bg-zinc-100 hover:bg-white text-zinc-950 rounded-full font-medium text-sm transition-all hover:shadow-[0_0_20px_-5px_rgba(255,255,255,0.3)] w-full sm:w-auto">
             <iconify-icon icon="solar:play-circle-linear" width="20" stroke-width="1.5" class="text-zinc-950"></iconify-icon>
             Start Daily Calm
           </button>
-          <button class="px-6 py-3 border border-white/10 hover:border-white/20 hover:bg-white/5 rounded-full text-zinc-300 text-sm font-medium transition-all w-full sm:w-auto">
+          <a href="/sessions" class="px-6 py-3 border border-white/10 hover:border-white/20 hover:bg-white/5 rounded-full text-zinc-300 text-sm font-medium transition-all w-full sm:w-auto text-center">
             Explore Library
-          </button>
+          </a>
         </div>
       </div>
 
@@ -102,7 +100,32 @@ const extraHead = `<script type="application/ld+json">${websiteJsonLd}</script>`
       </a>
     </section>
 
+    {/* About Meditation Section - SEO Content */}
+    <section class="max-w-4xl mx-auto space-y-8">
+      <h2 class="font-display text-2xl md:text-3xl font-medium text-zinc-100 tracking-tight text-center">
+        Your Path to Daily Mindfulness
+      </h2>
+      <div class="grid md:grid-cols-2 gap-8 text-zinc-400 text-sm leading-relaxed">
+        <div class="space-y-4">
+          <p>
+            Daily Meditation Guide offers a curated library of guided meditation sessions designed for every level of experience. Whether you're new to mindfulness or have an established practice, our sessions provide the structure and guidance to help you build a consistent daily routine.
+          </p>
+          <p>
+            Research from institutions like Harvard Medical School and the National Institutes of Health has shown that regular meditation practice can reduce stress, improve sleep quality, and enhance focus and emotional well-being. Even short sessions of 5 to 10 minutes can make a meaningful difference in your day.
+          </p>
+        </div>
+        <div class="space-y-4">
+          <p>
+            Our library includes sessions for <strong class="text-zinc-300">sleep</strong> to help you wind down before bed, <strong class="text-zinc-300">anxiety relief</strong> practices with calming breathing techniques, <strong class="text-zinc-300">focus</strong> sessions for sharper concentration, and <strong class="text-zinc-300">nature soundscapes</strong> for ambient relaxation.
+          </p>
+          <p>
+            Each session is paired with high-quality audio and thoughtfully written guides. Listen on your commute, during a lunch break, or as part of your morning routine. Start with just five minutes a day and build from there at your own pace.
+          </p>
+        </div>
+      </div>
+    </section>
+
     {/* Interactive content: filters + grid */}
-    <HomeContent client:load sessions={sessions} />
+    <HomeContent client:idle sessions={sessions} />
   </div>
 </MainLayout>

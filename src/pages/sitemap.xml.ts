@@ -7,13 +7,10 @@ interface SitemapRow {
 }
 
 const STATIC_PAGES = [
-  { path: '/', changefreq: 'daily', priority: '1.0', lastmod: '2026-04-07' },
-  { path: '/sessions', changefreq: 'weekly', priority: '0.9', lastmod: '2026-04-07' },
-  { path: '/about', changefreq: 'monthly', priority: '0.7', lastmod: '2026-04-07' },
-  { path: '/contact', changefreq: 'monthly', priority: '0.5', lastmod: '2026-04-07' },
-  { path: '/privacy', changefreq: 'yearly', priority: '0.3', lastmod: '2026-04-07' },
-  { path: '/terms', changefreq: 'yearly', priority: '0.3', lastmod: '2026-04-07' },
-  { path: '/disclaimer', changefreq: 'yearly', priority: '0.3', lastmod: '2026-04-07' },
+  { path: '/', lastmod: '2026-04-07' },
+  { path: '/sessions', lastmod: '2026-04-07' },
+  { path: '/about', lastmod: '2026-04-07' },
+  { path: '/contact', lastmod: '2026-04-07' },
 ];
 
 export async function GET(context: APIContext) {
@@ -32,8 +29,6 @@ export async function GET(context: APIContext) {
     p => `  <url>
     <loc>${SITE_URL}${p.path}</loc>
     <lastmod>${p.path === '/' ? latestSessionDate : p.lastmod}</lastmod>
-    <changefreq>${p.changefreq}</changefreq>
-    <priority>${p.priority}</priority>
   </url>`
   ).join('\n');
 
@@ -41,8 +36,6 @@ export async function GET(context: APIContext) {
     row => `  <url>
     <loc>${SITE_URL}/session/${escapeXml(row.slug)}</loc>
     <lastmod>${toW3CDate(row.updated_at)}</lastmod>
-    <changefreq>weekly</changefreq>
-    <priority>0.8</priority>
   </url>`
   ).join('\n');
 

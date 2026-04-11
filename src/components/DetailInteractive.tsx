@@ -80,6 +80,14 @@ export default function DetailInteractive({ session, processedContent, headings,
             <div>
               <p className="text-sm text-zinc-200 font-medium">{session.author}</p>
               <p className="text-xs text-zinc-500">{session.role}</p>
+              {(session.publishedAt || session.createdAt) && (
+                <p className="text-xs text-zinc-600 mt-0.5">
+                  {new Date(String(session.publishedAt || session.createdAt)).toLocaleDateString('en-US', { year: 'numeric', month: 'long', day: 'numeric' })}
+                  {session.updatedAt && session.updatedAt !== session.publishedAt && (
+                    <span> · Updated {new Date(String(session.updatedAt)).toLocaleDateString('en-US', { year: 'numeric', month: 'long', day: 'numeric' })}</span>
+                  )}
+                </p>
+              )}
             </div>
             <div className="flex-grow"></div>
             <div className="flex gap-2">
