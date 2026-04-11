@@ -1,9 +1,17 @@
 import { defineMiddleware } from 'astro:middleware';
 
 export const onRequest = defineMiddleware(async (context, next) => {
-  const response = await next();
+  let response = await next();
   const url = new URL(context.request.url);
   const path = url.pathname;
+
+  // Redirect responses are immutable on Cloudflare — clone to make headers writable
+  if (response.status >= 300 && response.status < 400) {
+    response = new Response(null, {
+      status: response.status,
+      headers: new Headers(response.headers),
+    });
+  }
 
   // Security headers for all responses
   response.headers.set('X-Content-Type-Options', 'nosniff');
