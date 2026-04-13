@@ -49,11 +49,9 @@ export function videoSlug(title: string, videoId: string): string {
   return `${base}-${suffix}`;
 }
 
-export function thumbnailUrl(videoId: string, size: 'max' | 'hq' | 'mq' = 'max'): string {
-  const map = {
-    max: 'maxresdefault',
-    hq: 'hqdefault',
-    mq: 'mqdefault',
-  } as const;
-  return `https://i.ytimg.com/vi/${videoId}/${map[size]}.jpg`;
+// Note: use img.youtube.com (not i.ytimg.com) because it's whitelisted in CSP.
+// hqdefault.jpg is the highest resolution guaranteed to exist for every YouTube video.
+export function thumbnailUrl(videoId: string, size: 'hq' | 'mq' = 'hq'): string {
+  const map = { hq: 'hqdefault', mq: 'mqdefault' } as const;
+  return `https://img.youtube.com/vi/${videoId}/${map[size]}.jpg`;
 }

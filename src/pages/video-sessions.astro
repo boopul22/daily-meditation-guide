@@ -155,13 +155,12 @@ const extraHead = `<script type="application/ld+json">${itemListJsonLd}</script>
             >
               <div class="relative aspect-video w-full overflow-hidden bg-zinc-800">
                 <img
-                  src={thumbnailUrl(video.id, 'max')}
+                  src={thumbnailUrl(video.id, 'hq')}
                   alt={video.title}
                   loading="lazy"
                   decoding="async"
-                  width={1280}
-                  height={720}
-                  onerror={`this.onerror=null;this.src='${thumbnailUrl(video.id, 'hq')}'`}
+                  width={480}
+                  height={360}
                   class="absolute inset-0 w-full h-full object-cover transition-transform duration-500 group-hover:scale-105"
                 />
                 <div class="absolute inset-0 bg-gradient-to-t from-black/50 via-transparent to-transparent"></div>

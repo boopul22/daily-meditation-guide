@@ -26,7 +26,7 @@ const category = categorize(title, description);
 
 const siteUrl = 'https://dailymeditationguide.com';
 const pageUrl = `${siteUrl}/video-sessions/${slug}`;
-const thumb = thumbnailUrl(videoId, 'max');
+const thumb = thumbnailUrl(videoId, 'hq');
 
 const metaDescription = description
   ? description.replace(/\s+/g, ' ').trim().slice(0, 155)
@@ -37,7 +37,7 @@ const videoObjectJsonLd = JSON.stringify({
   '@type': 'VideoObject',
   name: title,
   description: metaDescription,
-  thumbnailUrl: [thumb, thumbnailUrl(videoId, 'hq')],
+  thumbnailUrl: [thumb],
   uploadDate: publishedAt,
   contentUrl: `https://www.youtube.com/watch?v=${videoId}`,
   embedUrl: `https://www.youtube-nocookie.com/embed/${videoId}`,
