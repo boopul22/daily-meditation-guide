@@ -59,8 +59,18 @@ const Divider = () => <div className="w-px h-6 bg-white/10 mx-1 self-center" />;
 
 const RichTextEditor: React.FC<RichTextEditorProps> = ({ content, onChange, sessionSlug, currentUser }) => {
   const fileInputRef = useRef<HTMLInputElement>(null);
+  const tableButtonRef = useRef<HTMLDivElement>(null);
   const [uploading, setUploading] = useState(false);
   const [tableMenuOpen, setTableMenuOpen] = useState(false);
+  const [tableMenuPos, setTableMenuPos] = useState({ top: 0, left: 0 });
+
+  const openTableMenu = () => {
+    if (tableButtonRef.current) {
+      const rect = tableButtonRef.current.getBoundingClientRect();
+      setTableMenuPos({ top: rect.bottom + 4, left: rect.left });
+    }
+    setTableMenuOpen(v => !v);
+  };
 
   const editor = useEditor({
     extensions: [
@@ -217,9 +227,9 @@ const RichTextEditor: React.FC<RichTextEditorProps> = ({ content, onChange, sess
         >
           <iconify-icon icon="solar:minus-linear" width="16"></iconify-icon>
         </ToolbarButton>
-        <div className="relative">
+        <div ref={tableButtonRef} className="relative">
           <ToolbarButton
-            onClick={() => setTableMenuOpen(v => !v)}
+            onClick={openTableMenu}
             active={editor.isActive('table') || tableMenuOpen}
             title="Table"
           >
@@ -227,7 +237,8 @@ const RichTextEditor: React.FC<RichTextEditorProps> = ({ content, onChange, sess
           </ToolbarButton>
           {tableMenuOpen && (
             <div
-              className="absolute top-full left-0 mt-1 z-50 bg-zinc-800 border border-white/10 rounded-lg shadow-xl p-1 min-w-[160px] text-xs text-zinc-300"
+              className="fixed z-[9999] bg-zinc-800 border border-white/10 rounded-lg shadow-xl p-1 min-w-[160px] text-xs text-zinc-300"
+              style={{ top: tableMenuPos.top, left: tableMenuPos.left }}
               onMouseLeave={() => setTableMenuOpen(false)}
             >
               <button type="button" className="w-full text-left px-3 py-1.5 rounded hover:bg-white/10 transition-colors"
