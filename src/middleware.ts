@@ -28,7 +28,7 @@ export const onRequest = defineMiddleware(async (context, next) => {
     "font-src 'self' https://fonts.gstatic.com",
     "img-src 'self' https://pub-141831e61e69445289222976a15b6fb3.r2.dev https://img.youtube.com data:",
     "connect-src 'self' https://api.iconify.design https://cloudflareinsights.com",
-    "frame-src 'none'",
+    "frame-src 'self' https://www.youtube.com https://www.youtube-nocookie.com",
     "object-src 'none'",
     "base-uri 'self'",
     "form-action 'self'",
