@@ -2,22 +2,145 @@ import React, { useState, useRef, useEffect } from 'react';
 import { useStore } from '@nanostores/react';
 import { $user, $authLoading, login, logout, fetchCurrentUser } from '../stores/authStore';
 
+type NotificationItem = {
+  slug: string;
+  title: string;
+  category?: string;
+  description?: string;
+  author?: string;
+  publishedAt: string | null;
+};
+
+const LAST_SEEN_KEY = 'dmg:notifications:lastSeen';
+
+function formatRelative(iso: string | null): string {
+  if (!iso) return '';
+  const then = new Date(iso).getTime();
+  if (Number.isNaN(then)) return '';
+  const diff = Date.now() - then;
+  const mins = Math.floor(diff / 60000);
+  if (mins < 1) return 'just now';
+  if (mins < 60) return `${mins}m ago`;
+  const hrs = Math.floor(mins / 60);
+  if (hrs < 24) return `${hrs}h ago`;
+  const days = Math.floor(hrs / 24);
+  if (days < 7) return `${days}d ago`;
+  const weeks = Math.floor(days / 7);
+  if (weeks < 4) return `${weeks}w ago`;
+  const months = Math.floor(days / 30);
+  return `${months}mo ago`;
+}
+
 const Navbar: React.FC = () => {
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
   const [isDropdownOpen, setIsDropdownOpen] = useState(false);
+  const [isNotifOpen, setIsNotifOpen] = useState(false);
+  const [allSessions, setAllSessions] = useState<NotificationItem[]>([]);
+  const [notifLoading, setNotifLoading] = useState(false);
+  const [notifLoaded, setNotifLoaded] = useState(false);
+  const [unreadCount, setUnreadCount] = useState(0);
+  const [isSearchOpen, setIsSearchOpen] = useState(false);
+  const [searchQuery, setSearchQuery] = useState('');
   const dropdownRef = useRef<HTMLDivElement>(null);
+  const notifRef = useRef<HTMLDivElement>(null);
+  const searchInputRef = useRef<HTMLInputElement>(null);
+
+  const notifications = allSessions.slice(0, 6);
+  const searchResults = searchQuery.trim()
+    ? allSessions
+        .filter((s) => {
+          const q = searchQuery.toLowerCase();
+          return (
+            s.title?.toLowerCase().includes(q) ||
+            s.description?.toLowerCase().includes(q) ||
+            s.category?.toLowerCase().includes(q) ||
+            s.author?.toLowerCase().includes(q)
+          );
+        })
+        .slice(0, 10)
+    : [];
   const user = useStore($user);
   const loading = useStore($authLoading);
 
-  // Fetch user on mount
   useEffect(() => {
     fetchCurrentUser();
   }, []);
 
+  const loadSessions = async () => {
+    if (notifLoading) return;
+    setNotifLoading(true);
+    try {
+      const res = await fetch('/api/sessions');
+      if (!res.ok) throw new Error('Failed');
+      const data = (await res.json()) as NotificationItem[];
+      setAllSessions(data);
+      setNotifLoaded(true);
+      const lastSeen = Number(localStorage.getItem(LAST_SEEN_KEY) || 0);
+      const unread = data.slice(0, 6).filter(n => {
+        const t = n.publishedAt ? new Date(n.publishedAt).getTime() : 0;
+        return t > lastSeen;
+      }).length;
+      setUnreadCount(unread);
+    } catch {
+      setNotifLoaded(true);
+    } finally {
+      setNotifLoading(false);
+    }
+  };
+
+  useEffect(() => {
+    loadSessions();
+  }, []);
+
+  const openNotifications = () => {
+    setIsNotifOpen(true);
+    if (!notifLoaded) loadSessions();
+    const newest = notifications[0]?.publishedAt;
+    if (newest) {
+      localStorage.setItem(LAST_SEEN_KEY, String(new Date(newest).getTime()));
+    } else {
+      localStorage.setItem(LAST_SEEN_KEY, String(Date.now()));
+    }
+    setUnreadCount(0);
+  };
+
+  const toggleNotifications = () => {
+    if (isNotifOpen) setIsNotifOpen(false);
+    else openNotifications();
+  };
+
+  const openSearch = () => {
+    setIsSearchOpen(true);
+    if (!notifLoaded) loadSessions();
+    setIsMobileMenuOpen(false);
+    setTimeout(() => searchInputRef.current?.focus(), 50);
+  };
+
+  const closeSearch = () => {
+    setIsSearchOpen(false);
+    setSearchQuery('');
+  };
+
+  useEffect(() => {
+    function onKey(e: KeyboardEvent) {
+      if (e.key === 'Escape' && isSearchOpen) closeSearch();
+      if ((e.key === 'k' || e.key === 'K') && (e.metaKey || e.ctrlKey)) {
+        e.preventDefault();
+        openSearch();
+      }
+    }
+    document.addEventListener('keydown', onKey);
+    return () => document.removeEventListener('keydown', onKey);
+  }, [isSearchOpen, notifLoaded]);
+
   useEffect(() => {
     function handleClickOutside(event: MouseEvent) {
-      if (dropdownRef.current && !dropdownRef.current.contains(event.target as Node)) {
+      const target = event.target as Node;
+      if (dropdownRef.current && !dropdownRef.current.contains(target)) {
         setIsDropdownOpen(false);
+      }
+      if (notifRef.current && !notifRef.current.contains(target)) {
+        setIsNotifOpen(false);
       }
     }
     document.addEventListener('mousedown', handleClickOutside);
@@ -48,13 +171,52 @@ const Navbar: React.FC = () => {
           </div>
 
           <div className="flex items-center gap-4">
-            <button aria-label="Search" className="hidden md:block p-2 hover:bg-white/5 rounded-full transition-colors text-zinc-400 hover:text-white">
+            <button onClick={openSearch} aria-label="Search" className="hidden md:block p-2 hover:bg-white/5 rounded-full transition-colors text-zinc-400 hover:text-white">
               <iconify-icon icon="solar:magnifer-linear" width="20" stroke-width="1.5"></iconify-icon>
             </button>
-            <button aria-label="Notifications" className="hidden md:block p-2 hover:bg-white/5 rounded-full transition-colors text-zinc-400 hover:text-white relative">
-              <div className="absolute top-2 right-2 w-1.5 h-1.5 bg-indigo-500 rounded-full"></div>
-              <iconify-icon icon="solar:bell-linear" width="20" stroke-width="1.5"></iconify-icon>
-            </button>
+            <div className="hidden md:block relative" ref={notifRef}>
+              <button
+                onClick={toggleNotifications}
+                aria-label="Notifications"
+                aria-haspopup="menu"
+                aria-expanded={isNotifOpen}
+                className="p-2 hover:bg-white/5 rounded-full transition-colors text-zinc-400 hover:text-white relative"
+              >
+                {unreadCount > 0 && (
+                  <div className="absolute top-1.5 right-1.5 w-1.5 h-1.5 bg-indigo-500 rounded-full"></div>
+                )}
+                <iconify-icon icon="solar:bell-linear" width="20" stroke-width="1.5"></iconify-icon>
+              </button>
+              {isNotifOpen && (
+                <div className="absolute right-0 mt-2 w-80 py-2 bg-zinc-900 border border-white/10 rounded-xl shadow-xl z-50">
+                  <div className="px-4 py-2 border-b border-white/5 flex items-center justify-between">
+                    <p className="text-sm text-zinc-200 font-medium">Latest sessions</p>
+                    <a href="/sessions" className="text-xs text-indigo-400 hover:text-indigo-300">View all</a>
+                  </div>
+                  <div className="max-h-96 overflow-y-auto">
+                    {notifLoading && notifications.length === 0 ? (
+                      <div className="px-4 py-6 text-center text-sm text-zinc-500">Loading…</div>
+                    ) : notifications.length === 0 ? (
+                      <div className="px-4 py-6 text-center text-sm text-zinc-500">No new sessions</div>
+                    ) : (
+                      notifications.map((n) => (
+                        <a
+                          key={n.slug}
+                          href={`/sessions/${n.slug}`}
+                          onClick={() => setIsNotifOpen(false)}
+                          className="block px-4 py-3 hover:bg-white/5 transition-colors border-b border-white/5 last:border-b-0"
+                        >
+                          <p className="text-sm text-zinc-200 font-medium line-clamp-2">{n.title}</p>
+                          <p className="text-xs text-zinc-500 mt-0.5">
+                            {n.category ? `${n.category} · ` : ''}{formatRelative(n.publishedAt)}
+                          </p>
+                        </a>
+                      ))
+                    )}
+                  </div>
+                </div>
+              )}
+            </div>
 
             {/* Desktop Auth */}
             {loading ? (
@@ -121,14 +283,50 @@ const Navbar: React.FC = () => {
             <a href="/contact" onClick={() => setIsMobileMenuOpen(false)} className="border-b border-white/5 pb-4">Contact</a>
 
             <div className="flex items-center gap-4 mt-4">
-              <button aria-label="Search" className="p-3 bg-white/5 rounded-full text-zinc-400">
+              <button onClick={openSearch} aria-label="Search" className="p-3 bg-white/5 rounded-full text-zinc-400">
                 <iconify-icon icon="solar:magnifer-linear" width="24"></iconify-icon>
               </button>
-              <button aria-label="Notifications" className="p-3 bg-white/5 rounded-full text-zinc-400 relative">
-                <div className="absolute top-3 right-3 w-2 h-2 bg-indigo-500 rounded-full"></div>
+              <button
+                onClick={toggleNotifications}
+                aria-label="Notifications"
+                aria-expanded={isNotifOpen}
+                className="p-3 bg-white/5 rounded-full text-zinc-400 relative"
+              >
+                {unreadCount > 0 && (
+                  <div className="absolute top-2.5 right-2.5 w-2 h-2 bg-indigo-500 rounded-full"></div>
+                )}
                 <iconify-icon icon="solar:bell-linear" width="24"></iconify-icon>
               </button>
             </div>
+            {isNotifOpen && (
+              <div className="mt-2 bg-zinc-900 border border-white/10 rounded-xl overflow-hidden">
+                <div className="px-4 py-3 border-b border-white/5 flex items-center justify-between">
+                  <p className="text-sm text-zinc-200 font-medium">Latest sessions</p>
+                  <a href="/sessions" onClick={() => setIsMobileMenuOpen(false)} className="text-xs text-indigo-400">View all</a>
+                </div>
+                <div className="max-h-80 overflow-y-auto">
+                  {notifLoading && notifications.length === 0 ? (
+                    <div className="px-4 py-6 text-center text-sm text-zinc-500">Loading…</div>
+                  ) : notifications.length === 0 ? (
+                    <div className="px-4 py-6 text-center text-sm text-zinc-500">No new sessions</div>
+                  ) : (
+                    notifications.map((n) => (
+                      <a
+                        key={n.slug}
+                        href={`/sessions/${n.slug}`}
+                        onClick={() => setIsMobileMenuOpen(false)}
+                        className="block px-4 py-3 hover:bg-white/5 border-b border-white/5 last:border-b-0"
+                      >
+                        <p className="text-sm text-zinc-200 font-medium line-clamp-2">{n.title}</p>
+                        <p className="text-xs text-zinc-500 mt-0.5">
+                          {n.category ? `${n.category} · ` : ''}{formatRelative(n.publishedAt)}
+                        </p>
+                      </a>
+                    ))
+                  )}
+                </div>
+              </div>
+            )}
 
             {/* Mobile Auth */}
             <div className="mt-2 border-t border-white/5 pt-6">
@@ -165,6 +363,63 @@ const Navbar: React.FC = () => {
                 >
                   Sign In with Google
                 </button>
+              )}
+            </div>
+          </div>
+        </div>
+      )}
+
+      {isSearchOpen && (
+        <div
+          className="fixed inset-0 z-[60] bg-black/70 backdrop-blur-sm flex items-start justify-center pt-20 px-4"
+          onClick={closeSearch}
+        >
+          <div
+            className="w-full max-w-xl bg-zinc-900 border border-white/10 rounded-2xl shadow-2xl overflow-hidden"
+            onClick={(e) => e.stopPropagation()}
+          >
+            <div className="flex items-center gap-3 px-4 py-3 border-b border-white/10">
+              <iconify-icon icon="solar:magnifer-linear" width="20" class="text-zinc-500"></iconify-icon>
+              <input
+                ref={searchInputRef}
+                type="text"
+                value={searchQuery}
+                onChange={(e) => setSearchQuery(e.target.value)}
+                placeholder="Search meditations…"
+                className="flex-1 bg-transparent text-zinc-100 placeholder-zinc-500 outline-none text-sm"
+              />
+              <button
+                onClick={closeSearch}
+                aria-label="Close search"
+                className="text-zinc-500 hover:text-zinc-300 text-xs px-2 py-1 border border-white/10 rounded"
+              >
+                Esc
+              </button>
+            </div>
+            <div className="max-h-[60vh] overflow-y-auto">
+              {notifLoading && allSessions.length === 0 ? (
+                <div className="px-4 py-8 text-center text-sm text-zinc-500">Loading sessions…</div>
+              ) : !searchQuery.trim() ? (
+                <div className="px-4 py-8 text-center text-sm text-zinc-500">Start typing to search {allSessions.length} sessions</div>
+              ) : searchResults.length === 0 ? (
+                <div className="px-4 py-8 text-center text-sm text-zinc-500">No matches for "{searchQuery}"</div>
+              ) : (
+                searchResults.map((s) => (
+                  <a
+                    key={s.slug}
+                    href={`/sessions/${s.slug}`}
+                    onClick={closeSearch}
+                    className="block px-4 py-3 hover:bg-white/5 border-b border-white/5 last:border-b-0"
+                  >
+                    <p className="text-sm text-zinc-100 font-medium line-clamp-1">{s.title}</p>
+                    {s.description && (
+                      <p className="text-xs text-zinc-500 mt-0.5 line-clamp-1">{s.description}</p>
+                    )}
+                    <p className="text-xs text-zinc-600 mt-0.5">
+                      {s.category}{s.author ? ` · ${s.author}` : ''}
+                    </p>
+                  </a>
+                ))
               )}
             </div>
           </div>
