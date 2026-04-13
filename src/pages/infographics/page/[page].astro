@@ -1,0 +1,77 @@
+---
+import MainLayout from '../../../layouts/MainLayout.astro';
+import InfographicListing from '../../../components/InfographicListing.astro';
+import { getPublishedInfographicsPage } from '../../../lib/infographics';
+
+const pageParam = Astro.params.page;
+const pageNum = Number.parseInt(pageParam || '1', 10);
+
+if (!Number.isFinite(pageNum) || pageNum < 1) {
+  Astro.response.status = 404;
+  Astro.response.headers.set('X-Robots-Tag', 'noindex, nofollow');
+}
+
+// Page 1 should live at /infographics — redirect for canonical consistency
+if (pageNum === 1) {
+  return Astro.redirect('/infographics', 301);
+}
+
+const db = Astro.locals.runtime.env.DB;
+const { infographics, page, totalPages } = await getPublishedInfographicsPage(db, pageNum);
+
+if (pageNum > totalPages) {
+  Astro.response.status = 404;
+  Astro.response.headers.set('X-Robots-Tag', 'noindex, nofollow');
+}
+
+Astro.response.headers.set('Cache-Control', 'public, max-age=300, s-maxage=3600, stale-while-revalidate=86400');
+
+const siteUrl = 'https://dailymeditationguide.com';
+const canonical = `${siteUrl}/infographics/page/${page}`;
+const isValid = pageNum <= totalPages;
+
+const breadcrumbJsonLd = JSON.stringify({
+  "@context": "https://schema.org",
+  "@type": "BreadcrumbList",
+  "itemListElement": [
+    { "@type": "ListItem", "position": 1, "name": "Home", "item": `${siteUrl}/` },
+    { "@type": "ListItem", "position": 2, "name": "Infographics", "item": `${siteUrl}/infographics` },
+    { "@type": "ListItem", "position": 3, "name": `Page ${page}`, "item": canonical },
+  ],
+});
+
+let extraHead = `<script type="application/ld+json">${breadcrumbJsonLd}</script>`;
+extraHead += `<link rel="alternate" type="application/rss+xml" title="Infographics RSS" href="/infographics.xml" />`;
+const prevHref = page - 1 === 1 ? `${siteUrl}/infographics` : `${siteUrl}/infographics/page/${page - 1}`;
+extraHead += `<link rel="prev" href="${prevHref}" />`;
+if (page < totalPages) {
+  extraHead += `<link rel="next" href="${siteUrl}/infographics/page/${page + 1}" />`;
+}
+---
+
+<MainLayout
+  title={`Infographics — Page ${page}`}
+  description="Visual guides, stats, and practice summaries for mindfulness and meditation."
+  canonical={canonical}
+  noindex={!isValid}
+  extraHead={extraHead}
+>
+  <div class="space-y-12 animate-[fade-enter_0.5s_ease-out]">
+    <header class="space-y-4">
+      <nav aria-label="Breadcrumb" class="text-sm">
+        <ol class="flex items-center gap-2 text-zinc-500">
+          <li><a href="/" class="hover:text-zinc-300 transition-colors">Home</a></li>
+          <li><span class="text-zinc-600">/</span></li>
+          <li><a href="/infographics" class="hover:text-zinc-300 transition-colors">Infographics</a></li>
+          <li><span class="text-zinc-600">/</span></li>
+          <li class="text-zinc-400">Page {page}</li>
+        </ol>
+      </nav>
+      <h1 class="font-display text-3xl md:text-4xl font-medium text-zinc-100 tracking-tight">
+        Meditation Infographics — Page {page}
+      </h1>
+    </header>
+
+    <InfographicListing infographics={infographics} page={page} totalPages={totalPages} />
+  </div>
+</MainLayout>

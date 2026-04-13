@@ -42,6 +42,7 @@ const Navbar: React.FC = () => {
           <div className="hidden md:flex items-center gap-8">
             <a href="/" className="text-sm font-medium text-zinc-400 hover:text-zinc-100 transition-colors">Practice</a>
             <a href="/sessions" className="text-sm font-medium text-zinc-400 hover:text-zinc-100 transition-colors">Sessions</a>
+            <a href="/infographics" className="text-sm font-medium text-zinc-400 hover:text-zinc-100 transition-colors">Infographics</a>
             <a href="/about" className="text-sm font-medium text-zinc-400 hover:text-zinc-100 transition-colors">About</a>
             <a href="/contact" className="text-sm font-medium text-zinc-400 hover:text-zinc-100 transition-colors">Contact</a>
           </div>
@@ -115,6 +116,7 @@ const Navbar: React.FC = () => {
           <div className="flex flex-col gap-6 text-lg font-medium text-zinc-300">
             <a href="/" onClick={() => setIsMobileMenuOpen(false)} className="border-b border-white/5 pb-4">Practice</a>
             <a href="/sessions" onClick={() => setIsMobileMenuOpen(false)} className="border-b border-white/5 pb-4">Sessions</a>
+            <a href="/infographics" onClick={() => setIsMobileMenuOpen(false)} className="border-b border-white/5 pb-4">Infographics</a>
             <a href="/about" onClick={() => setIsMobileMenuOpen(false)} className="border-b border-white/5 pb-4">About</a>
             <a href="/contact" onClick={() => setIsMobileMenuOpen(false)} className="border-b border-white/5 pb-4">Contact</a>
 

@@ -35,6 +35,26 @@ export interface Session {
   lastUpdatedBy?: string | null;
 }
 
+export interface Infographic {
+  id: string;
+  slug: string;
+  title: string;
+  description: string;
+  imageUrl: string;
+  imageWidth: number;
+  imageHeight: number;
+  altText: string;
+  tags: string[];
+  seoTitle: string;
+  seoDescription: string;
+  status: 'draft' | 'published';
+  publishedAt?: string | null;
+  createdAt?: string;
+  updatedAt?: string;
+  version?: number;
+  lastUpdatedBy?: string | null;
+}
+
 // Global augmentation for Astro
 declare global {
   namespace JSX {

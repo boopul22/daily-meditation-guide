@@ -1,12 +1,12 @@
-import type { Session } from '../types';
+import type { Session, Infographic } from '../types';
 import { convertToWebP } from './convertToWebP';
 
 const API_BASE = '/api';
 
 // Custom error for version conflicts
 export class ConflictError extends Error {
-  currentData: Session;
-  constructor(message: string, currentData: Session) {
+  currentData: Session | Infographic;
+  constructor(message: string, currentData: Session | Infographic) {
     super(message);
     this.name = 'ConflictError';
     this.currentData = currentData;
@@ -73,6 +73,35 @@ export async function updateSession(slug: string, data: Partial<Session> & { ver
 
 export async function deleteSession(slug: string): Promise<void> {
   await request(`/sessions/${encodeURIComponent(slug)}`, { method: 'DELETE' });
+}
+
+export async function fetchInfographics(): Promise<Infographic[]> {
+  return request('/infographics');
+}
+
+export async function fetchInfographicBySlug(slug: string): Promise<Infographic> {
+  return request(`/infographics/${encodeURIComponent(slug)}`);
+}
+
+export async function createInfographic(data: Partial<Infographic>): Promise<Infographic> {
+  return request('/infographics', {
+    method: 'POST',
+    body: JSON.stringify(data),
+  });
+}
+
+export async function updateInfographic(
+  slug: string,
+  data: Partial<Infographic> & { version?: number; forceSave?: boolean },
+): Promise<Infographic> {
+  return request(`/infographics/${encodeURIComponent(slug)}`, {
+    method: 'PUT',
+    body: JSON.stringify(data),
+  });
+}
+
+export async function deleteInfographic(slug: string): Promise<void> {
+  await request(`/infographics/${encodeURIComponent(slug)}`, { method: 'DELETE' });
 }
 
 export async function uploadImage(file: File): Promise<string> {

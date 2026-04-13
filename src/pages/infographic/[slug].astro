@@ -1,0 +1,234 @@
+---
+import MainLayout from '../../layouts/MainLayout.astro';
+import { rowToInfographic } from '../../lib/db';
+import { absoluteImage } from '../../lib/rss';
+import type { Infographic } from '../../types';
+
+const { slug } = Astro.params;
+const db = Astro.locals.runtime.env.DB;
+
+let infographic: Infographic | null = null;
+
+if (slug) {
+  const row = await db.prepare(
+    "SELECT * FROM infographics WHERE slug = ? AND status = 'published'"
+  ).bind(slug).first();
+  if (row) {
+    infographic = rowToInfographic(row);
+  }
+}
+
+if (!infographic) {
+  Astro.response.status = 404;
+  Astro.response.headers.set('X-Robots-Tag', 'noindex, nofollow');
+} else {
+  Astro.response.headers.set('Cache-Control', 'public, max-age=300, s-maxage=3600, stale-while-revalidate=86400');
+}
+
+const siteUrl = 'https://dailymeditationguide.com';
+const pageUrl = infographic ? `${siteUrl}/infographic/${infographic.slug}` : siteUrl;
+const pageTitle = infographic?.seoTitle || infographic?.title || 'Infographic Not Found';
+const pageDescription = infographic
+  ? (infographic.seoDescription || infographic.description || `${infographic.title} — a mindfulness and meditation infographic.`)
+  : 'The infographic you are looking for could not be found.';
+const absoluteImg = infographic ? absoluteImage(infographic.imageUrl) : `${siteUrl}/og-image.jpg`;
+
+let extraHead = '';
+if (infographic) {
+  if (infographic.imageUrl) {
+    extraHead += `<link rel="preload" as="image" href="${infographic.imageUrl}" fetchpriority="high" />`;
+  }
+
+  const imageJsonLd = JSON.stringify({
+    "@context": "https://schema.org",
+    "@type": "ImageObject",
+    "contentUrl": absoluteImg,
+    "url": pageUrl,
+    "name": infographic.title,
+    "description": infographic.description || pageDescription,
+    ...(infographic.imageWidth ? { "width": infographic.imageWidth } : {}),
+    ...(infographic.imageHeight ? { "height": infographic.imageHeight } : {}),
+    "datePublished": infographic.publishedAt || infographic.createdAt || new Date().toISOString(),
+    ...(infographic.updatedAt ? { "dateModified": infographic.updatedAt } : {}),
+    "representativeOfPage": true,
+    "creator": {
+      "@type": "Organization",
+      "name": "Daily Meditation Guide",
+      "url": siteUrl,
+    },
+    "copyrightHolder": {
+      "@type": "Organization",
+      "name": "Daily Meditation Guide",
+    },
+    "creditText": "Daily Meditation Guide",
+    "license": `${siteUrl}/about`,
+    "acquireLicensePage": `${siteUrl}/contact`,
+  });
+
+  const breadcrumbJsonLd = JSON.stringify({
+    "@context": "https://schema.org",
+    "@type": "BreadcrumbList",
+    "itemListElement": [
+      { "@type": "ListItem", "position": 1, "name": "Home", "item": `${siteUrl}/` },
+      { "@type": "ListItem", "position": 2, "name": "Infographics", "item": `${siteUrl}/infographics` },
+      { "@type": "ListItem", "position": 3, "name": infographic.title, "item": pageUrl },
+    ],
+  });
+
+  extraHead += `<script type="application/ld+json">${imageJsonLd}</script>`;
+  extraHead += `<script type="application/ld+json">${breadcrumbJsonLd}</script>`;
+}
+
+const shareText = infographic?.title || '';
+const pinDescription = infographic?.description || infographic?.title || '';
+const pinUrl = infographic
+  ? `https://pinterest.com/pin/create/button/?url=${encodeURIComponent(pageUrl)}&media=${encodeURIComponent(absoluteImg)}&description=${encodeURIComponent(pinDescription)}`
+  : '#';
+const twitterUrl = `https://twitter.com/intent/tweet?url=${encodeURIComponent(pageUrl)}&text=${encodeURIComponent(shareText)}`;
+const facebookUrl = `https://www.facebook.com/sharer/sharer.php?u=${encodeURIComponent(pageUrl)}`;
+const whatsappUrl = `https://wa.me/?text=${encodeURIComponent(shareText + ' ' + pageUrl)}`;
+---
+
+<MainLayout
+  title={pageTitle}
+  description={pageDescription}
+  canonical={infographic ? pageUrl : undefined}
+  ogType={infographic ? 'article' : undefined}
+  ogImage={infographic ? absoluteImg : undefined}
+  noindex={!infographic}
+  extraHead={extraHead}
+>
+  {infographic ? (
+    <article class="animate-[fade-enter_0.5s_ease-out] space-y-8">
+      <nav aria-label="Breadcrumb" class="text-sm">
+        <ol class="flex items-center gap-2 text-zinc-500">
+          <li><a href="/" class="hover:text-zinc-300 transition-colors">Home</a></li>
+          <li><span class="text-zinc-600">/</span></li>
+          <li><a href="/infographics" class="hover:text-zinc-300 transition-colors">Infographics</a></li>
+          <li><span class="text-zinc-600">/</span></li>
+          <li class="text-zinc-400 truncate max-w-[200px]">{infographic.title}</li>
+        </ol>
+      </nav>
+
+      <header class="space-y-4 max-w-3xl">
+        <h1 class="font-display text-3xl md:text-5xl font-medium text-zinc-100 tracking-tight">
+          {infographic.title}
+        </h1>
+        {infographic.description && (
+          <p class="text-zinc-400 text-lg leading-relaxed">{infographic.description}</p>
+        )}
+        {infographic.tags && infographic.tags.length > 0 && (
+          <div class="flex flex-wrap items-center gap-2 pt-2">
+            {infographic.tags.map((tag) => (
+              <span class="text-xs px-2 py-1 rounded-full bg-white/5 border border-white/5 text-zinc-400">
+                {tag}
+              </span>
+            ))}
+          </div>
+        )}
+      </header>
+
+      <figure class="rounded-2xl overflow-hidden border border-white/[0.06] bg-zinc-900/40">
+        <img
+          src={infographic.imageUrl}
+          alt={infographic.altText || infographic.title}
+          width={infographic.imageWidth || undefined}
+          height={infographic.imageHeight || undefined}
+          fetchpriority="high"
+          decoding="async"
+          class="w-full h-auto block"
+        />
+        {infographic.altText && (
+          <figcaption class="sr-only">{infographic.altText}</figcaption>
+        )}
+      </figure>
+
+      <section aria-label="Share" class="space-y-3">
+        <h2 class="text-sm font-medium text-zinc-400 uppercase tracking-wider">Share this infographic</h2>
+        <div class="flex flex-wrap items-center gap-2">
+          <a
+            href={pinUrl}
+            target="_blank"
+            rel="noopener noreferrer nofollow"
+            data-pin-do="buttonPin"
+            data-pin-custom="true"
+            class="inline-flex items-center gap-2 px-4 py-2 bg-[#E60023] hover:bg-[#ad081b] text-white rounded-full text-sm font-medium transition-colors"
+          >
+            <iconify-icon icon="mdi:pinterest" width="18"></iconify-icon>
+            Pin it
+          </a>
+          <a
+            href={twitterUrl}
+            target="_blank"
+            rel="noopener noreferrer nofollow"
+            class="inline-flex items-center gap-2 px-4 py-2 border border-white/10 hover:border-white/20 hover:bg-white/5 text-zinc-200 rounded-full text-sm font-medium transition-colors"
+          >
+            <iconify-icon icon="mdi:twitter" width="18"></iconify-icon>
+            Tweet
+          </a>
+          <a
+            href={facebookUrl}
+            target="_blank"
+            rel="noopener noreferrer nofollow"
+            class="inline-flex items-center gap-2 px-4 py-2 border border-white/10 hover:border-white/20 hover:bg-white/5 text-zinc-200 rounded-full text-sm font-medium transition-colors"
+          >
+            <iconify-icon icon="mdi:facebook" width="18"></iconify-icon>
+            Share
+          </a>
+          <a
+            href={whatsappUrl}
+            target="_blank"
+            rel="noopener noreferrer nofollow"
+            class="inline-flex items-center gap-2 px-4 py-2 border border-white/10 hover:border-white/20 hover:bg-white/5 text-zinc-200 rounded-full text-sm font-medium transition-colors"
+          >
+            <iconify-icon icon="mdi:whatsapp" width="18"></iconify-icon>
+            WhatsApp
+          </a>
+          <button
+            type="button"
+            data-copy-link={pageUrl}
+            class="inline-flex items-center gap-2 px-4 py-2 border border-white/10 hover:border-white/20 hover:bg-white/5 text-zinc-200 rounded-full text-sm font-medium transition-colors"
+          >
+            <iconify-icon icon="mdi:link-variant" width="18"></iconify-icon>
+            Copy link
+          </button>
+        </div>
+      </section>
+
+      <div class="pt-4">
+        <a
+          href="/infographics"
+          class="inline-flex items-center gap-2 text-sm text-zinc-400 hover:text-zinc-200 transition-colors"
+        >
+          ← Browse all infographics
+        </a>
+      </div>
+    </article>
+  ) : (
+    <div class="flex flex-col items-center justify-center min-h-[60vh] text-center space-y-8 animate-[fade-enter_0.5s_ease-out]">
+      <h1 class="font-display text-6xl font-bold text-zinc-300">404</h1>
+      <p class="text-zinc-500">This infographic doesn't exist or has been removed.</p>
+      <a
+        href="/infographics"
+        class="px-6 py-3 bg-zinc-100 hover:bg-white text-zinc-950 rounded-full font-medium text-sm transition-colors"
+      >
+        Browse Infographics
+      </a>
+    </div>
+  )}
+</MainLayout>
+
+<script is:inline>
+  document.querySelectorAll('[data-copy-link]').forEach((btn) => {
+    btn.addEventListener('click', async () => {
+      const url = btn.getAttribute('data-copy-link');
+      if (!url) return;
+      try {
+        await navigator.clipboard.writeText(url);
+        const original = btn.innerHTML;
+        btn.innerHTML = 'Copied!';
+        setTimeout(() => { btn.innerHTML = original; }, 1500);
+      } catch (_) {}
+    });
+  });
+</script>

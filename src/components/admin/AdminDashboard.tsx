@@ -93,7 +93,14 @@ const AdminDashboard: React.FC = () => {
   return (
     <div className="space-y-4 md:space-y-6 animate-[fade-enter_0.5s_ease-out] -mx-2 md:mx-0">
       <div className="flex items-center justify-between px-2 md:px-0">
-        <h1 className="text-lg md:text-2xl font-medium text-zinc-100 tracking-tight">Admin Dashboard</h1>
+        <div className="flex items-center gap-4">
+          <h1 className="text-lg md:text-2xl font-medium text-zinc-100 tracking-tight">Sessions</h1>
+          <nav className="hidden md:flex items-center gap-3 text-xs text-zinc-500">
+            <span className="text-zinc-300">Sessions</span>
+            <span className="text-zinc-700">/</span>
+            <a href="/admin/infographics" className="hover:text-zinc-200 transition-colors">Infographics</a>
+          </nav>
+        </div>
         <div className="flex items-center gap-2 md:gap-3">
           <a
             href="/admin/new"

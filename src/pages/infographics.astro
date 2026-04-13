@@ -1,0 +1,66 @@
+---
+import MainLayout from '../layouts/MainLayout.astro';
+import InfographicListing from '../components/InfographicListing.astro';
+import { getPublishedInfographicsPage } from '../lib/infographics';
+
+const db = Astro.locals.runtime.env.DB;
+const { infographics, page, totalPages } = await getPublishedInfographicsPage(db, 1);
+
+Astro.response.headers.set('Cache-Control', 'public, max-age=300, s-maxage=3600, stale-while-revalidate=86400');
+
+const siteUrl = 'https://dailymeditationguide.com';
+const canonical = `${siteUrl}/infographics`;
+
+const itemListJsonLd = JSON.stringify({
+  "@context": "https://schema.org",
+  "@type": "CollectionPage",
+  "name": "Meditation & Mindfulness Infographics",
+  "description": "Visual guides, stats, and practice summaries for mindfulness and meditation.",
+  "url": canonical,
+  "mainEntity": {
+    "@type": "ItemList",
+    "numberOfItems": infographics.length,
+    "itemListElement": infographics.slice(0, 30).map((item, i) => ({
+      "@type": "ListItem",
+      "position": i + 1,
+      "url": `${siteUrl}/infographic/${item.slug}`,
+      "name": item.title,
+    })),
+  },
+});
+
+const breadcrumbJsonLd = JSON.stringify({
+  "@context": "https://schema.org",
+  "@type": "BreadcrumbList",
+  "itemListElement": [
+    { "@type": "ListItem", "position": 1, "name": "Home", "item": `${siteUrl}/` },
+    { "@type": "ListItem", "position": 2, "name": "Infographics", "item": canonical },
+  ],
+});
+
+let extraHead = `<script type="application/ld+json">${itemListJsonLd}</script><script type="application/ld+json">${breadcrumbJsonLd}</script>`;
+extraHead += `<link rel="alternate" type="application/rss+xml" title="Infographics RSS" href="/infographics.xml" />`;
+if (totalPages > 1) {
+  extraHead += `<link rel="next" href="${siteUrl}/infographics/page/2" />`;
+}
+---
+
+<MainLayout
+  title="Meditation Infographics"
+  description="Visual guides, stats, and practice summaries for mindfulness and meditation."
+  canonical={canonical}
+  extraHead={extraHead}
+>
+  <div class="space-y-12 animate-[fade-enter_0.5s_ease-out]">
+    <header class="space-y-6">
+      <h1 class="font-display text-3xl md:text-5xl font-medium text-zinc-100 tracking-tight">
+        Meditation Infographics
+      </h1>
+      <p class="text-zinc-500 max-w-2xl text-lg">
+        Bite-sized visual guides to mindfulness, breathing techniques, and meditation practices — free to browse, save, and share.
+      </p>
+    </header>
+
+    <InfographicListing infographics={infographics} page={page} totalPages={totalPages} />
+  </div>
+</MainLayout>

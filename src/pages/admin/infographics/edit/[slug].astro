@@ -1,0 +1,10 @@
+---
+import AdminLayout from '../../../../layouts/AdminLayout.astro';
+import AdminInfographicForm from '../../../../components/admin/AdminInfographicForm';
+
+const { slug } = Astro.params;
+---
+
+<AdminLayout title="Edit Infographic">
+  <AdminInfographicForm client:load slug={slug} />
+</AdminLayout>

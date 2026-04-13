@@ -1,0 +1,10 @@
+---
+import AdminLayout from '../../../layouts/AdminLayout.astro';
+import InfographicsDashboard from '../../../components/admin/InfographicsDashboard';
+---
+
+<AdminLayout title="Infographics">
+  <div class="max-w-5xl mx-auto px-4 py-6 md:py-10">
+    <InfographicsDashboard client:load />
+  </div>
+</AdminLayout>
