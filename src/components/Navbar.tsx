@@ -8,6 +8,8 @@ type NotificationItem = {
   category?: string;
   description?: string;
   author?: string;
+  featuredImage?: string;
+  duration?: string;
   publishedAt: string | null;
 };
 
@@ -188,28 +190,49 @@ const Navbar: React.FC = () => {
                 <iconify-icon icon="solar:bell-linear" width="20" stroke-width="1.5"></iconify-icon>
               </button>
               {isNotifOpen && (
-                <div className="absolute right-0 mt-2 w-80 py-2 bg-zinc-900 border border-white/10 rounded-xl shadow-xl z-50">
-                  <div className="px-4 py-2 border-b border-white/5 flex items-center justify-between">
-                    <p className="text-sm text-zinc-200 font-medium">Latest sessions</p>
-                    <a href="/sessions" className="text-xs text-indigo-400 hover:text-indigo-300">View all</a>
+                <div className="absolute right-0 mt-3 w-[22rem] bg-zinc-950/95 backdrop-blur-xl border border-white/10 rounded-2xl shadow-2xl shadow-black/50 z-50 overflow-hidden animate-[fade-enter_0.15s_ease-out]">
+                  <div className="px-4 py-3 border-b border-white/5 flex items-center justify-between">
+                    <div className="flex items-center gap-2">
+                      <iconify-icon icon="solar:bell-bold" width="16" class="text-indigo-400"></iconify-icon>
+                      <p className="text-sm text-zinc-100 font-semibold tracking-tight">Latest sessions</p>
+                    </div>
+                    <a href="/sessions" className="text-xs text-indigo-400 hover:text-indigo-300 font-medium">View all →</a>
                   </div>
-                  <div className="max-h-96 overflow-y-auto">
+                  <div className="max-h-[28rem] overflow-y-auto">
                     {notifLoading && notifications.length === 0 ? (
-                      <div className="px-4 py-6 text-center text-sm text-zinc-500">Loading…</div>
+                      <div className="px-4 py-10 text-center text-sm text-zinc-500">Loading…</div>
                     ) : notifications.length === 0 ? (
-                      <div className="px-4 py-6 text-center text-sm text-zinc-500">No new sessions</div>
+                      <div className="px-4 py-10 text-center text-sm text-zinc-500">No new sessions</div>
                     ) : (
                       notifications.map((n) => (
                         <a
                           key={n.slug}
                           href={`/session/${n.slug}`}
                           onClick={() => setIsNotifOpen(false)}
-                          className="block px-4 py-3 hover:bg-white/5 transition-colors border-b border-white/5 last:border-b-0"
+                          className="flex items-start gap-3 px-4 py-3 hover:bg-white/[0.04] transition-colors border-b border-white/5 last:border-b-0 group"
                         >
-                          <p className="text-sm text-zinc-200 font-medium line-clamp-2">{n.title}</p>
-                          <p className="text-xs text-zinc-500 mt-0.5">
-                            {n.category ? `${n.category} · ` : ''}{formatRelative(n.publishedAt)}
-                          </p>
+                          {n.featuredImage ? (
+                            <img
+                              src={n.featuredImage}
+                              alt=""
+                              loading="lazy"
+                              className="w-12 h-12 rounded-lg object-cover border border-white/5 flex-shrink-0"
+                            />
+                          ) : (
+                            <div className="w-12 h-12 rounded-lg bg-gradient-to-br from-indigo-500/20 to-purple-500/20 border border-white/5 flex items-center justify-center flex-shrink-0">
+                              <iconify-icon icon="solar:meditation-linear" width="20" class="text-indigo-300"></iconify-icon>
+                            </div>
+                          )}
+                          <div className="flex-1 min-w-0">
+                            <p className="text-sm text-zinc-100 font-medium line-clamp-2 group-hover:text-white leading-snug">{n.title}</p>
+                            <div className="flex items-center gap-1.5 mt-1 text-xs text-zinc-500">
+                              {n.category && (
+                                <span className="px-1.5 py-0.5 rounded bg-white/5 text-zinc-400">{n.category}</span>
+                              )}
+                              <span>·</span>
+                              <span>{formatRelative(n.publishedAt)}</span>
+                            </div>
+                          </div>
                         </a>
                       ))
                     )}
@@ -299,28 +322,42 @@ const Navbar: React.FC = () => {
               </button>
             </div>
             {isNotifOpen && (
-              <div className="mt-2 bg-zinc-900 border border-white/10 rounded-xl overflow-hidden">
+              <div className="mt-2 bg-zinc-950/80 backdrop-blur-xl border border-white/10 rounded-2xl overflow-hidden">
                 <div className="px-4 py-3 border-b border-white/5 flex items-center justify-between">
-                  <p className="text-sm text-zinc-200 font-medium">Latest sessions</p>
-                  <a href="/sessions" onClick={() => setIsMobileMenuOpen(false)} className="text-xs text-indigo-400">View all</a>
+                  <div className="flex items-center gap-2">
+                    <iconify-icon icon="solar:bell-bold" width="16" class="text-indigo-400"></iconify-icon>
+                    <p className="text-sm text-zinc-100 font-semibold">Latest sessions</p>
+                  </div>
+                  <a href="/sessions" onClick={() => setIsMobileMenuOpen(false)} className="text-xs text-indigo-400 font-medium">View all →</a>
                 </div>
                 <div className="max-h-80 overflow-y-auto">
                   {notifLoading && notifications.length === 0 ? (
-                    <div className="px-4 py-6 text-center text-sm text-zinc-500">Loading…</div>
+                    <div className="px-4 py-8 text-center text-sm text-zinc-500">Loading…</div>
                   ) : notifications.length === 0 ? (
-                    <div className="px-4 py-6 text-center text-sm text-zinc-500">No new sessions</div>
+                    <div className="px-4 py-8 text-center text-sm text-zinc-500">No new sessions</div>
                   ) : (
                     notifications.map((n) => (
                       <a
                         key={n.slug}
                         href={`/session/${n.slug}`}
                         onClick={() => setIsMobileMenuOpen(false)}
-                        className="block px-4 py-3 hover:bg-white/5 border-b border-white/5 last:border-b-0"
+                        className="flex items-start gap-3 px-4 py-3 hover:bg-white/[0.04] border-b border-white/5 last:border-b-0"
                       >
-                        <p className="text-sm text-zinc-200 font-medium line-clamp-2">{n.title}</p>
-                        <p className="text-xs text-zinc-500 mt-0.5">
-                          {n.category ? `${n.category} · ` : ''}{formatRelative(n.publishedAt)}
-                        </p>
+                        {n.featuredImage ? (
+                          <img src={n.featuredImage} alt="" loading="lazy" className="w-12 h-12 rounded-lg object-cover border border-white/5 flex-shrink-0" />
+                        ) : (
+                          <div className="w-12 h-12 rounded-lg bg-gradient-to-br from-indigo-500/20 to-purple-500/20 border border-white/5 flex items-center justify-center flex-shrink-0">
+                            <iconify-icon icon="solar:meditation-linear" width="20" class="text-indigo-300"></iconify-icon>
+                          </div>
+                        )}
+                        <div className="flex-1 min-w-0">
+                          <p className="text-sm text-zinc-100 font-medium line-clamp-2 leading-snug">{n.title}</p>
+                          <div className="flex items-center gap-1.5 mt-1 text-xs text-zinc-500">
+                            {n.category && <span className="px-1.5 py-0.5 rounded bg-white/5 text-zinc-400">{n.category}</span>}
+                            <span>·</span>
+                            <span>{formatRelative(n.publishedAt)}</span>
+                          </div>
+                        </div>
                       </a>
                     ))
                   )}
@@ -371,53 +408,70 @@ const Navbar: React.FC = () => {
 
       {isSearchOpen && (
         <div
-          className="fixed inset-0 z-[60] bg-black/70 backdrop-blur-sm flex items-start justify-center pt-20 px-4"
+          className="fixed inset-0 z-[60] bg-black/80 backdrop-blur-md flex items-start justify-center pt-[10vh] px-4 animate-[fade-enter_0.15s_ease-out]"
           onClick={closeSearch}
         >
           <div
-            className="w-full max-w-xl bg-zinc-900 border border-white/10 rounded-2xl shadow-2xl overflow-hidden"
+            className="w-full max-w-xl bg-zinc-950/95 border border-white/10 rounded-2xl shadow-2xl shadow-black/60 overflow-hidden"
             onClick={(e) => e.stopPropagation()}
           >
-            <div className="flex items-center gap-3 px-4 py-3 border-b border-white/10">
-              <iconify-icon icon="solar:magnifer-linear" width="20" class="text-zinc-500"></iconify-icon>
+            <div className="flex items-center gap-3 px-5 py-4 border-b border-white/10">
+              <iconify-icon icon="solar:magnifer-linear" width="20" class="text-zinc-400"></iconify-icon>
               <input
                 ref={searchInputRef}
                 type="text"
                 value={searchQuery}
                 onChange={(e) => setSearchQuery(e.target.value)}
-                placeholder="Search meditations…"
-                className="flex-1 bg-transparent text-zinc-100 placeholder-zinc-500 outline-none text-sm"
+                placeholder="Search meditations, topics, authors…"
+                className="flex-1 bg-transparent text-zinc-100 placeholder-zinc-500 outline-none text-base"
               />
               <button
                 onClick={closeSearch}
                 aria-label="Close search"
-                className="text-zinc-500 hover:text-zinc-300 text-xs px-2 py-1 border border-white/10 rounded"
+                className="text-zinc-500 hover:text-zinc-300 text-[10px] font-medium px-2 py-1 border border-white/10 rounded-md tracking-wider"
               >
-                Esc
+                ESC
               </button>
             </div>
-            <div className="max-h-[60vh] overflow-y-auto">
+            <div className="max-h-[65vh] overflow-y-auto">
               {notifLoading && allSessions.length === 0 ? (
-                <div className="px-4 py-8 text-center text-sm text-zinc-500">Loading sessions…</div>
+                <div className="px-4 py-12 text-center text-sm text-zinc-500">Loading sessions…</div>
               ) : !searchQuery.trim() ? (
-                <div className="px-4 py-8 text-center text-sm text-zinc-500">Start typing to search {allSessions.length} sessions</div>
+                <div className="px-4 py-12 text-center">
+                  <iconify-icon icon="solar:magnifer-linear" width="32" class="text-zinc-700 mb-2"></iconify-icon>
+                  <p className="text-sm text-zinc-500">Start typing to search {allSessions.length} sessions</p>
+                </div>
               ) : searchResults.length === 0 ? (
-                <div className="px-4 py-8 text-center text-sm text-zinc-500">No matches for "{searchQuery}"</div>
+                <div className="px-4 py-12 text-center">
+                  <p className="text-sm text-zinc-400">No matches for "{searchQuery}"</p>
+                  <p className="text-xs text-zinc-600 mt-1">Try a different keyword or topic</p>
+                </div>
               ) : (
                 searchResults.map((s) => (
                   <a
                     key={s.slug}
                     href={`/session/${s.slug}`}
                     onClick={closeSearch}
-                    className="block px-4 py-3 hover:bg-white/5 border-b border-white/5 last:border-b-0"
+                    className="flex items-start gap-3 px-5 py-3 hover:bg-white/[0.04] border-b border-white/5 last:border-b-0 group"
                   >
-                    <p className="text-sm text-zinc-100 font-medium line-clamp-1">{s.title}</p>
-                    {s.description && (
-                      <p className="text-xs text-zinc-500 mt-0.5 line-clamp-1">{s.description}</p>
+                    {s.featuredImage ? (
+                      <img src={s.featuredImage} alt="" loading="lazy" className="w-14 h-14 rounded-lg object-cover border border-white/5 flex-shrink-0" />
+                    ) : (
+                      <div className="w-14 h-14 rounded-lg bg-gradient-to-br from-indigo-500/20 to-purple-500/20 border border-white/5 flex items-center justify-center flex-shrink-0">
+                        <iconify-icon icon="solar:meditation-linear" width="22" class="text-indigo-300"></iconify-icon>
+                      </div>
                     )}
-                    <p className="text-xs text-zinc-600 mt-0.5">
-                      {s.category}{s.author ? ` · ${s.author}` : ''}
-                    </p>
+                    <div className="flex-1 min-w-0">
+                      <p className="text-sm text-zinc-100 font-medium line-clamp-1 group-hover:text-white">{s.title}</p>
+                      {s.description && (
+                        <p className="text-xs text-zinc-500 mt-0.5 line-clamp-1">{s.description}</p>
+                      )}
+                      <div className="flex items-center gap-1.5 mt-1 text-xs text-zinc-600">
+                        {s.category && <span className="px-1.5 py-0.5 rounded bg-white/5 text-zinc-400">{s.category}</span>}
+                        {s.author && <><span>·</span><span>{s.author}</span></>}
+                      </div>
+                    </div>
+                    <iconify-icon icon="solar:arrow-right-linear" width="16" class="text-zinc-700 group-hover:text-indigo-400 mt-1 flex-shrink-0"></iconify-icon>
                   </a>
                 ))
               )}
