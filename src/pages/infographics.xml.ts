@@ -25,12 +25,13 @@ export async function GET(context: APIContext) {
 
   const items = results.map(row => {
     const imageUrl = escapeXml(absoluteImage(row.image_url));
-    const pageUrl = `${SITE_URL}/infographic/${escapeXml(row.slug)}`;
+    const indexUrl = `${SITE_URL}/`;
+    const slugGuid = `${SITE_URL}/infographic/${escapeXml(row.slug)}`;
     return `    <item>
       <title>${escapeXml(row.title)}</title>
       <description>${escapeXml(row.description || row.title)}</description>
-      <link>${pageUrl}</link>
-      <guid isPermaLink="true">${pageUrl}</guid>
+      <link>${indexUrl}</link>
+      <guid isPermaLink="false">${slugGuid}</guid>
       <pubDate>${toRFC2822(row.published_at)}</pubDate>
       <enclosure url="${imageUrl}" type="image/webp" length="0"/>
       <media:content url="${imageUrl}" medium="image"/>
