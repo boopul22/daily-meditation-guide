@@ -1,4 +1,4 @@
-import type { Session, Infographic } from '../types';
+import type { Session, Infographic, Author } from '../types';
 import { convertToWebP } from './convertToWebP';
 
 const API_BASE = '/api';
@@ -102,6 +102,18 @@ export async function updateInfographic(
 
 export async function deleteInfographic(slug: string): Promise<void> {
   await request(`/infographics/${encodeURIComponent(slug)}`, { method: 'DELETE' });
+}
+
+export async function fetchAuthors(): Promise<Author[]> {
+  return request('/authors');
+}
+
+export async function createAuthor(data: Partial<Author>): Promise<Author> {
+  return request('/authors', { method: 'POST', body: JSON.stringify(data) });
+}
+
+export async function updateAuthor(id: string, data: Partial<Author>): Promise<Author> {
+  return request(`/authors/${encodeURIComponent(id)}`, { method: 'PUT', body: JSON.stringify(data) });
 }
 
 export async function uploadImage(file: File): Promise<string> {

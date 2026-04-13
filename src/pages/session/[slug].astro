@@ -1,7 +1,7 @@
 ---
 import MainLayout from '../../layouts/MainLayout.astro';
 import DetailInteractive from '../../components/DetailInteractive';
-import { rowToSession } from '../../lib/db';
+import { rowToSession, SESSION_SELECT_WITH_AUTHOR } from '../../lib/db';
 import { processContentForTOC } from '../../utils/tocUtils';
 import type { Session } from '../../types';
 
@@ -12,7 +12,7 @@ let session: Session | null = null;
 
 if (slug) {
   const row = await db.prepare(
-    "SELECT * FROM sessions WHERE slug = ? AND status = 'published'"
+    `${SESSION_SELECT_WITH_AUTHOR} WHERE s.slug = ? AND s.status = 'published'`
   ).bind(slug).first();
   if (row) {
     session = rowToSession(row);
@@ -39,7 +39,7 @@ let relatedSessions: Session[] = [];
 if (session?.relatedSessions && session.relatedSessions.length > 0) {
   const placeholders = session.relatedSessions.map(() => '?').join(',');
   const { results } = await db.prepare(
-    `SELECT * FROM sessions WHERE id IN (${placeholders}) AND status = 'published'`
+    `${SESSION_SELECT_WITH_AUTHOR} WHERE s.id IN (${placeholders}) AND s.status = 'published'`
   ).bind(...session.relatedSessions).all();
   relatedSessions = (results || []).map((r: any) => rowToSession(r));
 }

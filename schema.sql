@@ -6,6 +6,7 @@ CREATE TABLE sessions (
   title TEXT NOT NULL,
   author TEXT NOT NULL,
   role TEXT NOT NULL,
+  author_id TEXT REFERENCES authors(id),
   duration TEXT NOT NULL,
   duration_sec INTEGER NOT NULL,
   category TEXT NOT NULL,
@@ -21,6 +22,19 @@ CREATE TABLE sessions (
   created_at TEXT NOT NULL DEFAULT (datetime('now')),
   updated_at TEXT NOT NULL DEFAULT (datetime('now'))
 );
+
+CREATE TABLE IF NOT EXISTS authors (
+  id TEXT PRIMARY KEY,
+  slug TEXT UNIQUE NOT NULL,
+  name TEXT NOT NULL,
+  role TEXT NOT NULL DEFAULT '',
+  picture TEXT NOT NULL DEFAULT '',
+  bio TEXT NOT NULL DEFAULT '',
+  created_at TEXT NOT NULL DEFAULT (datetime('now')),
+  updated_at TEXT NOT NULL DEFAULT (datetime('now'))
+);
+CREATE INDEX IF NOT EXISTS idx_authors_slug ON authors(slug);
+CREATE INDEX IF NOT EXISTS idx_sessions_author_id ON sessions(author_id);
 
 CREATE TABLE IF NOT EXISTS infographics (
   id TEXT PRIMARY KEY,

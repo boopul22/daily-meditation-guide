@@ -76,7 +76,19 @@ export default function DetailInteractive({ session, processedContent, headings,
           </h1>
 
           <div className="flex items-center gap-4 border-b border-white/5 pb-8">
-            <div className="w-10 h-10 rounded-full bg-gradient-to-tr from-zinc-700 to-zinc-600 border border-white/10"></div>
+            {session.authorPicture ? (
+              <img
+                src={session.authorPicture}
+                alt={session.author}
+                loading="lazy"
+                decoding="async"
+                width={40}
+                height={40}
+                className="w-10 h-10 rounded-full object-cover border border-white/10"
+              />
+            ) : (
+              <div className="w-10 h-10 rounded-full bg-gradient-to-tr from-zinc-700 to-zinc-600 border border-white/10"></div>
+            )}
             <div>
               <p className="text-sm text-zinc-200 font-medium">{session.author}</p>
               <p className="text-xs text-zinc-500">{session.role}</p>

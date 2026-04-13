@@ -1,14 +1,14 @@
 import type { APIContext } from 'astro';
 import { requireAuth, isAdmin } from '../../../lib/auth';
 import { verifyCFAccessJWT } from '../../../lib/cfaccess';
-import { rowToSession } from '../../../lib/db';
+import { rowToSession, SESSION_SELECT_WITH_AUTHOR } from '../../../lib/db';
 
 export async function GET(context: APIContext) {
   const env = context.locals.runtime.env;
   const db = env.DB;
   const slug = context.params.slug as string;
 
-  const row = await db.prepare('SELECT * FROM sessions WHERE slug = ?')
+  const row = await db.prepare(`${SESSION_SELECT_WITH_AUTHOR} WHERE s.slug = ?`)
     .bind(slug)
     .first();
 
@@ -36,7 +36,7 @@ export async function PUT(context: APIContext) {
     const body = await context.request.json() as any;
     const now = new Date().toISOString();
 
-    const existing = await db.prepare('SELECT * FROM sessions WHERE slug = ?')
+    const existing = await db.prepare(`${SESSION_SELECT_WITH_AUTHOR} WHERE s.slug = ?`)
       .bind(slug)
       .first();
 
@@ -107,9 +107,21 @@ export async function PUT(context: APIContext) {
 
     const newVersion = ((existing.version as number) ?? 1) + 1;
 
+    // Resolve author: if authorId is provided, denormalize name/role from authors table
+    let nextAuthorId: string | null = (body.authorId !== undefined ? body.authorId : (existing.author_id as string | null)) || null;
+    let nextAuthorName = body.author ?? existing.author;
+    let nextAuthorRole = body.role ?? existing.role;
+    if (body.authorId !== undefined && body.authorId) {
+      const authorRow = await db.prepare('SELECT name, role FROM authors WHERE id = ?').bind(body.authorId).first();
+      if (!authorRow) return Response.json({ error: 'Author not found' }, { status: 400 });
+      nextAuthorId = body.authorId;
+      nextAuthorName = authorRow.name as string;
+      nextAuthorRole = authorRow.role as string;
+    }
+
     await db.prepare(
       `UPDATE sessions SET
-        slug = ?, title = ?, author = ?, role = ?, duration = ?, duration_sec = ?,
+        slug = ?, title = ?, author = ?, role = ?, author_id = ?, duration = ?, duration_sec = ?,
         category = ?, color = ?, description = ?, featured_image = ?, audio_url = ?,
         full_content = ?, related_sessions = ?, faq_items = ?, status = ?, published_at = ?,
         updated_at = ?, version = ?, last_updated_by = ?
@@ -117,8 +129,9 @@ export async function PUT(context: APIContext) {
     ).bind(
       newSlug,
       body.title ?? existing.title,
-      body.author ?? existing.author,
-      body.role ?? existing.role,
+      nextAuthorName,
+      nextAuthorRole,
+      nextAuthorId,
       body.duration ?? existing.duration,
       body.durationSec ?? existing.duration_sec,
       body.category ?? existing.category,
@@ -137,7 +150,7 @@ export async function PUT(context: APIContext) {
       existing.id
     ).run();
 
-    const updated = await db.prepare('SELECT * FROM sessions WHERE id = ?')
+    const updated = await db.prepare(`${SESSION_SELECT_WITH_AUTHOR} WHERE s.id = ?`)
       .bind(existing.id)
       .first();
 

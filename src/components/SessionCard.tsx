@@ -57,7 +57,19 @@ export default function SessionCard({ session }: SessionCardProps) {
       </div>
       <div className="mt-4 flex items-center justify-between border-t border-white/5 pt-3">
         <div className="flex items-center gap-2">
-          <div className="w-5 h-5 rounded-full bg-zinc-700"></div>
+          {session.authorPicture ? (
+            <img
+              src={session.authorPicture}
+              alt={session.author}
+              loading="lazy"
+              decoding="async"
+              width={20}
+              height={20}
+              className="w-5 h-5 rounded-full object-cover border border-white/10"
+            />
+          ) : (
+            <div className="w-5 h-5 rounded-full bg-zinc-700"></div>
+          )}
           <span className="text-xs text-zinc-400">{session.author}</span>
         </div>
         <iconify-icon icon="solar:arrow-right-linear" class="text-zinc-600 group-hover:text-zinc-300 transition-colors"></iconify-icon>

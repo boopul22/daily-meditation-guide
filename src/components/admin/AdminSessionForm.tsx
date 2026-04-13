@@ -1,8 +1,8 @@
 import React, { useCallback, useEffect, useRef, useState } from 'react';
 import { useStore } from '@nanostores/react';
 import { $user, $authLoading, fetchCurrentUser } from '../../stores/authStore';
-import { fetchSessions, fetchSessionBySlug, createSession, updateSession, uploadImage, ConflictError } from '../../lib/api';
-import type { Session, FAQItem } from '../../types';
+import { fetchSessions, fetchSessionBySlug, createSession, updateSession, uploadImage, ConflictError, fetchAuthors, createAuthor, updateAuthor } from '../../lib/api';
+import type { Session, FAQItem, Author } from '../../types';
 import RichTextEditor from './RichTextEditor';
 
 const CATEGORIES = ['Sleep', 'Anxiety', 'Focus', 'Sounds'];
@@ -26,7 +26,7 @@ function parseDurationToSec(duration: string): number {
 type MobileTab = 'details' | 'editor' | 'preview';
 
 interface FormData {
-  title: string; slug: string; author: string; role: string; duration: string;
+  title: string; slug: string; authorId: string; duration: string;
   category: string; color: string; description: string;
   featuredImage: string; audioUrl: string; fullContent: string;
   relatedSessions: string[];
@@ -71,6 +71,13 @@ const AdminSessionForm: React.FC<AdminSessionFormProps> = ({ slug }) => {
   const isAuth = !!user?.isAdmin;
 
   const [allSessions, setAllSessions] = useState<Session[]>([]);
+  const [authors, setAuthors] = useState<Author[]>([]);
+  const [authorPanelOpen, setAuthorPanelOpen] = useState(false);
+  const [authorPanelMode, setAuthorPanelMode] = useState<'create' | 'edit'>('create');
+  const [authorDraft, setAuthorDraft] = useState<{ name: string; role: string; picture: string; bio: string }>({ name: '', role: '', picture: '', bio: '' });
+  const [savingAuthor, setSavingAuthor] = useState(false);
+  const [uploadingAuthorPic, setUploadingAuthorPic] = useState(false);
+  const authorPicFileRef = useRef<HTMLInputElement>(null);
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
   const [publishing, setPublishing] = useState(false);
@@ -95,7 +102,7 @@ const AdminSessionForm: React.FC<AdminSessionFormProps> = ({ slug }) => {
   const [conflict, setConflict] = useState<ConflictInfo | null>(null);
 
   const [form, setForm] = useState<FormData>({
-    title: '', slug: '', author: '', role: '', duration: '',
+    title: '', slug: '', authorId: '', duration: '',
     category: CATEGORIES[0], color: COLORS[0], description: '',
     featuredImage: '', audioUrl: '', fullContent: '',
     relatedSessions: [],
@@ -109,13 +116,15 @@ const AdminSessionForm: React.FC<AdminSessionFormProps> = ({ slug }) => {
     if (!isAuth) return;
     const load = async () => {
       try {
-        const sessions = await fetchSessions();
+        const [sessions, authorList] = await Promise.all([fetchSessions(), fetchAuthors()]);
         setAllSessions(sessions);
+        setAuthors(authorList);
         if (isEdit && slug) {
           const session = await fetchSessionBySlug(slug);
           setForm({
-            title: session.title, slug: session.slug, author: session.author,
-            role: session.role, duration: session.duration, category: session.category,
+            title: session.title, slug: session.slug,
+            authorId: session.authorId || '',
+            duration: session.duration, category: session.category,
             color: session.color, description: session.description,
             featuredImage: session.featuredImage || '', audioUrl: session.audioUrl || '',
             fullContent: session.fullContent, relatedSessions: session.relatedSessions,
@@ -136,14 +145,63 @@ const AdminSessionForm: React.FC<AdminSessionFormProps> = ({ slug }) => {
     setForm(prev => {
       const updated = { ...prev, [field]: value };
       if (field === 'title' && !isEdit && !savedSlug) updated.slug = slugify(value);
-      if (field === 'author') {
-        const match = allSessions.find(s => s.author === value);
-        if (match) updated.role = match.role;
-      }
       return updated;
     });
     hasUnsavedChanges.current = true;
     scheduleAutoSave();
+  };
+
+  const openCreateAuthor = () => {
+    setAuthorPanelMode('create');
+    setAuthorDraft({ name: '', role: '', picture: '', bio: '' });
+    setAuthorPanelOpen(true);
+  };
+
+  const openEditAuthor = () => {
+    const current = authors.find(a => a.id === form.authorId);
+    if (!current) return;
+    setAuthorPanelMode('edit');
+    setAuthorDraft({ name: current.name, role: current.role, picture: current.picture, bio: current.bio });
+    setAuthorPanelOpen(true);
+  };
+
+  const handleAuthorPicUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    if (!e.target.files?.length) return;
+    setUploadingAuthorPic(true);
+    try {
+      const url = await uploadImage(e.target.files[0]);
+      setAuthorDraft(d => ({ ...d, picture: url }));
+    } catch (err: any) { setError(`Upload failed: ${err.message}`); }
+    finally {
+      setUploadingAuthorPic(false);
+      if (authorPicFileRef.current) authorPicFileRef.current.value = '';
+    }
+  };
+
+  const handleSaveAuthor = async () => {
+    if (!authorDraft.name.trim()) { setError('Author name is required'); return; }
+    setSavingAuthor(true);
+    setError('');
+    try {
+      if (authorPanelMode === 'create') {
+        const created = await createAuthor(authorDraft);
+        setAuthors(prev => [...prev, created].sort((a, b) => a.name.localeCompare(b.name)));
+        setForm(prev => ({ ...prev, authorId: created.id }));
+        hasUnsavedChanges.current = true;
+        scheduleAutoSave();
+      } else {
+        const updated = await updateAuthor(form.authorId, authorDraft);
+        setAuthors(prev => prev.map(a => a.id === updated.id ? updated : a));
+        // Session's denormalized author/role was updated server-side; trigger autosave so version stays in sync.
+        hasUnsavedChanges.current = true;
+        scheduleAutoSave();
+      }
+      setAuthorPanelOpen(false);
+    } catch (err: any) {
+      setError(err.message);
+    } finally {
+      setSavingAuthor(false);
+    }
   };
 
   const toggleRelated = (id: string) => {
@@ -200,8 +258,9 @@ const AdminSessionForm: React.FC<AdminSessionFormProps> = ({ slug }) => {
     try {
       const session = await fetchSessionBySlug(savedSlug);
       setForm({
-        title: session.title, slug: session.slug, author: session.author,
-        role: session.role, duration: session.duration, category: session.category,
+        title: session.title, slug: session.slug,
+        authorId: session.authorId || '',
+        duration: session.duration, category: session.category,
         color: session.color, description: session.description,
         featuredImage: session.featuredImage || '', audioUrl: session.audioUrl || '',
         fullContent: session.fullContent, relatedSessions: session.relatedSessions,
@@ -420,8 +479,7 @@ const AdminSessionForm: React.FC<AdminSessionFormProps> = ({ slug }) => {
   if (loading) return <div className="h-screen flex items-center justify-center"><p className="text-zinc-500">Loading...</p></div>;
 
   const relatedOptions = allSessions.filter(s => s.slug !== form.slug);
-  const existingAuthors = [...new Set(allSessions.map(s => s.author).filter(Boolean))];
-  const existingRoles = [...new Set(allSessions.map(s => s.role).filter(Boolean))];
+  const selectedAuthor = authors.find(a => a.id === form.authorId) || null;
   const isBusy = saving || publishing || updating;
 
   const statusBadge = status === 'published' ? (
@@ -456,18 +514,113 @@ const AdminSessionForm: React.FC<AdminSessionFormProps> = ({ slug }) => {
         <input value={form.slug} onChange={e => handleChange('slug', e.target.value)} className="sf-input !text-xs !text-zinc-500" required />
       </div>
 
-      <div className="grid grid-cols-2 gap-2">
-        <div>
-          <span className="sf-label">Author</span>
-          <input value={form.author} onChange={e => handleChange('author', e.target.value)} list="authors-list" className="sf-input" required />
-          <datalist id="authors-list">{existingAuthors.map(a => <option key={a} value={a} />)}</datalist>
+      <div>
+        <span className="sf-label">Author</span>
+        <div className="flex items-center gap-1.5">
+          {selectedAuthor?.picture ? (
+            <img src={selectedAuthor.picture} alt="" className="flex-none w-7 h-7 rounded-full object-cover border border-white/10" />
+          ) : (
+            <div className="flex-none w-7 h-7 rounded-full bg-zinc-800 border border-white/10 flex items-center justify-center text-[9px] text-zinc-500">
+              {selectedAuthor ? selectedAuthor.name.charAt(0).toUpperCase() : '?'}
+            </div>
+          )}
+          <select
+            value={form.authorId}
+            onChange={e => handleChange('authorId', e.target.value)}
+            className="sf-input !flex-1"
+            required
+          >
+            <option value="">— Select author —</option>
+            {authors.map(a => (
+              <option key={a.id} value={a.id}>{a.name}{a.role ? ` · ${a.role}` : ''}</option>
+            ))}
+          </select>
+          <button
+            type="button"
+            onClick={openCreateAuthor}
+            title="New author"
+            className="flex-none w-8 h-[30px] rounded-md border border-white/10 flex items-center justify-center text-zinc-400 hover:text-zinc-200 hover:bg-white/5 transition-colors"
+          >
+            <iconify-icon icon="solar:user-plus-linear" width="14"></iconify-icon>
+          </button>
+          {selectedAuthor && (
+            <button
+              type="button"
+              onClick={openEditAuthor}
+              title="Edit author"
+              className="flex-none w-8 h-[30px] rounded-md border border-white/10 flex items-center justify-center text-zinc-400 hover:text-zinc-200 hover:bg-white/5 transition-colors"
+            >
+              <iconify-icon icon="solar:pen-linear" width="13"></iconify-icon>
+            </button>
+          )}
         </div>
-        <div>
-          <span className="sf-label">Role</span>
-          <input value={form.role} onChange={e => handleChange('role', e.target.value)} list="roles-list" className="sf-input" required />
-          <datalist id="roles-list">{existingRoles.map(r => <option key={r} value={r} />)}</datalist>
-        </div>
+        {selectedAuthor?.role && (
+          <p className="mt-1 text-[10px] text-zinc-500">Role: {selectedAuthor.role}</p>
+        )}
       </div>
+
+      {authorPanelOpen && (
+        <div className="rounded-lg border border-indigo-500/30 bg-indigo-500/5 p-2.5 space-y-2">
+          <div className="flex items-center justify-between">
+            <span className="text-[11px] font-medium text-indigo-300">
+              {authorPanelMode === 'create' ? 'New author' : 'Edit author'}
+            </span>
+            <button type="button" onClick={() => setAuthorPanelOpen(false)} className="text-zinc-500 hover:text-zinc-300">
+              <iconify-icon icon="solar:close-circle-linear" width="14"></iconify-icon>
+            </button>
+          </div>
+          <input
+            value={authorDraft.name}
+            onChange={e => setAuthorDraft(d => ({ ...d, name: e.target.value }))}
+            placeholder="Name"
+            className="sf-input"
+          />
+          <input
+            value={authorDraft.role}
+            onChange={e => setAuthorDraft(d => ({ ...d, role: e.target.value }))}
+            placeholder="Role (e.g. Researcher)"
+            className="sf-input"
+          />
+          <div className="flex gap-1.5">
+            <input
+              value={authorDraft.picture}
+              onChange={e => setAuthorDraft(d => ({ ...d, picture: e.target.value }))}
+              placeholder="Profile pic URL or upload"
+              className="sf-input flex-1 !text-xs"
+            />
+            <input ref={authorPicFileRef} type="file" accept="image/*" className="hidden" onChange={handleAuthorPicUpload} />
+            <button
+              type="button"
+              onClick={() => authorPicFileRef.current?.click()}
+              disabled={uploadingAuthorPic}
+              className="flex-none w-8 h-[30px] rounded-md border border-white/10 flex items-center justify-center text-zinc-400 hover:text-zinc-200 hover:bg-white/5 transition-colors disabled:opacity-50"
+            >
+              {uploadingAuthorPic
+                ? <span className="w-3 h-3 border-2 border-zinc-500 border-t-zinc-200 rounded-full animate-spin"></span>
+                : <iconify-icon icon="solar:upload-linear" width="13"></iconify-icon>
+              }
+            </button>
+          </div>
+          {authorDraft.picture && (
+            <img src={authorDraft.picture} alt="" className="w-12 h-12 rounded-full object-cover border border-white/10" onError={e => (e.currentTarget.style.display = 'none')} />
+          )}
+          <textarea
+            value={authorDraft.bio}
+            onChange={e => setAuthorDraft(d => ({ ...d, bio: e.target.value }))}
+            placeholder="Bio (optional)"
+            rows={2}
+            className="sf-input resize-none !text-xs"
+          />
+          <button
+            type="button"
+            onClick={handleSaveAuthor}
+            disabled={savingAuthor || !authorDraft.name.trim()}
+            className="w-full px-2 py-1.5 rounded-md bg-indigo-500/20 border border-indigo-500/30 text-indigo-200 text-[11px] font-medium hover:bg-indigo-500/30 transition-colors disabled:opacity-50"
+          >
+            {savingAuthor ? 'Saving…' : authorPanelMode === 'create' ? 'Create author' : 'Save changes'}
+          </button>
+        </div>
+      )}
 
       <div className="grid grid-cols-3 gap-2">
         <div><span className="sf-label">Duration</span><input value={form.duration} onChange={e => handleChange('duration', e.target.value)} placeholder="Optional" className="sf-input" /></div>

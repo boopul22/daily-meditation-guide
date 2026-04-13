@@ -11,12 +11,26 @@ export interface FAQItem {
   answer: string;
 }
 
+export interface Author {
+  id: string;
+  slug: string;
+  name: string;
+  role: string;
+  picture: string;
+  bio: string;
+  createdAt?: string;
+  updatedAt?: string;
+}
+
 export interface Session {
   id: string;
   slug: string;
   title: string;
   author: string;
   role: string;
+  authorId?: string | null;
+  authorPicture?: string;
+  authorSlug?: string;
   duration: string;
   durationSec: number; // For progress bar logic
   category: string;

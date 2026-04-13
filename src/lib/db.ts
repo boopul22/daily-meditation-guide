@@ -1,12 +1,15 @@
-import type { Session, Infographic } from '../types';
+import type { Session, Infographic, Author } from '../types';
 
 export function rowToSession(row: any): Session {
   return {
     id: row.id,
     slug: row.slug,
     title: row.title,
-    author: row.author,
-    role: row.role,
+    author: row.author_name ?? row.author,
+    role: row.author_role ?? row.role,
+    authorId: row.author_id ?? null,
+    authorPicture: row.author_picture ?? '',
+    authorSlug: row.author_slug ?? '',
     duration: row.duration,
     durationSec: row.duration_sec,
     category: row.category,
@@ -25,6 +28,31 @@ export function rowToSession(row: any): Session {
     lastUpdatedBy: row.last_updated_by || null,
   };
 }
+
+export function rowToAuthor(row: any): Author {
+  return {
+    id: row.id,
+    slug: row.slug,
+    name: row.name,
+    role: row.role || '',
+    picture: row.picture || '',
+    bio: row.bio || '',
+    createdAt: row.created_at,
+    updatedAt: row.updated_at,
+  };
+}
+
+// Shared SELECT clause that joins the authors table for display fields.
+// Any code that reads session rows for display should use this instead of SELECT *.
+export const SESSION_SELECT_WITH_AUTHOR = `
+  SELECT s.*,
+         a.name AS author_name,
+         a.role AS author_role,
+         a.picture AS author_picture,
+         a.slug AS author_slug
+  FROM sessions s
+  LEFT JOIN authors a ON a.id = s.author_id
+`;
 
 export function rowToInfographic(row: any): Infographic {
   let tags: string[] = [];

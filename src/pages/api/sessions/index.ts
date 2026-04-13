@@ -1,21 +1,16 @@
 import type { APIContext } from 'astro';
 import { requireAuth, isAdmin } from '../../../lib/auth';
 import { verifyCFAccessJWT } from '../../../lib/cfaccess';
-import { rowToSession } from '../../../lib/db';
+import { rowToSession, SESSION_SELECT_WITH_AUTHOR } from '../../../lib/db';
 
 export async function GET(context: APIContext) {
   const env = context.locals.runtime.env;
   const db = env.DB;
   const admin = await isAdmin(context.request, env);
 
-  let query: string;
-  if (admin) {
-    // Admin sees all sessions
-    query = 'SELECT * FROM sessions ORDER BY created_at DESC';
-  } else {
-    // Public sees only published
-    query = "SELECT * FROM sessions WHERE status = 'published' ORDER BY published_at DESC";
-  }
+  const query = admin
+    ? `${SESSION_SELECT_WITH_AUTHOR} ORDER BY s.created_at DESC`
+    : `${SESSION_SELECT_WITH_AUTHOR} WHERE s.status = 'published' ORDER BY s.published_at DESC`;
 
   const { results } = await db.prepare(query).all();
   return Response.json(results.map(rowToSession));
@@ -54,15 +49,27 @@ export async function POST(context: APIContext) {
   const status = body.status === 'published' ? 'published' : 'draft';
   const publishedAt = status === 'published' ? now : null;
 
+  // Resolve author_id → denormalized author/role for feeds + legacy fallback
+  let authorId: string | null = body.authorId || null;
+  let authorName = body.author || '';
+  let authorRole = body.role || '';
+  if (authorId) {
+    const authorRow = await db.prepare('SELECT name, role FROM authors WHERE id = ?').bind(authorId).first();
+    if (!authorRow) return Response.json({ error: 'Author not found' }, { status: 400 });
+    authorName = authorRow.name as string;
+    authorRole = authorRow.role as string;
+  }
+
   await db.prepare(
-    `INSERT INTO sessions (id, slug, title, author, role, duration, duration_sec, category, color, description, featured_image, audio_url, full_content, related_sessions, faq_items, status, published_at, created_at, updated_at, version, last_updated_by)
-     VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`
+    `INSERT INTO sessions (id, slug, title, author, role, author_id, duration, duration_sec, category, color, description, featured_image, audio_url, full_content, related_sessions, faq_items, status, published_at, created_at, updated_at, version, last_updated_by)
+     VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`
   ).bind(
     id,
     slug,
     body.title,
-    body.author,
-    body.role,
+    authorName,
+    authorRole,
+    authorId,
     body.duration || '',
     body.durationSec || 0,
     body.category,
@@ -81,7 +88,7 @@ export async function POST(context: APIContext) {
     creatorEmail
   ).run();
 
-  const row = await db.prepare('SELECT * FROM sessions WHERE id = ?')
+  const row = await db.prepare(`${SESSION_SELECT_WITH_AUTHOR} WHERE s.id = ?`)
     .bind(id)
     .first();
 
