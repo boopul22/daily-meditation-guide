@@ -1,21 +1,64 @@
-import { useState } from 'react';
-import { YOUTUBE_VIDEOS, type YouTubeVideo } from '../data/youtubeVideos';
+import { useEffect, useState } from 'react';
 import VideoCard from './VideoCard';
 
+interface YouTubeVideo {
+  id: string;
+  title: string;
+}
+
 export default function SessionsContent() {
+    const [videos, setVideos] = useState<YouTubeVideo[]>([]);
+    const [loading, setLoading] = useState(true);
+    const [error, setError] = useState<string | null>(null);
     const [selectedVideo, setSelectedVideo] = useState<YouTubeVideo | null>(null);
+
+    useEffect(() => {
+        let cancelled = false;
+        fetch('/api/youtube-videos')
+            .then((r) => {
+                if (!r.ok) throw new Error(`Failed to load videos (${r.status})`);
+                return r.json();
+            })
+            .then((data: YouTubeVideo[]) => {
+                if (!cancelled) {
+                    setVideos(data);
+                    setLoading(false);
+                }
+            })
+            .catch((err) => {
+                if (!cancelled) {
+                    setError(err?.message ?? 'Failed to load videos');
+                    setLoading(false);
+                }
+            });
+        return () => { cancelled = true; };
+    }, []);
 
     return (
         <div className="space-y-12">
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-                {YOUTUBE_VIDEOS.map((video) => (
-                    <VideoCard
-                        key={video.id}
-                        video={video}
-                        onClick={setSelectedVideo}
-                    />
-                ))}
-            </div>
+            {loading && (
+                <div className="text-center py-16 text-zinc-500 text-sm">Loading sessions…</div>
+            )}
+
+            {error && (
+                <div className="text-center py-16 text-rose-400 text-sm">{error}</div>
+            )}
+
+            {!loading && !error && videos.length === 0 && (
+                <div className="text-center py-16 text-zinc-500 text-sm">No sessions yet.</div>
+            )}
+
+            {!loading && !error && videos.length > 0 && (
+                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                    {videos.map((video) => (
+                        <VideoCard
+                            key={video.id}
+                            video={video}
+                            onClick={setSelectedVideo}
+                        />
+                    ))}
+                </div>
+            )}
 
             {/* Video Modal */}
             {selectedVideo && (

@@ -1,0 +1,9 @@
+name = "dmg-youtube-cron"
+main = "src/index.ts"
+compatibility_date = "2025-01-01"
+
+[triggers]
+crons = ["0 0 */5 * *"]
+
+[vars]
+SYNC_URL = "https://dailymeditationguide.com/api/cron/youtube-sync"

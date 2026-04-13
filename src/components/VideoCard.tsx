@@ -1,4 +1,7 @@
-import type { YouTubeVideo } from '../data/youtubeVideos';
+interface YouTubeVideo {
+    id: string;
+    title: string;
+}
 
 interface VideoCardProps {
     video: YouTubeVideo;
