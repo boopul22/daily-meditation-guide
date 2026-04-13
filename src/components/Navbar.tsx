@@ -241,11 +241,12 @@ const Navbar: React.FC = () => {
               )}
             </div>
 
-            {/* Desktop Auth */}
+            {/* Desktop Auth — fixed width slot prevents layout shift between loading → signed-in/out */}
+            <div className="hidden md:flex items-center justify-end min-w-[90px] h-8">
             {loading ? (
-              <div className="hidden md:block w-8 h-8 rounded-full bg-zinc-800 animate-pulse"></div>
+              <div className="w-8 h-8 rounded-full bg-zinc-800 animate-pulse"></div>
             ) : user ? (
-              <div className="hidden md:block relative" ref={dropdownRef}>
+              <div className="relative" ref={dropdownRef}>
                 <button
                   onClick={() => setIsDropdownOpen(!isDropdownOpen)}
                   aria-label="User menu"
@@ -276,11 +277,12 @@ const Navbar: React.FC = () => {
             ) : (
               <button
                 onClick={login}
-                className="hidden md:block px-4 py-1.5 text-sm font-medium text-zinc-300 border border-white/10 hover:border-white/20 hover:bg-white/5 rounded-full transition-colors"
+                className="px-4 py-1.5 text-sm font-medium text-zinc-300 border border-white/10 hover:border-white/20 hover:bg-white/5 rounded-full transition-colors"
               >
                 Sign In
               </button>
             )}
+            </div>
 
             {/* Mobile Menu Button */}
             <button

@@ -1,6 +1,25 @@
 @import "tailwindcss";
 @plugin "@tailwindcss/typography";
 
+/* Reserve space for <iconify-icon> before the web component upgrades,
+   preventing CLS. Width attribute on the element overrides the 1em default. */
+iconify-icon {
+  display: inline-block;
+  width: 1em;
+  height: 1em;
+  vertical-align: -0.125em;
+}
+iconify-icon[width="14"] { font-size: 14px; }
+iconify-icon[width="16"] { font-size: 16px; }
+iconify-icon[width="18"] { font-size: 18px; }
+iconify-icon[width="20"] { font-size: 20px; }
+iconify-icon[width="22"] { font-size: 22px; }
+iconify-icon[width="24"] { font-size: 24px; }
+iconify-icon[width="28"] { font-size: 28px; }
+iconify-icon[width="32"] { font-size: 32px; }
+iconify-icon[width="40"] { font-size: 40px; }
+iconify-icon[width="48"] { font-size: 48px; }
+
 /* ── Custom Theme ── */
 @theme {
   --font-display: 'Playfair Display', Georgia, serif;
