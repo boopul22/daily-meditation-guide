@@ -99,28 +99,28 @@ const whatsappUrl = `https://wa.me/?text=${encodeURIComponent(shareText + ' ' + 
   extraHead={extraHead}
 >
   {infographic ? (
-    <article class="animate-[fade-enter_0.5s_ease-out] space-y-8">
-      <nav aria-label="Breadcrumb" class="text-sm">
-        <ol class="flex items-center gap-2 text-zinc-500">
-          <li><a href="/" class="hover:text-zinc-300 transition-colors">Home</a></li>
-          <li><span class="text-zinc-600">/</span></li>
-          <li><a href="/infographics" class="hover:text-zinc-300 transition-colors">Infographics</a></li>
-          <li><span class="text-zinc-600">/</span></li>
-          <li class="text-zinc-400 truncate max-w-[200px]">{infographic.title}</li>
+    <article class="animate-[fade-enter_0.5s_ease-out] max-w-3xl mx-auto space-y-6 md:space-y-8">
+      <nav aria-label="Breadcrumb" class="text-xs md:text-sm">
+        <ol class="flex items-center gap-2 text-zinc-500 overflow-hidden">
+          <li class="shrink-0"><a href="/" class="hover:text-zinc-300 transition-colors">Home</a></li>
+          <li class="shrink-0"><span class="text-zinc-600">/</span></li>
+          <li class="shrink-0"><a href="/infographics" class="hover:text-zinc-300 transition-colors">Infographics</a></li>
+          <li class="shrink-0"><span class="text-zinc-600">/</span></li>
+          <li class="text-zinc-400 truncate min-w-0">{infographic.title}</li>
         </ol>
       </nav>
 
-      <header class="space-y-4 max-w-3xl">
-        <h1 class="font-display text-3xl md:text-5xl font-medium text-zinc-100 tracking-tight">
+      <header class="space-y-3 md:space-y-4">
+        <h1 class="font-display text-2xl sm:text-3xl md:text-4xl font-medium text-zinc-100 tracking-tight leading-tight">
           {infographic.title}
         </h1>
         {infographic.description && (
-          <p class="text-zinc-400 text-lg leading-relaxed">{infographic.description}</p>
+          <p class="text-zinc-400 text-base md:text-lg leading-relaxed">{infographic.description}</p>
         )}
         {infographic.tags && infographic.tags.length > 0 && (
-          <div class="flex flex-wrap items-center gap-2 pt-2">
+          <div class="flex flex-wrap items-center gap-1.5 pt-1">
             {infographic.tags.map((tag) => (
-              <span class="text-xs px-2 py-1 rounded-full bg-white/5 border border-white/5 text-zinc-400">
+              <span class="text-[10px] md:text-xs px-2 py-0.5 md:py-1 rounded-full bg-white/5 border border-white/5 text-zinc-400">
                 {tag}
               </span>
             ))}
@@ -128,7 +128,7 @@ const whatsappUrl = `https://wa.me/?text=${encodeURIComponent(shareText + ' ' + 
         )}
       </header>
 
-      <figure class="rounded-2xl overflow-hidden border border-white/[0.06] bg-zinc-900/40">
+      <figure class="rounded-2xl overflow-hidden border border-white/[0.06] bg-zinc-900/40 max-w-md mx-auto">
         <img
           src={infographic.imageUrl}
           alt={infographic.altText || infographic.title}
@@ -144,58 +144,61 @@ const whatsappUrl = `https://wa.me/?text=${encodeURIComponent(shareText + ' ' + 
       </figure>
 
       <section aria-label="Share" class="space-y-3">
-        <h2 class="text-sm font-medium text-zinc-400 uppercase tracking-wider">Share this infographic</h2>
-        <div class="flex flex-wrap items-center gap-2">
+        <h2 class="text-xs md:text-sm font-medium text-zinc-400 uppercase tracking-wider">Share this infographic</h2>
+        <div class="flex flex-wrap items-center gap-1.5 md:gap-2">
           <a
             href={pinUrl}
             target="_blank"
             rel="noopener noreferrer nofollow"
-            data-pin-do="buttonPin"
-            data-pin-custom="true"
-            class="inline-flex items-center gap-2 px-4 py-2 bg-[#E60023] hover:bg-[#ad081b] text-white rounded-full text-sm font-medium transition-colors"
+            aria-label="Pin it on Pinterest"
+            class="inline-flex items-center gap-1.5 px-3 md:px-4 py-1.5 md:py-2 bg-[#E60023] hover:bg-[#ad081b] text-white rounded-full text-xs md:text-sm font-medium transition-colors"
           >
-            <iconify-icon icon="mdi:pinterest" width="18"></iconify-icon>
+            <iconify-icon icon="mdi:pinterest" width="16"></iconify-icon>
             Pin it
           </a>
           <a
             href={twitterUrl}
             target="_blank"
             rel="noopener noreferrer nofollow"
-            class="inline-flex items-center gap-2 px-4 py-2 border border-white/10 hover:border-white/20 hover:bg-white/5 text-zinc-200 rounded-full text-sm font-medium transition-colors"
+            aria-label="Share on Twitter"
+            class="inline-flex items-center gap-1.5 px-3 md:px-4 py-1.5 md:py-2 border border-white/10 hover:border-white/20 hover:bg-white/5 text-zinc-200 rounded-full text-xs md:text-sm font-medium transition-colors"
           >
-            <iconify-icon icon="mdi:twitter" width="18"></iconify-icon>
+            <iconify-icon icon="mdi:twitter" width="16"></iconify-icon>
             Tweet
           </a>
           <a
             href={facebookUrl}
             target="_blank"
             rel="noopener noreferrer nofollow"
-            class="inline-flex items-center gap-2 px-4 py-2 border border-white/10 hover:border-white/20 hover:bg-white/5 text-zinc-200 rounded-full text-sm font-medium transition-colors"
+            aria-label="Share on Facebook"
+            class="inline-flex items-center gap-1.5 px-3 md:px-4 py-1.5 md:py-2 border border-white/10 hover:border-white/20 hover:bg-white/5 text-zinc-200 rounded-full text-xs md:text-sm font-medium transition-colors"
           >
-            <iconify-icon icon="mdi:facebook" width="18"></iconify-icon>
+            <iconify-icon icon="mdi:facebook" width="16"></iconify-icon>
             Share
           </a>
           <a
             href={whatsappUrl}
             target="_blank"
             rel="noopener noreferrer nofollow"
-            class="inline-flex items-center gap-2 px-4 py-2 border border-white/10 hover:border-white/20 hover:bg-white/5 text-zinc-200 rounded-full text-sm font-medium transition-colors"
+            aria-label="Share on WhatsApp"
+            class="inline-flex items-center gap-1.5 px-3 md:px-4 py-1.5 md:py-2 border border-white/10 hover:border-white/20 hover:bg-white/5 text-zinc-200 rounded-full text-xs md:text-sm font-medium transition-colors"
           >
-            <iconify-icon icon="mdi:whatsapp" width="18"></iconify-icon>
+            <iconify-icon icon="mdi:whatsapp" width="16"></iconify-icon>
             WhatsApp
           </a>
           <button
             type="button"
             data-copy-link={pageUrl}
-            class="inline-flex items-center gap-2 px-4 py-2 border border-white/10 hover:border-white/20 hover:bg-white/5 text-zinc-200 rounded-full text-sm font-medium transition-colors"
+            aria-label="Copy link"
+            class="inline-flex items-center gap-1.5 px-3 md:px-4 py-1.5 md:py-2 border border-white/10 hover:border-white/20 hover:bg-white/5 text-zinc-200 rounded-full text-xs md:text-sm font-medium transition-colors"
           >
-            <iconify-icon icon="mdi:link-variant" width="18"></iconify-icon>
+            <iconify-icon icon="mdi:link-variant" width="16"></iconify-icon>
             Copy link
           </button>
         </div>
       </section>
 
-      <div class="pt-4">
+      <div class="pt-2">
         <a
           href="/infographics"
           class="inline-flex items-center gap-2 text-sm text-zinc-400 hover:text-zinc-200 transition-colors"
