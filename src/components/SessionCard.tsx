@@ -21,7 +21,7 @@ export default function SessionCard({ session }: SessionCardProps) {
   return (
     <a
       href={`/session/${session.slug}`}
-      className="cursor-pointer group relative bg-zinc-900/40 border border-white/[0.06] hover:border-white/[0.12] rounded-2xl p-4 transition-all duration-300 hover:bg-zinc-800/40 hover:-translate-y-1 hover:shadow-lg hover:shadow-black/20"
+      className="cursor-pointer group relative flex flex-col h-full bg-zinc-900/40 border border-white/[0.06] hover:border-white/[0.12] rounded-2xl p-4 transition-all duration-300 hover:bg-zinc-800/40 hover:-translate-y-1 hover:shadow-lg hover:shadow-black/20"
     >
       <div className="relative h-[19rem] w-full rounded-xl overflow-hidden mb-4 bg-zinc-800">
         {session.featuredImage ? (
@@ -47,7 +47,7 @@ export default function SessionCard({ session }: SessionCardProps) {
           {session.duration}
         </div>
       </div>
-      <div className="space-y-1">
+      <div className="space-y-1 flex-1">
         <h3 className={`font-display text-zinc-200 font-medium tracking-tight ${textClass} transition-colors`}>
           {session.title}
         </h3>

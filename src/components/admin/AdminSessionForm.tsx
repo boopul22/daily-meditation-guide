@@ -5,7 +5,7 @@ import { fetchSessions, fetchSessionBySlug, createSession, updateSession, upload
 import type { Session, FAQItem, Author } from '../../types';
 import RichTextEditor from './RichTextEditor';
 
-const CATEGORIES = ['Sleep', 'Anxiety', 'Focus', 'Sounds'];
+const DEFAULT_CATEGORIES = ['Sleep', 'Anxiety', 'Focus', 'Sounds'];
 const COLORS = ['indigo', 'teal', 'orange', 'rose', 'blue', 'emerald', 'purple'];
 const COLOR_DOT: Record<string, string> = {
   indigo: 'bg-indigo-500', teal: 'bg-teal-500', orange: 'bg-orange-500',
@@ -103,7 +103,7 @@ const AdminSessionForm: React.FC<AdminSessionFormProps> = ({ slug }) => {
 
   const [form, setForm] = useState<FormData>({
     title: '', slug: '', authorId: '', duration: '',
-    category: CATEGORIES[0], color: COLORS[0], description: '',
+    category: DEFAULT_CATEGORIES[0], color: COLORS[0], description: '',
     featuredImage: '', audioUrl: '', fullContent: '',
     relatedSessions: [],
     faqItems: [],
@@ -624,7 +624,7 @@ const AdminSessionForm: React.FC<AdminSessionFormProps> = ({ slug }) => {
 
       <div className="grid grid-cols-3 gap-2">
         <div><span className="sf-label">Duration</span><input value={form.duration} onChange={e => handleChange('duration', e.target.value)} placeholder="Optional" className="sf-input" /></div>
-        <div><span className="sf-label">Category</span><select value={form.category} onChange={e => handleChange('category', e.target.value)} className="sf-input">{CATEGORIES.map(c => <option key={c} value={c}>{c}</option>)}</select></div>
+        <div><span className="sf-label">Category</span><input list="sf-category-options" value={form.category} onChange={e => handleChange('category', e.target.value)} placeholder="Type or pick…" className="sf-input" required /><datalist id="sf-category-options">{Array.from(new Set([...DEFAULT_CATEGORIES, ...allSessions.map(s => s.category).filter(Boolean)])).map(c => <option key={c} value={c} />)}</datalist></div>
         <div>
           <span className="sf-label">Color</span>
           <div className="flex items-center gap-1.5">

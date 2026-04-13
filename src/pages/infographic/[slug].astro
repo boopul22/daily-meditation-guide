@@ -81,8 +81,9 @@ if (infographic) {
 
 const shareText = infographic?.title || '';
 const pinDescription = infographic?.description || infographic?.title || '';
+const pinTargetUrl = `${siteUrl}/infographics`;
 const pinUrl = infographic
-  ? `https://pinterest.com/pin/create/button/?url=${encodeURIComponent(pageUrl)}&media=${encodeURIComponent(absoluteImg)}&description=${encodeURIComponent(pinDescription)}`
+  ? `https://pinterest.com/pin/create/button/?url=${encodeURIComponent(pinTargetUrl)}&media=${encodeURIComponent(absoluteImg)}&description=${encodeURIComponent(pinDescription)}`
   : '#';
 const twitterUrl = `https://twitter.com/intent/tweet?url=${encodeURIComponent(pageUrl)}&text=${encodeURIComponent(shareText)}`;
 const facebookUrl = `https://www.facebook.com/sharer/sharer.php?u=${encodeURIComponent(pageUrl)}`;

@@ -1,0 +1,29 @@
+{
+  "version": "0.0.1",
+  "configurations": [
+    {
+      "name": "Pages Dev (Full Stack)",
+      "runtimeExecutable": "npm",
+      "runtimeArgs": ["run", "dev"],
+      "port": 8788
+    },
+    {
+      "name": "Vite Dev Server",
+      "runtimeExecutable": "npx",
+      "runtimeArgs": ["vite"],
+      "port": 3000
+    },
+    {
+      "name": "Vite Remote Dev",
+      "runtimeExecutable": "npx",
+      "runtimeArgs": ["vite", "--mode", "remote"],
+      "port": 3000
+    },
+    {
+      "name": "Collab Worker Dev",
+      "runtimeExecutable": "npx",
+      "runtimeArgs": ["wrangler", "dev", "--config", "collab-worker/wrangler.toml"],
+      "port": 8787
+    }
+  ]
+}

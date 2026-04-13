@@ -1,0 +1,100 @@
+- generic [active] [ref=e1]:
+  - navigation [ref=e3]:
+    - generic [ref=e4]:
+      - link "dailymeditationguide.com" [ref=e5] [cursor=pointer]:
+        - /url: /
+        - generic [ref=e8]: dailymeditationguide.com
+      - button "Open menu" [ref=e10]
+  - generic [ref=e11]:
+    - main [ref=e12]:
+      - article [ref=e13]:
+        - navigation "Breadcrumb" [ref=e14]:
+          - list [ref=e15]:
+            - listitem [ref=e16]:
+              - link "Home" [ref=e17] [cursor=pointer]:
+                - /url: /
+            - listitem [ref=e18]: /
+            - listitem [ref=e19]:
+              - link "Infographics" [ref=e20] [cursor=pointer]:
+                - /url: /infographics
+            - listitem [ref=e21]: /
+            - listitem [ref=e22]: "Daily Meditation Guide: Four Paths to Inner Calm"
+        - generic [ref=e23]:
+          - 'heading "Daily Meditation Guide: Four Paths to Inner Calm" [level=1] [ref=e24]'
+          - paragraph [ref=e25]: A visual introduction to four guided meditation practices — sleep, anxiety relief, focus, and nature sounds — each designed to help you start a daily habit in just five minutes.
+          - generic [ref=e26]:
+            - generic [ref=e27]: meditation
+            - generic [ref=e28]: sleep
+            - generic [ref=e29]: anxiety-relief
+            - generic [ref=e30]: focus
+            - generic [ref=e31]: nature-sounds
+            - generic [ref=e32]: beginners
+            - generic [ref=e33]: 5-minute-meditation
+        - figure "Daily Meditation Guide infographic showing four meditation categories (Sleep, Anxiety Relief, Focus, Nature Sounds) around a woman in lotus pose, with a Start in 5 Minutes call to action" [ref=e34]:
+          - img "Daily Meditation Guide infographic showing four meditation categories (Sleep, Anxiety Relief, Focus, Nature Sounds) around a woman in lotus pose, with a Start in 5 Minutes call to action" [ref=e35]
+          - generic [ref=e36]: Daily Meditation Guide infographic showing four meditation categories (Sleep, Anxiety Relief, Focus, Nature Sounds) around a woman in lotus pose, with a Start in 5 Minutes call to action
+        - region "Share" [ref=e37]:
+          - heading "Share this infographic" [level=2] [ref=e38]
+          - generic [ref=e39]:
+            - link "Pin it" [ref=e40] [cursor=pointer]:
+              - /url: https://pinterest.com/pin/create/button/?url=https%3A%2F%2Fdailymeditationguide.com%2Finfographic%2Fdaily-meditation-guide-quick-start&media=https%3A%2F%2Fdailymeditationguide.com%2Fapi%2Fimage%2Fuploads%2F1776092125-test01.webp&description=A%20visual%20introduction%20to%20four%20guided%20meditation%20practices%20%E2%80%94%20sleep%2C%20anxiety%20relief%2C%20focus%2C%20and%20nature%20sounds%20%E2%80%94%20each%20designed%20to%20help%20you%20start%20a%20daily%20habit%20in%20just%20five%20minutes.
+              - img [ref=e42]
+              - text: Pin it
+            - link "Tweet" [ref=e44] [cursor=pointer]:
+              - /url: https://twitter.com/intent/tweet?url=https%3A%2F%2Fdailymeditationguide.com%2Finfographic%2Fdaily-meditation-guide-quick-start&text=Daily%20Meditation%20Guide%3A%20Four%20Paths%20to%20Inner%20Calm
+              - img [ref=e46]
+              - text: Tweet
+            - link "Share" [ref=e48] [cursor=pointer]:
+              - /url: https://www.facebook.com/sharer/sharer.php?u=https%3A%2F%2Fdailymeditationguide.com%2Finfographic%2Fdaily-meditation-guide-quick-start
+              - img [ref=e50]
+              - text: Share
+            - link "WhatsApp" [ref=e52] [cursor=pointer]:
+              - /url: https://wa.me/?text=Daily%20Meditation%20Guide%3A%20Four%20Paths%20to%20Inner%20Calm%20https%3A%2F%2Fdailymeditationguide.com%2Finfographic%2Fdaily-meditation-guide-quick-start
+              - img [ref=e54]
+              - text: WhatsApp
+            - button "Copy link" [ref=e56]:
+              - img [ref=e58]
+              - text: Copy link
+        - link "← Browse all infographics" [ref=e61] [cursor=pointer]:
+          - /url: /infographics
+    - contentinfo [ref=e62]:
+      - generic [ref=e63]:
+        - generic [ref=e64]:
+          - link "dailymeditationguide.com" [ref=e65] [cursor=pointer]:
+            - /url: /
+            - generic [ref=e68]: dailymeditationguide.com
+          - paragraph [ref=e69]: Daily curation of guided meditations and ambient soundscapes to help you find focus and stillness.
+        - generic [ref=e70]:
+          - heading "Platform" [level=4] [ref=e71]
+          - generic [ref=e72]:
+            - link "Browse" [ref=e73] [cursor=pointer]:
+              - /url: /
+            - link "Sessions" [ref=e74] [cursor=pointer]:
+              - /url: /sessions
+            - link "About" [ref=e75] [cursor=pointer]:
+              - /url: /about
+        - generic [ref=e76]:
+          - heading "Support" [level=4] [ref=e77]
+          - generic [ref=e78]:
+            - link "Contact Us" [ref=e79] [cursor=pointer]:
+              - /url: /contact
+            - link "Disclaimer" [ref=e80] [cursor=pointer]:
+              - /url: /disclaimer
+      - generic [ref=e81]:
+        - paragraph [ref=e82]: © 2026 dailymeditationguide.com. All rights reserved.
+        - generic [ref=e83]:
+          - link "Privacy Policy" [ref=e84] [cursor=pointer]:
+            - /url: /privacy
+          - link "Terms of Service" [ref=e85] [cursor=pointer]:
+            - /url: /terms
+          - link "Disclaimer" [ref=e86] [cursor=pointer]:
+            - /url: /disclaimer
+  - generic [ref=e90]:
+    - paragraph [ref=e92]:
+      - text: We use cookies to enhance your experience and serve personalized advertisements through Google AdSense. By clicking "Accept," you consent to our use of cookies. Read our
+      - link "Privacy Policy" [ref=e93] [cursor=pointer]:
+        - /url: /privacy
+      - text: for more information.
+    - generic [ref=e94]:
+      - button "Decline" [ref=e95]
+      - button "Accept" [ref=e96]
