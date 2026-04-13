@@ -1,3 +1,5 @@
+import { videoSlug } from './videoCategories';
+
 const UPLOADS_PLAYLIST_ID = 'UUsZvCHD_VtE2nx-fIdrKvDg';
 const YT_API = 'https://www.googleapis.com/youtube/v3/playlistItems';
 
@@ -64,24 +66,31 @@ export async function syncYouTubeVideos(
         continue;
       }
 
+      const slug = videoSlug(title, videoId);
+
       const existing = await db
-        .prepare('SELECT title, description FROM youtube_videos WHERE video_id = ?')
+        .prepare('SELECT title, description, slug FROM youtube_videos WHERE video_id = ?')
         .bind(videoId)
         .first();
 
       if (!existing) {
         await db
           .prepare(
-            'INSERT INTO youtube_videos (video_id, title, description, published_at) VALUES (?, ?, ?, ?)'
+            'INSERT INTO youtube_videos (video_id, title, description, slug, published_at) VALUES (?, ?, ?, ?, ?)'
           )
-          .bind(videoId, title, description, publishedAt)
+          .bind(videoId, title, description, slug, publishedAt)
           .run();
         result.inserted++;
       } else {
-        if (existing.title !== title || existing.description !== description) {
+        const needsUpdate =
+          existing.title !== title ||
+          existing.description !== description ||
+          !existing.slug ||
+          existing.slug === '';
+        if (needsUpdate) {
           await db
-            .prepare('UPDATE youtube_videos SET title = ?, description = ? WHERE video_id = ?')
-            .bind(title, description, videoId)
+            .prepare('UPDATE youtube_videos SET title = ?, description = ?, slug = ? WHERE video_id = ?')
+            .bind(title, description, existing.slug || slug, videoId)
             .run();
         }
         result.skipped++;

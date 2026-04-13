@@ -1,0 +1,163 @@
+---
+import MainLayout from '../../layouts/MainLayout.astro';
+import { categorize, thumbnailUrl } from '../../lib/videoCategories';
+
+export const prerender = false;
+
+const { slug } = Astro.params;
+const db = (Astro.locals as any).runtime.env.DB;
+
+const row = await db
+  .prepare(
+    'SELECT video_id, title, description, slug, published_at FROM youtube_videos WHERE slug = ?'
+  )
+  .bind(slug)
+  .first();
+
+if (!row) {
+  return new Response('Video not found', { status: 404 });
+}
+
+const videoId = row.video_id as string;
+const title = row.title as string;
+const description = (row.description as string) ?? '';
+const publishedAt = row.published_at as string;
+const category = categorize(title, description);
+
+const siteUrl = 'https://dailymeditationguide.com';
+const pageUrl = `${siteUrl}/video-sessions/${slug}`;
+const thumb = thumbnailUrl(videoId, 'max');
+
+const metaDescription = description
+  ? description.replace(/\s+/g, ' ').trim().slice(0, 155)
+  : `${title} — guided meditation from Daily Meditation Guide.`;
+
+const videoObjectJsonLd = JSON.stringify({
+  '@context': 'https://schema.org',
+  '@type': 'VideoObject',
+  name: title,
+  description: metaDescription,
+  thumbnailUrl: [thumb, thumbnailUrl(videoId, 'hq')],
+  uploadDate: publishedAt,
+  contentUrl: `https://www.youtube.com/watch?v=${videoId}`,
+  embedUrl: `https://www.youtube-nocookie.com/embed/${videoId}`,
+  publisher: {
+    '@type': 'Organization',
+    name: 'Daily Meditation Guide',
+    url: siteUrl,
+  },
+});
+
+const breadcrumbJsonLd = JSON.stringify({
+  '@context': 'https://schema.org',
+  '@type': 'BreadcrumbList',
+  itemListElement: [
+    { '@type': 'ListItem', position: 1, name: 'Home', item: `${siteUrl}/` },
+    { '@type': 'ListItem', position: 2, name: 'Video Sessions', item: `${siteUrl}/video-sessions` },
+    { '@type': 'ListItem', position: 3, name: title, item: pageUrl },
+  ],
+});
+
+const extraHead = `<script type="application/ld+json">${videoObjectJsonLd}</script><script type="application/ld+json">${breadcrumbJsonLd}</script><meta property="og:video" content="https://www.youtube.com/watch?v=${videoId}" /><meta property="og:video:type" content="text/html" /><meta property="og:type" content="video.other" />`;
+
+// Related videos: same category
+const { results: relatedRows } = await db
+  .prepare(
+    'SELECT video_id, title, slug FROM youtube_videos WHERE video_id != ? ORDER BY published_at DESC LIMIT 30'
+  )
+  .bind(videoId)
+  .all();
+
+const related = (relatedRows || [])
+  .map((r: any) => ({
+    id: r.video_id as string,
+    title: r.title as string,
+    slug: r.slug as string,
+    cat: categorize(r.title as string, '').key,
+  }))
+  .filter((r: any) => r.cat === category.key)
+  .slice(0, 6);
+
+Astro.response.headers.set(
+  'Cache-Control',
+  'public, max-age=300, s-maxage=3600, stale-while-revalidate=86400'
+);
+---
+
+<MainLayout
+  title={title}
+  description={metaDescription}
+  canonical={pageUrl}
+  ogImage={thumb}
+  extraHead={extraHead}
+>
+  <article class="space-y-8 animate-[fade-enter_0.5s_ease-out]">
+    <nav class="text-xs text-zinc-500 flex items-center gap-2" aria-label="Breadcrumb">
+      <a href="/" class="hover:text-zinc-300 transition-colors">Home</a>
+      <span class="text-zinc-700">/</span>
+      <a href="/video-sessions" class="hover:text-zinc-300 transition-colors">Video Sessions</a>
+      <span class="text-zinc-700">/</span>
+      <span class="text-zinc-400 truncate">{title}</span>
+    </nav>
+
+    <header class="space-y-4">
+      <div class="flex items-center gap-2">
+        <a
+          href={`/video-sessions#${category.key}`}
+          class="inline-flex items-center gap-1 px-3 py-1 text-xs rounded-full bg-white/5 border border-white/10 text-zinc-400 hover:bg-white/10 hover:text-white transition-colors"
+        >
+          {category.label}
+        </a>
+      </div>
+      <h1 class="font-display text-2xl md:text-4xl font-medium text-zinc-100 tracking-tight leading-tight">
+        {title}
+      </h1>
+    </header>
+
+    <div class="relative aspect-video w-full rounded-2xl overflow-hidden border border-white/[0.08] bg-black shadow-2xl">
+      <iframe
+        src={`https://www.youtube-nocookie.com/embed/${videoId}?rel=0&modestbranding=1`}
+        class="absolute inset-0 w-full h-full"
+        title={title}
+        frameborder="0"
+        allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+        allowfullscreen
+      ></iframe>
+    </div>
+
+    {description && (
+      <section class="space-y-3">
+        <h2 class="font-display text-lg font-medium text-zinc-200 tracking-tight">About this session</h2>
+        <div class="text-zinc-400 text-sm leading-relaxed whitespace-pre-line max-w-3xl">
+          {description}
+        </div>
+      </section>
+    )}
+
+    {related.length > 0 && (
+      <section class="space-y-4 pt-8 border-t border-white/5">
+        <h2 class="font-display text-lg font-medium text-zinc-200 tracking-tight">More {category.label}</h2>
+        <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
+          {related.map((r: any) => (
+            <a
+              href={`/video-sessions/${r.slug}`}
+              class="group flex gap-3 p-3 rounded-xl bg-zinc-900/40 border border-white/[0.06] hover:border-white/[0.12] hover:bg-zinc-800/40 transition-all"
+            >
+              <img
+                src={thumbnailUrl(r.id, 'mq')}
+                alt={r.title}
+                loading="lazy"
+                width={120}
+                height={68}
+                class="w-24 h-14 rounded-lg object-cover flex-shrink-0"
+              />
+              <span class="text-xs text-zinc-300 line-clamp-3 group-hover:text-white transition-colors">
+                {r.title}
+              </span>
+            </a>
+          ))}
+        </div>
+      </section>
+    )}
+  </article>
+</MainLayout>

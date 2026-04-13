@@ -9,6 +9,7 @@ interface SitemapRow {
 const STATIC_PAGES = [
   { path: '/', lastmod: '2026-04-13' },
   { path: '/sessions', lastmod: '2026-04-13' },
+  { path: '/video-sessions', lastmod: '2026-04-13' },
   { path: '/infographics', lastmod: '2026-04-13' },
   { path: '/about', lastmod: '2026-04-13' },
   { path: '/contact', lastmod: '2026-04-13' },
@@ -19,17 +20,21 @@ const INFOGRAPHICS_PAGE_SIZE = 24;
 export async function GET(context: APIContext) {
   const db = context.locals.runtime.env.DB;
 
-  const [sessionsRes, infographicsRes] = await Promise.all([
+  const [sessionsRes, infographicsRes, videosRes] = await Promise.all([
     db.prepare(
       "SELECT slug, updated_at FROM sessions WHERE status = 'published' ORDER BY published_at DESC"
     ).all<SitemapRow>(),
     db.prepare(
       "SELECT slug, updated_at FROM infographics WHERE status = 'published' ORDER BY published_at DESC"
     ).all<SitemapRow>(),
+    db.prepare(
+      "SELECT slug, published_at AS updated_at FROM youtube_videos WHERE slug != '' ORDER BY published_at DESC"
+    ).all<SitemapRow>(),
   ]);
 
   const sessions = sessionsRes.results || [];
   const infographics = infographicsRes.results || [];
+  const videos = videosRes.results || [];
 
   const latestDate = sessions.length > 0
     ? toW3CDate(sessions[0].updated_at).split('T')[0]
@@ -56,6 +61,13 @@ export async function GET(context: APIContext) {
   </url>`
   ).join('\n');
 
+  const videoEntries = videos.map(
+    row => `  <url>
+    <loc>${SITE_URL}/video-sessions/${escapeXml(row.slug)}</loc>
+    <lastmod>${toW3CDate(row.updated_at)}</lastmod>
+  </url>`
+  ).join('\n');
+
   // Paginated infographics listing pages (page 2..N)
   const totalPages = Math.max(1, Math.ceil(infographics.length / INFOGRAPHICS_PAGE_SIZE));
   const infographicPages: string[] = [];
@@ -70,6 +82,7 @@ export async function GET(context: APIContext) {
 <urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
 ${staticEntries}
 ${sessionEntries}
+${videoEntries}
 ${infographicEntries}
 ${infographicPages.join('\n')}
 </urlset>`;
