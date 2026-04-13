@@ -1,10 +1,11 @@
-import React, { useCallback, useRef, useState } from 'react';
+import React, { useCallback, useEffect, useRef, useState } from 'react';
 import { useEditor, EditorContent } from '@tiptap/react';
 import StarterKit from '@tiptap/starter-kit';
 import Link from '@tiptap/extension-link';
 import Image from '@tiptap/extension-image';
 import Placeholder from '@tiptap/extension-placeholder';
-import { Table, TableRow, TableCell, TableHeader } from '@tiptap/extension-table';
+import { TableKit } from '@tiptap/extension-table';
+import TextAlign from '@tiptap/extension-text-align';
 import { uploadImage } from '../../lib/api';
 import type { User } from '../../types';
 
@@ -21,6 +22,7 @@ function preprocessContent(html: string): string {
   const doc = parser.parseFromString(html, 'text/html');
 
   doc.querySelectorAll('div').forEach(div => {
+    if (div.closest('table')) return;
     const cls = div.getAttribute('class') || '';
     if (cls.includes('border-l-') || (cls.includes('bg-zinc') && cls.includes('rounded'))) {
       const bq = doc.createElement('blockquote');
@@ -149,7 +151,10 @@ const RichTextEditor: React.FC<RichTextEditorProps> = ({ content, onChange, sess
   const [gridOpen, setGridOpen] = useState(false);
   const [gridPos, setGridPos] = useState({ top: 0, left: 0 });
 
+  const lastEmittedRef = useRef<string>(content);
+
   const editor = useEditor({
+    shouldRerenderOnTransaction: true,
     extensions: [
       StarterKit.configure({
         heading: { levels: [2, 3] },
@@ -163,22 +168,36 @@ const RichTextEditor: React.FC<RichTextEditorProps> = ({ content, onChange, sess
         inline: false,
         allowBase64: false,
       }),
-      Table.configure({
-        resizable: false,
-        HTMLAttributes: { class: 'rte-table' },
+      TableKit.configure({
+        table: {
+          resizable: false,
+          HTMLAttributes: { class: 'rte-table' },
+        },
       }),
-      TableRow,
-      TableHeader,
-      TableCell,
+      TextAlign.configure({
+        types: ['heading', 'paragraph'],
+        alignments: ['left', 'center', 'right', 'justify'],
+        defaultAlignment: 'left',
+      }),
       Placeholder.configure({
         placeholder: 'Start writing your session content...',
       }),
     ],
     content: preprocessContent(content),
     onUpdate: ({ editor }) => {
-      onChange(editor.getHTML());
+      const html = editor.getHTML();
+      lastEmittedRef.current = html;
+      onChange(html);
     },
   });
+
+  useEffect(() => {
+    if (!editor) return;
+    if (content === lastEmittedRef.current) return;
+    if (content === editor.getHTML()) return;
+    editor.commands.setContent(preprocessContent(content), { emitUpdate: false });
+    lastEmittedRef.current = content;
+  }, [content, editor]);
 
   const setLink = useCallback(() => {
     if (!editor) return;
@@ -217,7 +236,7 @@ const RichTextEditor: React.FC<RichTextEditorProps> = ({ content, onChange, sess
 
   if (!editor) return null;
 
-  const inTable = editor.isActive('table');
+  const inTable = editor.isActive('table') || editor.isActive('tableCell') || editor.isActive('tableHeader');
 
   return (
     <div className="rte-wrapper h-full flex flex-col">
@@ -230,7 +249,7 @@ const RichTextEditor: React.FC<RichTextEditorProps> = ({ content, onChange, sess
       />
 
       {/* Main toolbar */}
-      <div className="flex-none flex flex-wrap items-center gap-0.5 px-2 md:px-3 py-1 md:py-1.5 bg-zinc-900/50 border-b border-white/5 overflow-x-auto no-scrollbar">
+      <div className="flex-none flex flex-wrap items-center gap-0.5 px-2 md:px-3 py-1 md:py-1.5 bg-zinc-900/50 border-b border-white/5">
         <ToolbarButton
           onClick={() => editor.chain().focus().toggleHeading({ level: 2 }).run()}
           active={editor.isActive('heading', { level: 2 })}
@@ -278,6 +297,37 @@ const RichTextEditor: React.FC<RichTextEditorProps> = ({ content, onChange, sess
           title="Ordered List"
         >
           <iconify-icon icon="solar:list-1-linear" width="16"></iconify-icon>
+        </ToolbarButton>
+
+        <Divider />
+
+        <ToolbarButton
+          onClick={() => editor.chain().focus().setTextAlign('left').run()}
+          active={editor.isActive({ textAlign: 'left' })}
+          title="Align Left"
+        >
+          <iconify-icon icon="solar:text-align-left-linear" width="16"></iconify-icon>
+        </ToolbarButton>
+        <ToolbarButton
+          onClick={() => editor.chain().focus().setTextAlign('center').run()}
+          active={editor.isActive({ textAlign: 'center' })}
+          title="Align Center"
+        >
+          <iconify-icon icon="solar:text-align-center-linear" width="16"></iconify-icon>
+        </ToolbarButton>
+        <ToolbarButton
+          onClick={() => editor.chain().focus().setTextAlign('right').run()}
+          active={editor.isActive({ textAlign: 'right' })}
+          title="Align Right"
+        >
+          <iconify-icon icon="solar:text-align-right-linear" width="16"></iconify-icon>
+        </ToolbarButton>
+        <ToolbarButton
+          onClick={() => editor.chain().focus().setTextAlign('justify').run()}
+          active={editor.isActive({ textAlign: 'justify' })}
+          title="Justify"
+        >
+          <iconify-icon icon="solar:text-align-justify-linear" width="16"></iconify-icon>
         </ToolbarButton>
 
         <Divider />
