@@ -4,6 +4,7 @@ import StarterKit from '@tiptap/starter-kit';
 import Link from '@tiptap/extension-link';
 import Image from '@tiptap/extension-image';
 import Placeholder from '@tiptap/extension-placeholder';
+import { Table, TableRow, TableCell, TableHeader } from '@tiptap/extension-table';
 import { uploadImage } from '../../lib/api';
 import type { User } from '../../types';
 
@@ -59,6 +60,7 @@ const Divider = () => <div className="w-px h-6 bg-white/10 mx-1 self-center" />;
 const RichTextEditor: React.FC<RichTextEditorProps> = ({ content, onChange, sessionSlug, currentUser }) => {
   const fileInputRef = useRef<HTMLInputElement>(null);
   const [uploading, setUploading] = useState(false);
+  const [tableMenuOpen, setTableMenuOpen] = useState(false);
 
   const editor = useEditor({
     extensions: [
@@ -74,6 +76,13 @@ const RichTextEditor: React.FC<RichTextEditorProps> = ({ content, onChange, sess
         inline: false,
         allowBase64: false,
       }),
+      Table.configure({
+        resizable: false,
+        HTMLAttributes: { class: 'rte-table' },
+      }),
+      TableRow,
+      TableHeader,
+      TableCell,
       Placeholder.configure({
         placeholder: 'Start writing your session content...',
       }),
@@ -208,6 +217,55 @@ const RichTextEditor: React.FC<RichTextEditorProps> = ({ content, onChange, sess
         >
           <iconify-icon icon="solar:minus-linear" width="16"></iconify-icon>
         </ToolbarButton>
+        <div className="relative">
+          <ToolbarButton
+            onClick={() => setTableMenuOpen(v => !v)}
+            active={editor.isActive('table') || tableMenuOpen}
+            title="Table"
+          >
+            <iconify-icon icon="solar:tablet-linear" width="16"></iconify-icon>
+          </ToolbarButton>
+          {tableMenuOpen && (
+            <div
+              className="absolute top-full left-0 mt-1 z-50 bg-zinc-800 border border-white/10 rounded-lg shadow-xl p-1 min-w-[160px] text-xs text-zinc-300"
+              onMouseLeave={() => setTableMenuOpen(false)}
+            >
+              <button type="button" className="w-full text-left px-3 py-1.5 rounded hover:bg-white/10 transition-colors"
+                onClick={() => { editor.chain().focus().insertTable({ rows: 3, cols: 3, withHeaderRow: true }).run(); setTableMenuOpen(false); }}>
+                Insert 3×3 table
+              </button>
+              <button type="button" className="w-full text-left px-3 py-1.5 rounded hover:bg-white/10 transition-colors"
+                onClick={() => { editor.chain().focus().addColumnBefore().run(); setTableMenuOpen(false); }}>
+                Add column before
+              </button>
+              <button type="button" className="w-full text-left px-3 py-1.5 rounded hover:bg-white/10 transition-colors"
+                onClick={() => { editor.chain().focus().addColumnAfter().run(); setTableMenuOpen(false); }}>
+                Add column after
+              </button>
+              <button type="button" className="w-full text-left px-3 py-1.5 rounded hover:bg-white/10 transition-colors"
+                onClick={() => { editor.chain().focus().deleteColumn().run(); setTableMenuOpen(false); }}>
+                Delete column
+              </button>
+              <button type="button" className="w-full text-left px-3 py-1.5 rounded hover:bg-white/10 transition-colors"
+                onClick={() => { editor.chain().focus().addRowBefore().run(); setTableMenuOpen(false); }}>
+                Add row before
+              </button>
+              <button type="button" className="w-full text-left px-3 py-1.5 rounded hover:bg-white/10 transition-colors"
+                onClick={() => { editor.chain().focus().addRowAfter().run(); setTableMenuOpen(false); }}>
+                Add row after
+              </button>
+              <button type="button" className="w-full text-left px-3 py-1.5 rounded hover:bg-white/10 transition-colors"
+                onClick={() => { editor.chain().focus().deleteRow().run(); setTableMenuOpen(false); }}>
+                Delete row
+              </button>
+              <div className="my-1 border-t border-white/10" />
+              <button type="button" className="w-full text-left px-3 py-1.5 rounded hover:bg-red-500/20 text-red-400 transition-colors"
+                onClick={() => { editor.chain().focus().deleteTable().run(); setTableMenuOpen(false); }}>
+                Delete table
+              </button>
+            </div>
+          )}
+        </div>
 
         <Divider />
 
@@ -310,6 +368,43 @@ const RichTextEditor: React.FC<RichTextEditorProps> = ({ content, onChange, sess
           pointer-events: none;
           float: left;
           height: 0;
+        }
+        .rte-wrapper .tiptap .rte-table {
+          border-collapse: collapse;
+          width: 100%;
+          margin: 1rem 0;
+          font-size: 0.875rem;
+          overflow: hidden;
+          border-radius: 0.5rem;
+          border: 1px solid rgb(255 255 255 / 0.1);
+        }
+        .rte-wrapper .tiptap .rte-table th,
+        .rte-wrapper .tiptap .rte-table td {
+          border: 1px solid rgb(255 255 255 / 0.1);
+          padding: 0.5rem 0.75rem;
+          min-width: 4rem;
+          vertical-align: top;
+        }
+        .rte-wrapper .tiptap .rte-table th {
+          background: rgb(255 255 255 / 0.05);
+          color: #e4e4e7;
+          font-weight: 500;
+          text-align: left;
+        }
+        .rte-wrapper .tiptap .rte-table td {
+          color: #a1a1aa;
+        }
+        .rte-wrapper .tiptap .rte-table .selectedCell:after {
+          background: rgb(99 102 241 / 0.2);
+          content: '';
+          left: 0; right: 0; top: 0; bottom: 0;
+          pointer-events: none;
+          position: absolute;
+          z-index: 2;
+        }
+        .rte-wrapper .tiptap .rte-table td,
+        .rte-wrapper .tiptap .rte-table th {
+          position: relative;
         }
       `}</style>
     </div>
