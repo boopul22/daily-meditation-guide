@@ -8,29 +8,42 @@ interface FeedRow {
   description: string;
   category: string;
   published_at: string;
+  featured_image: string;
+}
+
+function absoluteImage(src: string): string {
+  if (!src) return `${SITE_URL}/meditation.png`;
+  if (/^https?:\/\//i.test(src)) return src;
+  return `${SITE_URL}${src.startsWith('/') ? '' : '/'}${src}`;
 }
 
 export async function GET(context: APIContext) {
   const db = context.locals.runtime.env.DB;
 
   const { results } = await db.prepare(
-    "SELECT slug, title, author, description, category, published_at FROM sessions WHERE status = 'published' ORDER BY published_at DESC LIMIT 50"
+    "SELECT slug, title, author, description, category, published_at, featured_image FROM sessions WHERE status = 'published' ORDER BY published_at DESC LIMIT 50"
   ).all<FeedRow>();
 
   const lastBuildDate = results.length > 0 ? toRFC2822(results[0].published_at) : new Date().toUTCString();
 
-  const items = results.map(row => `    <item>
+  const items = results.map(row => {
+    const imageUrl = escapeXml(absoluteImage(row.featured_image));
+    return `    <item>
       <title>${escapeXml(row.title)}</title>
-      <description>${escapeXml(row.description)}</description>
+      <description>${escapeXml(`<img src="${absoluteImage(row.featured_image)}" alt="${row.title}" /><br/>${row.description}`)}</description>
       <link>${SITE_URL}/session/${escapeXml(row.slug)}</link>
       <guid isPermaLink="true">${SITE_URL}/session/${escapeXml(row.slug)}</guid>
       <pubDate>${toRFC2822(row.published_at)}</pubDate>
       <category>${escapeXml(row.category)}</category>
       <author>${escapeXml(row.author)}</author>
-    </item>`).join('\n');
+      <enclosure url="${imageUrl}" type="image/jpeg" length="0"/>
+      <media:content url="${imageUrl}" medium="image"/>
+      <media:thumbnail url="${imageUrl}"/>
+    </item>`;
+  }).join('\n');
 
   const xml = `<?xml version="1.0" encoding="UTF-8"?>
-<rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom">
+<rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom" xmlns:media="http://search.yahoo.com/mrss/">
   <channel>
     <title>${escapeXml(SITE_NAME)}</title>
     <description>${escapeXml(SITE_DESCRIPTION)}</description>
