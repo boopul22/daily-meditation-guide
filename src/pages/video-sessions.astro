@@ -1,0 +1,84 @@
+---
+import MainLayout from '../layouts/MainLayout.astro';
+import VideoSessionsGrid from '../components/VideoSessionsGrid';
+
+const db = (Astro.locals as any).runtime.env.DB;
+const { results } = await db
+  .prepare(
+    'SELECT video_id, title, description, published_at FROM youtube_videos ORDER BY published_at DESC'
+  )
+  .all();
+
+const videos = (results || []).map((row: any) => ({
+  id: row.video_id as string,
+  title: row.title as string,
+  description: (row.description as string) ?? '',
+}));
+
+Astro.response.headers.set(
+  'Cache-Control',
+  'public, max-age=300, s-maxage=3600, stale-while-revalidate=86400'
+);
+
+const siteUrl = 'https://dailymeditationguide.com';
+const pageUrl = `${siteUrl}/video-sessions`;
+
+const itemListJsonLd = JSON.stringify({
+  '@context': 'https://schema.org',
+  '@type': 'CollectionPage',
+  name: 'Video Meditation Sessions',
+  description:
+    'A complete library of guided meditation videos — deep sleep, anxiety relief, morning energy, breathwork and more.',
+  url: pageUrl,
+  mainEntity: {
+    '@type': 'ItemList',
+    numberOfItems: videos.length,
+    itemListElement: videos.slice(0, 50).map((v: any, i: number) => ({
+      '@type': 'ListItem',
+      position: i + 1,
+      name: v.title,
+      url: `https://www.youtube.com/watch?v=${v.id}`,
+    })),
+  },
+});
+
+const breadcrumbJsonLd = JSON.stringify({
+  '@context': 'https://schema.org',
+  '@type': 'BreadcrumbList',
+  itemListElement: [
+    { '@type': 'ListItem', position: 1, name: 'Home', item: `${siteUrl}/` },
+    { '@type': 'ListItem', position: 2, name: 'Video Sessions', item: pageUrl },
+  ],
+});
+
+const extraHead = `<script type="application/ld+json">${itemListJsonLd}</script><script type="application/ld+json">${breadcrumbJsonLd}</script>`;
+---
+
+<MainLayout
+  title="Video Meditation Sessions"
+  description="Browse every guided meditation video from Daily Meditation Guide — sleep, anxiety, focus, breathwork and more. Watch without leaving the page."
+  canonical={pageUrl}
+  extraHead={extraHead}
+>
+  <div class="space-y-12 animate-[fade-enter_0.5s_ease-out]">
+    <header class="space-y-6">
+      <h1 class="font-display text-3xl md:text-5xl font-medium text-zinc-100 tracking-tight">
+        Video Meditation Sessions
+      </h1>
+      <p class="text-zinc-500 max-w-2xl text-lg">
+        Every guided meditation video, in one place. Tap any card to watch it right here.
+      </p>
+      <div class="flex items-center gap-3 text-xs text-zinc-500 pt-2">
+        <span class="px-3 py-1 rounded-full bg-white/5 border border-white/5">
+          {videos.length} sessions
+        </span>
+      </div>
+    </header>
+
+    {videos.length === 0 ? (
+      <div class="text-center py-24 text-zinc-500 text-sm">No video sessions yet.</div>
+    ) : (
+      <VideoSessionsGrid client:load videos={videos} />
+    )}
+  </div>
+</MainLayout>

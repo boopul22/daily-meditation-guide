@@ -4,6 +4,7 @@ const YT_API = 'https://www.googleapis.com/youtube/v3/playlistItems';
 interface PlaylistItem {
   snippet: {
     title: string;
+    description: string;
     resourceId: { videoId: string };
   };
   contentDetails: {
@@ -56,22 +57,33 @@ export async function syncYouTubeVideos(
       result.scanned++;
       const videoId = item.contentDetails?.videoId || item.snippet?.resourceId?.videoId;
       const title = item.snippet?.title;
+      const description = item.snippet?.description ?? '';
       const publishedAt = item.contentDetails?.videoPublishedAt;
       if (!videoId || !title || !publishedAt) {
         result.errors.push(`Missing fields for item: ${JSON.stringify(item).slice(0, 100)}`);
         continue;
       }
 
-      const res = await db
-        .prepare(
-          'INSERT OR IGNORE INTO youtube_videos (video_id, title, published_at) VALUES (?, ?, ?)'
-        )
-        .bind(videoId, title, publishedAt)
-        .run();
+      const existing = await db
+        .prepare('SELECT title, description FROM youtube_videos WHERE video_id = ?')
+        .bind(videoId)
+        .first();
 
-      if (res.meta.changes && res.meta.changes > 0) {
+      if (!existing) {
+        await db
+          .prepare(
+            'INSERT INTO youtube_videos (video_id, title, description, published_at) VALUES (?, ?, ?, ?)'
+          )
+          .bind(videoId, title, description, publishedAt)
+          .run();
         result.inserted++;
       } else {
+        if (existing.title !== title || existing.description !== description) {
+          await db
+            .prepare('UPDATE youtube_videos SET title = ?, description = ? WHERE video_id = ?')
+            .bind(title, description, videoId)
+            .run();
+        }
         result.skipped++;
       }
     }
