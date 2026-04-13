@@ -30,7 +30,7 @@ export async function GET(context: APIContext) {
     const imageUrl = escapeXml(absoluteImage(row.featured_image));
     return `    <item>
       <title>${escapeXml(row.title)}</title>
-      <description>${escapeXml(`<img src="${absoluteImage(row.featured_image)}" alt="${row.title}" /><br/>${row.description}`)}</description>
+      <description>${escapeXml(row.description)}</description>
       <link>${SITE_URL}/session/${escapeXml(row.slug)}</link>
       <guid isPermaLink="true">${SITE_URL}/session/${escapeXml(row.slug)}</guid>
       <pubDate>${toRFC2822(row.published_at)}</pubDate>
