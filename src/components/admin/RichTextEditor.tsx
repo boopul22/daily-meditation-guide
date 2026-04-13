@@ -289,14 +289,14 @@ const RichTextEditor: React.FC<RichTextEditorProps> = ({ content, onChange, sess
           active={editor.isActive('bulletList')}
           title="Bullet List"
         >
-          <iconify-icon icon="solar:list-linear" width="16"></iconify-icon>
+          <iconify-icon icon="tabler:list" width="16"></iconify-icon>
         </ToolbarButton>
         <ToolbarButton
           onClick={() => editor.chain().focus().toggleOrderedList().run()}
           active={editor.isActive('orderedList')}
           title="Ordered List"
         >
-          <iconify-icon icon="solar:list-1-linear" width="16"></iconify-icon>
+          <iconify-icon icon="tabler:list-numbers" width="16"></iconify-icon>
         </ToolbarButton>
 
         <Divider />
@@ -306,28 +306,28 @@ const RichTextEditor: React.FC<RichTextEditorProps> = ({ content, onChange, sess
           active={editor.isActive({ textAlign: 'left' })}
           title="Align Left"
         >
-          <iconify-icon icon="solar:text-align-left-linear" width="16"></iconify-icon>
+          <iconify-icon icon="tabler:align-left" width="16"></iconify-icon>
         </ToolbarButton>
         <ToolbarButton
           onClick={() => editor.chain().focus().setTextAlign('center').run()}
           active={editor.isActive({ textAlign: 'center' })}
           title="Align Center"
         >
-          <iconify-icon icon="solar:text-align-center-linear" width="16"></iconify-icon>
+          <iconify-icon icon="tabler:align-center" width="16"></iconify-icon>
         </ToolbarButton>
         <ToolbarButton
           onClick={() => editor.chain().focus().setTextAlign('right').run()}
           active={editor.isActive({ textAlign: 'right' })}
           title="Align Right"
         >
-          <iconify-icon icon="solar:text-align-right-linear" width="16"></iconify-icon>
+          <iconify-icon icon="tabler:align-right" width="16"></iconify-icon>
         </ToolbarButton>
         <ToolbarButton
           onClick={() => editor.chain().focus().setTextAlign('justify').run()}
           active={editor.isActive({ textAlign: 'justify' })}
           title="Justify"
         >
-          <iconify-icon icon="solar:text-align-justify-linear" width="16"></iconify-icon>
+          <iconify-icon icon="tabler:align-justified" width="16"></iconify-icon>
         </ToolbarButton>
 
         <Divider />
@@ -361,7 +361,7 @@ const RichTextEditor: React.FC<RichTextEditorProps> = ({ content, onChange, sess
           onClick={() => editor.chain().focus().setHorizontalRule().run()}
           title="Horizontal Rule"
         >
-          <iconify-icon icon="solar:minus-linear" width="16"></iconify-icon>
+          <iconify-icon icon="tabler:minus" width="16"></iconify-icon>
         </ToolbarButton>
 
         {/* Table insert button — only shown when NOT inside a table */}
@@ -372,7 +372,7 @@ const RichTextEditor: React.FC<RichTextEditorProps> = ({ content, onChange, sess
               active={gridOpen}
               title="Insert Table"
             >
-              <iconify-icon icon="solar:tablet-linear" width="16"></iconify-icon>
+              <iconify-icon icon="tabler:table" width="16"></iconify-icon>
             </ToolbarButton>
           </div>
         )}
