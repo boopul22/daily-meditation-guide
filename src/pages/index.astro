@@ -5,12 +5,23 @@ import { rowToSession, SESSION_SELECT_WITH_AUTHOR } from '../lib/db';
 import type { Session } from '../types';
 
 const db = Astro.locals.runtime.env.DB;
-const { results } = await db.prepare(
-  `${SESSION_SELECT_WITH_AUTHOR} WHERE s.status = 'published' ORDER BY s.published_at DESC`
-).all();
+const [sessionsRes, videosRes] = await Promise.all([
+  db.prepare(
+    `${SESSION_SELECT_WITH_AUTHOR} WHERE s.status = 'published' ORDER BY s.published_at DESC`
+  ).all(),
+  db.prepare(
+    "SELECT video_id, title, slug FROM youtube_videos WHERE slug != '' ORDER BY published_at DESC LIMIT 12"
+  ).all(),
+]);
 
-const sessions: Session[] = (results || []).map((row: any) => rowToSession(row));
+const sessions: Session[] = ((sessionsRes.results || []) as any[]).map((row) => rowToSession(row));
 const latestSession = sessions[0] || null;
+
+const videos = ((videosRes.results || []) as any[]).map((r) => ({
+  id: r.video_id as string,
+  title: r.title as string,
+  slug: r.slug as string,
+}));
 
 // CDN cache: serve cached for 1hr, revalidate in background
 Astro.response.headers.set('Cache-Control', 'public, max-age=300, s-maxage=3600, stale-while-revalidate=86400');
@@ -54,10 +65,10 @@ if (latestSession?.featuredImage) {
           Guided audio sessions for sleep, anxiety relief, and focus. Start your daily meditation practice with just five minutes.
         </p>
         <div class="flex flex-col sm:flex-row items-center gap-4 pt-2 w-full sm:w-auto">
-          <button class="group flex items-center justify-center gap-3 px-6 py-3 bg-zinc-100 hover:bg-white text-zinc-950 rounded-full font-medium text-sm transition-all hover:shadow-[0_0_20px_-5px_rgba(255,255,255,0.3)] w-full sm:w-auto">
+          <a href="/video-sessions" class="group flex items-center justify-center gap-3 px-6 py-3 bg-zinc-100 hover:bg-white text-zinc-950 rounded-full font-medium text-sm transition-all hover:shadow-[0_0_20px_-5px_rgba(255,255,255,0.3)] w-full sm:w-auto">
             <iconify-icon icon="solar:play-circle-linear" width="20" stroke-width="1.5" class="text-zinc-950"></iconify-icon>
-            Start Daily Calm
-          </button>
+            Watch Video Sessions
+          </a>
           <a href="/sessions" class="px-6 py-3 border border-white/10 hover:border-white/20 hover:bg-white/5 rounded-full text-zinc-300 text-sm font-medium transition-all w-full sm:w-auto text-center">
             Explore Library
           </a>
@@ -126,6 +137,6 @@ if (latestSession?.featuredImage) {
     </section>
 
     {/* Interactive content: filters + grid */}
-    <HomeContent client:idle sessions={sessions} />
+    <HomeContent client:idle sessions={sessions} videos={videos} />
   </div>
 </MainLayout>

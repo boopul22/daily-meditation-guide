@@ -1,6 +1,6 @@
 ---
 import MainLayout from '../layouts/MainLayout.astro';
-import { VIDEO_CATEGORIES, categorize, thumbnailUrl, videoSlug } from '../lib/videoCategories';
+import { VIDEO_CATEGORIES, categorize, thumbnailUrl, videoSlug, cleanDescription } from '../lib/videoCategories';
 
 interface VideoRow {
   video_id: string;
@@ -39,14 +39,15 @@ function excerpt(text: string, max = 160): string {
 const grouped = new Map<string, { label: string; videos: Video[] }>();
 
 for (const row of rows) {
-  const cat = categorize(row.title, row.description);
+  const cleaned = cleanDescription(row.description ?? '');
+  const cat = categorize(row.title, cleaned);
   const slug = row.slug || videoSlug(row.title, row.video_id);
   const video: Video = {
     id: row.video_id,
     title: row.title,
-    description: row.description ?? '',
+    description: cleaned,
     slug,
-    excerpt: excerpt(row.description ?? ''),
+    excerpt: excerpt(cleaned),
   };
   const bucket = grouped.get(cat.key);
   if (bucket) {

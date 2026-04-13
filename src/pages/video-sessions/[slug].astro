@@ -1,6 +1,6 @@
 ---
 import MainLayout from '../../layouts/MainLayout.astro';
-import { categorize, thumbnailUrl } from '../../lib/videoCategories';
+import { categorize, thumbnailUrl, cleanDescription } from '../../lib/videoCategories';
 
 export const prerender = false;
 
@@ -20,7 +20,7 @@ if (!row) {
 
 const videoId = row.video_id as string;
 const title = row.title as string;
-const description = (row.description as string) ?? '';
+const description = cleanDescription((row.description as string) ?? '');
 const publishedAt = row.published_at as string;
 const category = categorize(title, description);
 

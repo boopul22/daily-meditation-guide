@@ -49,6 +49,31 @@ export function videoSlug(title: string, videoId: string): string {
   return `${base}-${suffix}`;
 }
 
+// Strip common markdown syntax from YouTube descriptions so they render cleanly
+// as plain text. Keeps the text, drops the markers.
+export function cleanDescription(raw: string): string {
+  if (!raw) return '';
+  let text = raw;
+  // Remove markdown horizontal rules and trailing/leading divider lines
+  text = text.replace(/^\s*[-_*]{3,}\s*$/gm, '');
+  // Collapse heading markers (# Heading → Heading)
+  text = text.replace(/^\s{0,3}#{1,6}\s+/gm, '');
+  // Bold / italic: **x** __x__ *x* _x_ → x
+  text = text.replace(/\*\*([^*\n]+)\*\*/g, '$1');
+  text = text.replace(/__([^_\n]+)__/g, '$1');
+  text = text.replace(/(?<!\*)\*([^*\n]+)\*(?!\*)/g, '$1');
+  text = text.replace(/(?<!_)_([^_\n]+)_(?!_)/g, '$1');
+  // Inline code `x` → x
+  text = text.replace(/`([^`\n]+)`/g, '$1');
+  // List markers at line start: "- ", "* ", "+ ", "1. " → "• "
+  text = text.replace(/^\s*(?:[-*+]|\d+\.)\s+/gm, '• ');
+  // Links [text](url) → text
+  text = text.replace(/\[([^\]]+)\]\([^)]+\)/g, '$1');
+  // Collapse excessive blank lines (3+ → 2)
+  text = text.replace(/\n{3,}/g, '\n\n');
+  return text.trim();
+}
+
 // Note: use img.youtube.com (not i.ytimg.com) because it's whitelisted in CSP.
 // hqdefault.jpg is the highest resolution guaranteed to exist for every YouTube video.
 export function thumbnailUrl(videoId: string, size: 'hq' | 'mq' = 'hq'): string {
