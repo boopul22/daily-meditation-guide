@@ -202,7 +202,7 @@ const Navbar: React.FC = () => {
                       notifications.map((n) => (
                         <a
                           key={n.slug}
-                          href={`/sessions/${n.slug}`}
+                          href={`/session/${n.slug}`}
                           onClick={() => setIsNotifOpen(false)}
                           className="block px-4 py-3 hover:bg-white/5 transition-colors border-b border-white/5 last:border-b-0"
                         >
@@ -313,7 +313,7 @@ const Navbar: React.FC = () => {
                     notifications.map((n) => (
                       <a
                         key={n.slug}
-                        href={`/sessions/${n.slug}`}
+                        href={`/session/${n.slug}`}
                         onClick={() => setIsMobileMenuOpen(false)}
                         className="block px-4 py-3 hover:bg-white/5 border-b border-white/5 last:border-b-0"
                       >
@@ -407,7 +407,7 @@ const Navbar: React.FC = () => {
                 searchResults.map((s) => (
                   <a
                     key={s.slug}
-                    href={`/sessions/${s.slug}`}
+                    href={`/session/${s.slug}`}
                     onClick={closeSearch}
                     className="block px-4 py-3 hover:bg-white/5 border-b border-white/5 last:border-b-0"
                   >
