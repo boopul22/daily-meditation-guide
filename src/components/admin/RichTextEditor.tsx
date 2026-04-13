@@ -20,7 +20,6 @@ function preprocessContent(html: string): string {
   const parser = new DOMParser();
   const doc = parser.parseFromString(html, 'text/html');
 
-  // Convert styled divs (legacy blockquotes) to semantic <blockquote>
   doc.querySelectorAll('div').forEach(div => {
     const cls = div.getAttribute('class') || '';
     if (cls.includes('border-l-') || (cls.includes('bg-zinc') && cls.includes('rounded'))) {
@@ -57,20 +56,98 @@ const ToolbarButton: React.FC<{
 
 const Divider = () => <div className="w-px h-6 bg-white/10 mx-1 self-center" />;
 
+// Visual grid picker for inserting a table
+const TableGridPicker: React.FC<{
+  onSelect: (rows: number, cols: number) => void;
+  onClose: () => void;
+  style: React.CSSProperties;
+}> = ({ onSelect, onClose, style }) => {
+  const [hovered, setHovered] = useState({ rows: 0, cols: 0 });
+  const GRID = 6;
+
+  return (
+    <div
+      className="fixed z-[9999] bg-zinc-800 border border-white/10 rounded-xl shadow-2xl p-3"
+      style={style}
+      onMouseLeave={onClose}
+    >
+      <p className="text-xs text-zinc-400 mb-2 text-center">
+        {hovered.rows > 0 && hovered.cols > 0
+          ? `${hovered.rows} × ${hovered.cols} table`
+          : 'Hover to select size'}
+      </p>
+      <div className="grid gap-1" style={{ gridTemplateColumns: `repeat(${GRID}, 1.5rem)` }}>
+        {Array.from({ length: GRID * GRID }).map((_, i) => {
+          const row = Math.floor(i / GRID) + 1;
+          const col = (i % GRID) + 1;
+          const active = row <= hovered.rows && col <= hovered.cols;
+          return (
+            <div
+              key={i}
+              className={`w-6 h-6 rounded border cursor-pointer transition-colors ${active
+                ? 'bg-indigo-500/40 border-indigo-400/60'
+                : 'bg-white/5 border-white/10 hover:bg-white/10'}`}
+              onMouseEnter={() => setHovered({ rows: row, cols: col })}
+              onClick={() => { onSelect(row, col); onClose(); }}
+            />
+          );
+        })}
+      </div>
+    </div>
+  );
+};
+
+// Contextual toolbar shown when cursor is inside a table
+const TableContextBar: React.FC<{ editor: any }> = ({ editor }) => {
+  const btn = (label: string, icon: string, action: () => void, danger = false) => (
+    <button
+      key={label}
+      type="button"
+      onMouseDown={e => e.preventDefault()}
+      onClick={action}
+      title={label}
+      className={`flex items-center gap-1.5 px-2.5 py-1 rounded-md text-xs font-medium transition-colors whitespace-nowrap ${
+        danger
+          ? 'text-red-400 hover:bg-red-500/15'
+          : 'text-zinc-400 hover:bg-white/10 hover:text-zinc-200'
+      }`}
+    >
+      <iconify-icon icon={icon} width="13"></iconify-icon>
+      {label}
+    </button>
+  );
+
+  return (
+    <div className="flex-none flex items-center gap-0.5 px-2 py-1 bg-indigo-950/40 border-b border-indigo-500/20 overflow-x-auto no-scrollbar">
+      <span className="text-[10px] font-semibold text-indigo-400 uppercase tracking-wider px-1 mr-1">Table</span>
+
+      {btn('Col ←', 'solar:arrow-left-linear', () => editor.chain().focus().addColumnBefore().run())}
+      {btn('Col →', 'solar:arrow-right-linear', () => editor.chain().focus().addColumnAfter().run())}
+      {btn('Del Col', 'solar:close-square-linear', () => editor.chain().focus().deleteColumn().run())}
+
+      <div className="w-px h-4 bg-white/10 mx-1 self-center flex-none" />
+
+      {btn('Row ↑', 'solar:arrow-up-linear', () => editor.chain().focus().addRowBefore().run())}
+      {btn('Row ↓', 'solar:arrow-down-linear', () => editor.chain().focus().addRowAfter().run())}
+      {btn('Del Row', 'solar:close-square-linear', () => editor.chain().focus().deleteRow().run())}
+
+      <div className="w-px h-4 bg-white/10 mx-1 self-center flex-none" />
+
+      {btn('Toggle Header', 'solar:document-text-linear', () => editor.chain().focus().toggleHeaderRow().run())}
+
+      <div className="w-px h-4 bg-white/10 mx-1 self-center flex-none" />
+
+      {btn('Delete Table', 'solar:trash-bin-minimalistic-linear', () => editor.chain().focus().deleteTable().run(), true)}
+    </div>
+  );
+};
+
 const RichTextEditor: React.FC<RichTextEditorProps> = ({ content, onChange, sessionSlug, currentUser }) => {
   const fileInputRef = useRef<HTMLInputElement>(null);
   const tableButtonRef = useRef<HTMLDivElement>(null);
   const [uploading, setUploading] = useState(false);
-  const [tableMenuOpen, setTableMenuOpen] = useState(false);
-  const [tableMenuPos, setTableMenuPos] = useState({ top: 0, left: 0 });
-
-  const openTableMenu = () => {
-    if (tableButtonRef.current) {
-      const rect = tableButtonRef.current.getBoundingClientRect();
-      setTableMenuPos({ top: rect.bottom + 4, left: rect.left });
-    }
-    setTableMenuOpen(v => !v);
-  };
+  const [gridOpen, setGridOpen] = useState(false);
+  const [gridPos, setGridPos] = useState({ top: 0, left: 0 });
 
   const editor = useEditor({
     extensions: [
@@ -130,11 +207,20 @@ const RichTextEditor: React.FC<RichTextEditorProps> = ({ content, onChange, sess
     }
   }, [editor]);
 
+  const openGrid = () => {
+    if (tableButtonRef.current) {
+      const rect = tableButtonRef.current.getBoundingClientRect();
+      setGridPos({ top: rect.bottom + 4, left: rect.left });
+    }
+    setGridOpen(true);
+  };
+
   if (!editor) return null;
+
+  const inTable = editor.isActive('table');
 
   return (
     <div className="rte-wrapper h-full flex flex-col">
-      {/* Hidden file input for image upload */}
       <input
         ref={fileInputRef}
         type="file"
@@ -143,7 +229,7 @@ const RichTextEditor: React.FC<RichTextEditorProps> = ({ content, onChange, sess
         onChange={handleImageUpload}
       />
 
-      {/* Toolbar */}
+      {/* Main toolbar */}
       <div className="flex-none flex flex-wrap items-center gap-0.5 px-2 md:px-3 py-1 md:py-1.5 bg-zinc-900/50 border-b border-white/5 overflow-x-auto no-scrollbar">
         <ToolbarButton
           onClick={() => editor.chain().focus().toggleHeading({ level: 2 }).run()}
@@ -227,56 +313,19 @@ const RichTextEditor: React.FC<RichTextEditorProps> = ({ content, onChange, sess
         >
           <iconify-icon icon="solar:minus-linear" width="16"></iconify-icon>
         </ToolbarButton>
-        <div ref={tableButtonRef} className="relative">
-          <ToolbarButton
-            onClick={openTableMenu}
-            active={editor.isActive('table') || tableMenuOpen}
-            title="Table"
-          >
-            <iconify-icon icon="solar:tablet-linear" width="16"></iconify-icon>
-          </ToolbarButton>
-          {tableMenuOpen && (
-            <div
-              className="fixed z-[9999] bg-zinc-800 border border-white/10 rounded-lg shadow-xl p-1 min-w-[160px] text-xs text-zinc-300"
-              style={{ top: tableMenuPos.top, left: tableMenuPos.left }}
-              onMouseLeave={() => setTableMenuOpen(false)}
+
+        {/* Table insert button — only shown when NOT inside a table */}
+        {!inTable && (
+          <div ref={tableButtonRef}>
+            <ToolbarButton
+              onClick={openGrid}
+              active={gridOpen}
+              title="Insert Table"
             >
-              <button type="button" className="w-full text-left px-3 py-1.5 rounded hover:bg-white/10 transition-colors"
-                onClick={() => { editor.chain().focus().insertTable({ rows: 3, cols: 3, withHeaderRow: true }).run(); setTableMenuOpen(false); }}>
-                Insert 3×3 table
-              </button>
-              <button type="button" className="w-full text-left px-3 py-1.5 rounded hover:bg-white/10 transition-colors"
-                onClick={() => { editor.chain().focus().addColumnBefore().run(); setTableMenuOpen(false); }}>
-                Add column before
-              </button>
-              <button type="button" className="w-full text-left px-3 py-1.5 rounded hover:bg-white/10 transition-colors"
-                onClick={() => { editor.chain().focus().addColumnAfter().run(); setTableMenuOpen(false); }}>
-                Add column after
-              </button>
-              <button type="button" className="w-full text-left px-3 py-1.5 rounded hover:bg-white/10 transition-colors"
-                onClick={() => { editor.chain().focus().deleteColumn().run(); setTableMenuOpen(false); }}>
-                Delete column
-              </button>
-              <button type="button" className="w-full text-left px-3 py-1.5 rounded hover:bg-white/10 transition-colors"
-                onClick={() => { editor.chain().focus().addRowBefore().run(); setTableMenuOpen(false); }}>
-                Add row before
-              </button>
-              <button type="button" className="w-full text-left px-3 py-1.5 rounded hover:bg-white/10 transition-colors"
-                onClick={() => { editor.chain().focus().addRowAfter().run(); setTableMenuOpen(false); }}>
-                Add row after
-              </button>
-              <button type="button" className="w-full text-left px-3 py-1.5 rounded hover:bg-white/10 transition-colors"
-                onClick={() => { editor.chain().focus().deleteRow().run(); setTableMenuOpen(false); }}>
-                Delete row
-              </button>
-              <div className="my-1 border-t border-white/10" />
-              <button type="button" className="w-full text-left px-3 py-1.5 rounded hover:bg-red-500/20 text-red-400 transition-colors"
-                onClick={() => { editor.chain().focus().deleteTable().run(); setTableMenuOpen(false); }}>
-                Delete table
-              </button>
-            </div>
-          )}
-        </div>
+              <iconify-icon icon="solar:tablet-linear" width="16"></iconify-icon>
+            </ToolbarButton>
+          </div>
+        )}
 
         <Divider />
 
@@ -295,6 +344,20 @@ const RichTextEditor: React.FC<RichTextEditorProps> = ({ content, onChange, sess
           <iconify-icon icon="solar:undo-right-linear" width="16"></iconify-icon>
         </ToolbarButton>
       </div>
+
+      {/* Contextual table toolbar — shown only when cursor is inside a table */}
+      {inTable && <TableContextBar editor={editor} />}
+
+      {/* Grid picker portal */}
+      {gridOpen && (
+        <TableGridPicker
+          style={{ top: gridPos.top, left: gridPos.left }}
+          onSelect={(rows, cols) =>
+            editor.chain().focus().insertTable({ rows, cols, withHeaderRow: true }).run()
+          }
+          onClose={() => setGridOpen(false)}
+        />
+      )}
 
       {/* Editor Content */}
       <div className="flex-1 min-h-0 overflow-y-auto">
@@ -385,8 +448,6 @@ const RichTextEditor: React.FC<RichTextEditorProps> = ({ content, onChange, sess
           width: 100%;
           margin: 1rem 0;
           font-size: 0.875rem;
-          overflow: hidden;
-          border-radius: 0.5rem;
           border: 1px solid rgb(255 255 255 / 0.1);
         }
         .rte-wrapper .tiptap .rte-table th,
@@ -395,9 +456,10 @@ const RichTextEditor: React.FC<RichTextEditorProps> = ({ content, onChange, sess
           padding: 0.5rem 0.75rem;
           min-width: 4rem;
           vertical-align: top;
+          position: relative;
         }
         .rte-wrapper .tiptap .rte-table th {
-          background: rgb(255 255 255 / 0.05);
+          background: rgb(99 102 241 / 0.08);
           color: #e4e4e7;
           font-weight: 500;
           text-align: left;
@@ -406,16 +468,12 @@ const RichTextEditor: React.FC<RichTextEditorProps> = ({ content, onChange, sess
           color: #a1a1aa;
         }
         .rte-wrapper .tiptap .rte-table .selectedCell:after {
-          background: rgb(99 102 241 / 0.2);
+          background: rgb(99 102 241 / 0.15);
           content: '';
           left: 0; right: 0; top: 0; bottom: 0;
           pointer-events: none;
           position: absolute;
           z-index: 2;
-        }
-        .rte-wrapper .tiptap .rte-table td,
-        .rte-wrapper .tiptap .rte-table th {
-          position: relative;
         }
       `}</style>
     </div>
