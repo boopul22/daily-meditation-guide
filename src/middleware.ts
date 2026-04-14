@@ -34,17 +34,18 @@ export const onRequest = defineMiddleware(async (context, next) => {
     "form-action 'self'",
   ].join('; '));
 
-  // Ensure public pages are explicitly indexable
-  if (!path.startsWith('/admin') && !path.startsWith('/api/')) {
-    // Don't override if the page already sets a robots meta (noindex pages like privacy/terms)
-    // This header acts as a safety net for SSR pages
+  // /api/image/* serves user-facing images and must be indexable by Googlebot-Image
+  const isPublicImage = path.startsWith('/api/image/');
+
+  // Ensure public pages (and public images) are explicitly indexable
+  if (isPublicImage || (!path.startsWith('/admin') && !path.startsWith('/api/'))) {
     if (!response.headers.has('X-Robots-Tag')) {
-      response.headers.set('X-Robots-Tag', 'index, follow');
+      response.headers.set('X-Robots-Tag', 'index, follow, max-image-preview:large');
     }
   }
 
-  // Block admin and API routes from indexing
-  if (path.startsWith('/admin') || path.startsWith('/api/')) {
+  // Block admin and non-image API routes from indexing
+  if (path.startsWith('/admin') || (path.startsWith('/api/') && !isPublicImage)) {
     response.headers.set('X-Robots-Tag', 'noindex, nofollow');
   }
 

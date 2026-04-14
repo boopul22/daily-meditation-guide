@@ -3,6 +3,7 @@
 
 User-agent: *
 Allow: /
+Allow: /api/image/
 Disallow: /admin
 Disallow: /admin/
 Disallow: /api/

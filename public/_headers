@@ -29,6 +29,10 @@
 /contact
   X-Robots-Tag: index, follow
 
+# Image proxy must be indexable by Googlebot-Image
+/api/image/*
+  X-Robots-Tag: index, follow, max-image-preview:large
+
 # Block admin pages from indexing at edge level
 /admin/*
   X-Robots-Tag: noindex, nofollow
