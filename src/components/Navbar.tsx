@@ -181,7 +181,7 @@ const Navbar: React.FC = () => {
               href="https://ko-fi.com/bipul"
               target="_blank"
               rel="noopener noreferrer"
-              className="hidden lg:inline-flex items-center gap-1.5 px-3.5 py-1.5 mr-1 text-xs font-semibold text-white bg-gradient-to-r from-pink-500 to-rose-500 hover:from-pink-400 hover:to-rose-400 rounded-full transition-colors shadow-sm shadow-pink-500/20"
+              className="hidden lg:inline-flex items-center gap-1.5 px-3.5 py-1.5 text-xs font-semibold text-white bg-gradient-to-r from-pink-500 to-rose-500 hover:from-pink-400 hover:to-rose-400 rounded-full transition-colors shadow-sm shadow-pink-500/20"
             >
               <iconify-icon icon="solar:heart-bold" width="14"></iconify-icon>
               Donate
@@ -255,7 +255,7 @@ const Navbar: React.FC = () => {
             </div>
 
             {/* Desktop Auth — fixed width slot prevents layout shift between loading → signed-in/out */}
-            <div className="hidden lg:flex items-center justify-end min-w-[90px] h-8 ml-1">
+            <div className={`hidden lg:flex items-center justify-end h-8 ml-1 ${user ? '' : 'min-w-[90px]'}`}>
             {loading ? (
               <div className="w-8 h-8 rounded-full bg-zinc-800 animate-pulse"></div>
             ) : user ? (
