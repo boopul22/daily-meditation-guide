@@ -152,7 +152,7 @@ const Navbar: React.FC = () => {
   return (
     <>
       <nav className="fixed top-0 w-full z-50 border-b border-white/[0.06] bg-[#080706]/80 backdrop-blur-xl">
-        <div className="max-w-7xl mx-auto px-6 h-16 flex items-center justify-between gap-4">
+        <div className="max-w-7xl mx-auto px-6 h-16 flex items-center gap-8">
           <a
             href="/"
             className="flex items-center gap-2.5 group cursor-pointer flex-shrink-0"
@@ -168,7 +168,7 @@ const Navbar: React.FC = () => {
           </a>
 
           {/* Desktop Menu */}
-          <div className="hidden md:flex items-center gap-7">
+          <div className="hidden lg:flex items-center gap-7 flex-1">
             <a href="/" className="text-sm font-medium text-zinc-400 hover:text-zinc-100 transition-colors">Practice</a>
             <a href="/sessions" className="text-sm font-medium text-zinc-400 hover:text-zinc-100 transition-colors">Sessions</a>
             <a href="/infographics" className="text-sm font-medium text-zinc-400 hover:text-zinc-100 transition-colors">Infographics</a>
@@ -176,20 +176,20 @@ const Navbar: React.FC = () => {
             <a href="/contact" className="text-sm font-medium text-zinc-400 hover:text-zinc-100 transition-colors">Contact</a>
           </div>
 
-          <div className="flex items-center gap-2">
+          <div className="flex items-center gap-2 ml-auto">
             <a
               href="https://ko-fi.com/bipul"
               target="_blank"
               rel="noopener noreferrer"
-              className="hidden md:inline-flex items-center gap-1.5 px-3.5 py-1.5 mr-1 text-xs font-semibold text-white bg-gradient-to-r from-pink-500 to-rose-500 hover:from-pink-400 hover:to-rose-400 rounded-full transition-colors shadow-sm shadow-pink-500/20"
+              className="hidden lg:inline-flex items-center gap-1.5 px-3.5 py-1.5 mr-1 text-xs font-semibold text-white bg-gradient-to-r from-pink-500 to-rose-500 hover:from-pink-400 hover:to-rose-400 rounded-full transition-colors shadow-sm shadow-pink-500/20"
             >
               <iconify-icon icon="solar:heart-bold" width="14"></iconify-icon>
               Donate
             </a>
-            <button onClick={openSearch} aria-label="Search" className="hidden md:block p-2 hover:bg-white/5 rounded-full transition-colors text-zinc-400 hover:text-white">
+            <button onClick={openSearch} aria-label="Search" className="hidden lg:block p-2 hover:bg-white/5 rounded-full transition-colors text-zinc-400 hover:text-white">
               <iconify-icon icon="solar:magnifer-linear" width="20" stroke-width="1.5"></iconify-icon>
             </button>
-            <div className="hidden md:block relative" ref={notifRef}>
+            <div className="hidden lg:block relative" ref={notifRef}>
               <button
                 onClick={toggleNotifications}
                 aria-label="Notifications"
@@ -255,7 +255,7 @@ const Navbar: React.FC = () => {
             </div>
 
             {/* Desktop Auth — fixed width slot prevents layout shift between loading → signed-in/out */}
-            <div className="hidden md:flex items-center justify-end min-w-[90px] h-8 ml-1">
+            <div className="hidden lg:flex items-center justify-end min-w-[90px] h-8 ml-1">
             {loading ? (
               <div className="w-8 h-8 rounded-full bg-zinc-800 animate-pulse"></div>
             ) : user ? (
@@ -299,7 +299,7 @@ const Navbar: React.FC = () => {
 
             {/* Mobile Menu Button */}
             <button
-              className="md:hidden p-2 text-zinc-400 hover:text-white"
+              className="lg:hidden p-2 text-zinc-400 hover:text-white"
               onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)}
               aria-label={isMobileMenuOpen ? "Close menu" : "Open menu"}
               aria-expanded={isMobileMenuOpen}
@@ -312,7 +312,7 @@ const Navbar: React.FC = () => {
 
       {/* Mobile Menu Overlay */}
       {isMobileMenuOpen && (
-        <div className="fixed inset-0 z-40 bg-[#080706] pt-24 px-6 md:hidden animate-[fade-enter_0.2s_ease-out]">
+        <div className="fixed inset-0 z-40 bg-[#080706] pt-24 px-6 lg:hidden animate-[fade-enter_0.2s_ease-out]">
           <div className="flex flex-col gap-6 text-lg font-medium text-zinc-300">
             <a href="/" onClick={() => setIsMobileMenuOpen(false)} className="border-b border-white/5 pb-4">Practice</a>
             <a href="/sessions" onClick={() => setIsMobileMenuOpen(false)} className="border-b border-white/5 pb-4">Sessions</a>
