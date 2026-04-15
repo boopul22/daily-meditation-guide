@@ -152,23 +152,23 @@ const Navbar: React.FC = () => {
   return (
     <>
       <nav className="fixed top-0 w-full z-50 border-b border-white/[0.06] bg-[#080706]/80 backdrop-blur-xl">
-        <div className="max-w-6xl mx-auto px-6 h-16 flex items-center justify-between">
+        <div className="max-w-7xl mx-auto px-6 h-16 flex items-center justify-between gap-4">
           <a
             href="/"
-            className="flex items-center gap-2 group cursor-pointer"
+            className="flex items-center gap-2.5 group cursor-pointer flex-shrink-0"
           >
             <img
               src="/favicon-192x192.png"
               alt="Daily Meditation Guide"
-              width={24}
-              height={24}
-              className="w-6 h-6 rounded-full ring-1 ring-zinc-700 group-hover:ring-zinc-500 transition-colors"
+              width={28}
+              height={28}
+              className="w-7 h-7 rounded-full ring-1 ring-zinc-700 group-hover:ring-zinc-500 transition-colors"
             />
-            <span className="text-zinc-200 font-medium tracking-tighter text-sm">dailymeditationguide.com</span>
+            <span className="text-zinc-100 font-semibold tracking-tight text-[15px] hidden sm:inline">Daily Meditation Guide</span>
           </a>
 
           {/* Desktop Menu */}
-          <div className="hidden md:flex items-center gap-8">
+          <div className="hidden md:flex items-center gap-7">
             <a href="/" className="text-sm font-medium text-zinc-400 hover:text-zinc-100 transition-colors">Practice</a>
             <a href="/sessions" className="text-sm font-medium text-zinc-400 hover:text-zinc-100 transition-colors">Sessions</a>
             <a href="/infographics" className="text-sm font-medium text-zinc-400 hover:text-zinc-100 transition-colors">Infographics</a>
@@ -176,12 +176,12 @@ const Navbar: React.FC = () => {
             <a href="/contact" className="text-sm font-medium text-zinc-400 hover:text-zinc-100 transition-colors">Contact</a>
           </div>
 
-          <div className="flex items-center gap-4">
+          <div className="flex items-center gap-2">
             <a
               href="https://ko-fi.com/bipul"
               target="_blank"
               rel="noopener noreferrer"
-              className="hidden md:inline-flex items-center gap-1.5 px-3 py-1.5 text-xs font-semibold text-white bg-gradient-to-r from-pink-500 to-rose-500 hover:from-pink-400 hover:to-rose-400 rounded-full transition-colors shadow-sm shadow-pink-500/20"
+              className="hidden md:inline-flex items-center gap-1.5 px-3.5 py-1.5 mr-1 text-xs font-semibold text-white bg-gradient-to-r from-pink-500 to-rose-500 hover:from-pink-400 hover:to-rose-400 rounded-full transition-colors shadow-sm shadow-pink-500/20"
             >
               <iconify-icon icon="solar:heart-bold" width="14"></iconify-icon>
               Donate
@@ -255,7 +255,7 @@ const Navbar: React.FC = () => {
             </div>
 
             {/* Desktop Auth — fixed width slot prevents layout shift between loading → signed-in/out */}
-            <div className="hidden md:flex items-center justify-end min-w-[90px] h-8">
+            <div className="hidden md:flex items-center justify-end min-w-[90px] h-8 ml-1">
             {loading ? (
               <div className="w-8 h-8 rounded-full bg-zinc-800 animate-pulse"></div>
             ) : user ? (
