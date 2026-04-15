@@ -177,6 +177,15 @@ const Navbar: React.FC = () => {
           </div>
 
           <div className="flex items-center gap-4">
+            <a
+              href="https://ko-fi.com/bipul"
+              target="_blank"
+              rel="noopener noreferrer"
+              className="hidden md:inline-flex items-center gap-1.5 px-3 py-1.5 text-xs font-semibold text-white bg-gradient-to-r from-pink-500 to-rose-500 hover:from-pink-400 hover:to-rose-400 rounded-full transition-colors shadow-sm shadow-pink-500/20"
+            >
+              <iconify-icon icon="solar:heart-bold" width="14"></iconify-icon>
+              Donate
+            </a>
             <button onClick={openSearch} aria-label="Search" className="hidden md:block p-2 hover:bg-white/5 rounded-full transition-colors text-zinc-400 hover:text-white">
               <iconify-icon icon="solar:magnifer-linear" width="20" stroke-width="1.5"></iconify-icon>
             </button>
@@ -310,6 +319,16 @@ const Navbar: React.FC = () => {
             <a href="/infographics" onClick={() => setIsMobileMenuOpen(false)} className="border-b border-white/5 pb-4">Infographics</a>
             <a href="/about" onClick={() => setIsMobileMenuOpen(false)} className="border-b border-white/5 pb-4">About</a>
             <a href="/contact" onClick={() => setIsMobileMenuOpen(false)} className="border-b border-white/5 pb-4">Contact</a>
+            <a
+              href="https://ko-fi.com/bipul"
+              target="_blank"
+              rel="noopener noreferrer"
+              onClick={() => setIsMobileMenuOpen(false)}
+              className="inline-flex items-center justify-center gap-2 px-4 py-3 text-sm font-semibold text-white bg-gradient-to-r from-pink-500 to-rose-500 rounded-full"
+            >
+              <iconify-icon icon="solar:heart-bold" width="16"></iconify-icon>
+              Donate
+            </a>
 
             <div className="flex items-center gap-4 mt-4">
               <button onClick={openSearch} aria-label="Search" className="p-3 bg-white/5 rounded-full text-zinc-400">
