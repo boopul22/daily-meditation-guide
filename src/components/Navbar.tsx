@@ -152,7 +152,7 @@ const Navbar: React.FC = () => {
   return (
     <>
       <nav className="fixed top-0 w-full z-50 border-b border-white/[0.06] bg-[#080706]/80 backdrop-blur-xl">
-        <div className="max-w-7xl mx-auto px-6 h-16 flex items-center gap-8">
+        <div className="max-w-7xl mx-auto px-6 h-16 flex items-center justify-between gap-4 lg:grid lg:grid-cols-[auto_1fr_auto]">
           <a
             href="/"
             className="flex items-center gap-2.5 group cursor-pointer flex-shrink-0"
@@ -168,7 +168,7 @@ const Navbar: React.FC = () => {
           </a>
 
           {/* Desktop Menu */}
-          <div className="hidden lg:flex items-center gap-7 flex-1">
+          <div className="hidden lg:flex items-center justify-center gap-7">
             <a href="/" className="text-sm font-medium text-zinc-400 hover:text-zinc-100 transition-colors">Practice</a>
             <a href="/sessions" className="text-sm font-medium text-zinc-400 hover:text-zinc-100 transition-colors">Sessions</a>
             <a href="/infographics" className="text-sm font-medium text-zinc-400 hover:text-zinc-100 transition-colors">Infographics</a>
@@ -176,7 +176,7 @@ const Navbar: React.FC = () => {
             <a href="/contact" className="text-sm font-medium text-zinc-400 hover:text-zinc-100 transition-colors">Contact</a>
           </div>
 
-          <div className="flex items-center gap-2 ml-auto">
+          <div className="flex items-center gap-2 justify-end">
             <a
               href="https://ko-fi.com/bipul"
               target="_blank"
