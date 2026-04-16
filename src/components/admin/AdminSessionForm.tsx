@@ -25,6 +25,86 @@ function parseDurationToSec(duration: string): number {
 
 type MobileTab = 'details' | 'editor' | 'preview';
 
+interface CategoryComboboxProps {
+  value: string;
+  onChange: (next: string) => void;
+  options: string[];
+}
+
+const CategoryCombobox: React.FC<CategoryComboboxProps> = ({ value, onChange, options }) => {
+  const [open, setOpen] = useState(false);
+  const [query, setQuery] = useState('');
+  const wrapRef = useRef<HTMLDivElement>(null);
+
+  useEffect(() => {
+    if (!open) return;
+    const handle = (e: MouseEvent) => {
+      if (wrapRef.current && !wrapRef.current.contains(e.target as Node)) setOpen(false);
+    };
+    document.addEventListener('mousedown', handle);
+    return () => document.removeEventListener('mousedown', handle);
+  }, [open]);
+
+  const q = query.trim().toLowerCase();
+  const filtered = q ? options.filter(o => o.toLowerCase().includes(q)) : options;
+  const showAdd = !!q && !options.some(o => o.toLowerCase() === q);
+
+  const pick = (next: string) => {
+    onChange(next);
+    setQuery('');
+    setOpen(false);
+  };
+
+  return (
+    <div ref={wrapRef} className="relative">
+      <input
+        value={open ? query : value}
+        onChange={e => { setQuery(e.target.value); if (!open) setOpen(true); }}
+        onFocus={() => { setQuery(''); setOpen(true); }}
+        onKeyDown={e => {
+          if (e.key === 'Enter') {
+            e.preventDefault();
+            if (filtered.length) pick(filtered[0]);
+            else if (q) pick(query.trim());
+          } else if (e.key === 'Escape') {
+            setOpen(false);
+          }
+        }}
+        placeholder="Type or pick…"
+        className="sf-input"
+        required={!value}
+        autoComplete="off"
+      />
+      {open && (
+        <div className="absolute z-30 left-0 right-0 mt-1 max-h-48 overflow-y-auto rounded-md border border-white/10 bg-zinc-900 shadow-lg">
+          {filtered.map(o => (
+            <button
+              key={o}
+              type="button"
+              onMouseDown={e => { e.preventDefault(); pick(o); }}
+              className={`w-full text-left px-2 py-1.5 text-xs hover:bg-white/5 ${o === value ? 'text-indigo-200 bg-white/5' : 'text-zinc-200'}`}
+            >
+              {o}
+            </button>
+          ))}
+          {showAdd && (
+            <button
+              type="button"
+              onMouseDown={e => { e.preventDefault(); pick(query.trim()); }}
+              className="w-full text-left px-2 py-1.5 text-xs text-emerald-300 hover:bg-white/5 border-t border-white/5"
+            >
+              + Add "{query.trim()}"
+            </button>
+          )}
+          {!filtered.length && !showAdd && (
+            <div className="px-2 py-1.5 text-xs text-zinc-500">No matches</div>
+          )}
+        </div>
+      )}
+    </div>
+  );
+};
+
 interface FormData {
   title: string; slug: string; authorId: string; duration: string;
   category: string; color: string; description: string;
@@ -624,7 +704,14 @@ const AdminSessionForm: React.FC<AdminSessionFormProps> = ({ slug }) => {
 
       <div className="grid grid-cols-3 gap-2">
         <div><span className="sf-label">Duration</span><input value={form.duration} onChange={e => handleChange('duration', e.target.value)} placeholder="Optional" className="sf-input" /></div>
-        <div><span className="sf-label">Category</span><input list="sf-category-options" value={form.category} onChange={e => handleChange('category', e.target.value)} placeholder="Type or pick…" className="sf-input" required /><datalist id="sf-category-options">{Array.from(new Set([...DEFAULT_CATEGORIES, ...allSessions.map(s => s.category).filter(Boolean)])).map(c => <option key={c} value={c} />)}</datalist></div>
+        <div>
+          <span className="sf-label">Category</span>
+          <CategoryCombobox
+            value={form.category}
+            onChange={v => handleChange('category', v)}
+            options={Array.from(new Set([...DEFAULT_CATEGORIES, ...allSessions.map(s => s.category).filter(Boolean)])).sort((a, b) => a.localeCompare(b))}
+          />
+        </div>
         <div>
           <span className="sf-label">Color</span>
           <div className="flex items-center gap-1.5">
