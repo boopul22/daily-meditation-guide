@@ -17,6 +17,9 @@ const [sessionsRes, videosRes] = await Promise.all([
 const sessions: Session[] = ((sessionsRes.results || []) as any[]).map((row) => rowToSession(row));
 const latestSession = sessions[0] || null;
 
+// Strip heavy fields not needed by HomeContent to reduce HTML payload (~178KB -> ~40KB)
+const slimSessions = sessions.map(({ fullContent, faqItems, relatedSessions, ...rest }) => rest);
+
 const videos = ((videosRes.results || []) as any[]).map((r) => ({
   id: r.video_id as string,
   title: r.title as string,
@@ -32,7 +35,15 @@ const websiteJsonLd = JSON.stringify({
   "name": "Daily Meditation Guide",
   "description": "Your daily guide to mindfulness and meditation. Curated audio journeys to help you focus, sleep, and reset.",
   "url": "https://dailymeditationguide.com",
-  "inLanguage": "en"
+  "inLanguage": "en",
+  "potentialAction": {
+    "@type": "SearchAction",
+    "target": {
+      "@type": "EntryPoint",
+      "urlTemplate": "https://dailymeditationguide.com/sessions?q={search_term_string}"
+    },
+    "query-input": "required name=search_term_string"
+  }
 });
 
 let extraHead = `<script type="application/ld+json">${websiteJsonLd}</script>`;
@@ -137,6 +148,6 @@ if (latestSession?.featuredImage) {
     </section>
 
     {/* Interactive content: filters + grid */}
-    <HomeContent client:idle sessions={sessions} videos={videos} />
+    <HomeContent client:idle sessions={slimSessions} videos={videos} />
   </div>
 </MainLayout>

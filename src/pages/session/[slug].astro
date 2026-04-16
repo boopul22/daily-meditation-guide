@@ -74,7 +74,9 @@ if (session) {
     ...(session.author && {
       "author": {
         "@type": "Person",
-        "name": session.author
+        "name": session.author,
+        ...(session.authorPicture && { "image": session.authorPicture.startsWith('http') ? session.authorPicture : `${siteUrl}${session.authorPicture}` }),
+        "url": `${siteUrl}/about`
       }
     }),
     "datePublished": session.publishedAt || session.createdAt || new Date().toISOString(),
@@ -123,6 +125,8 @@ if (session) {
   ogImage={session ? (pageImage.startsWith('http') ? pageImage : `${siteUrl}${pageImage}`) : undefined}
   noindex={!session}
   extraHead={extraHead}
+  articlePublishedTime={session?.publishedAt || session?.createdAt || undefined}
+  articleModifiedTime={session?.updatedAt || undefined}
 >
   {session ? (
     <div class="animate-[fade-enter_0.5s_ease-out]">

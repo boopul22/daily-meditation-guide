@@ -13,6 +13,9 @@ const STATIC_PAGES = [
   { path: '/infographics', lastmod: '2026-04-13' },
   { path: '/about', lastmod: '2026-04-13' },
   { path: '/contact', lastmod: '2026-04-13' },
+  { path: '/privacy', lastmod: '2026-04-13' },
+  { path: '/terms', lastmod: '2026-04-13' },
+  { path: '/disclaimer', lastmod: '2026-04-13' },
 ];
 
 const INFOGRAPHICS_PAGE_SIZE = 24;

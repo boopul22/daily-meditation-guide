@@ -23,12 +23,12 @@ export const onRequest = defineMiddleware(async (context, next) => {
   // Content Security Policy
   response.headers.set('Content-Security-Policy', [
     "default-src 'self'",
-    "script-src 'self' 'unsafe-inline' https://code.iconify.design https://static.cloudflareinsights.com https://www.googletagmanager.com",
+    "script-src 'self' 'unsafe-inline' https://code.iconify.design https://static.cloudflareinsights.com https://www.googletagmanager.com https://pagead2.googlesyndication.com https://adservice.google.com",
     "style-src 'self' 'unsafe-inline' https://fonts.googleapis.com",
     "font-src 'self' https://fonts.gstatic.com",
-    "img-src 'self' https://pub-141831e61e69445289222976a15b6fb3.r2.dev https://img.youtube.com https://www.googletagmanager.com https://www.google-analytics.com data:",
-    "connect-src 'self' https://api.iconify.design https://cloudflareinsights.com https://www.google-analytics.com https://*.analytics.google.com https://*.googletagmanager.com",
-    "frame-src 'self' https://www.youtube.com https://www.youtube-nocookie.com",
+    "img-src 'self' https://pub-141831e61e69445289222976a15b6fb3.r2.dev https://img.youtube.com https://www.googletagmanager.com https://www.google-analytics.com https://pagead2.googlesyndication.com data:",
+    "connect-src 'self' https://api.iconify.design https://cloudflareinsights.com https://www.google-analytics.com https://*.analytics.google.com https://*.googletagmanager.com https://pagead2.googlesyndication.com",
+    "frame-src 'self' https://www.youtube.com https://www.youtube-nocookie.com https://googleads.g.doubleclick.net https://tpc.googlesyndication.com",
     "object-src 'none'",
     "base-uri 'self'",
     "form-action 'self'",
