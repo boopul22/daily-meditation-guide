@@ -1,7 +1,7 @@
 ---
 import MainLayout from '../layouts/MainLayout.astro';
-import SessionsContent from '../components/SessionsContent';
 import { rowToSession, SESSION_SELECT_WITH_AUTHOR } from '../lib/db';
+import { thumbnailUrl, videoSlug, categorize, cleanDescription, VIDEO_CATEGORIES } from '../lib/videoCategories';
 import type { Session } from '../types';
 
 const db = Astro.locals.runtime.env.DB;
@@ -9,6 +9,41 @@ const { results } = await db.prepare(
   `${SESSION_SELECT_WITH_AUTHOR} WHERE s.status = 'published' ORDER BY s.published_at DESC`
 ).all();
 const sessions: Session[] = (results || []).map((row: any) => rowToSession(row));
+
+interface VideoRow { video_id: string; title: string; description: string | null; slug: string | null }
+interface Video { id: string; title: string; slug: string }
+
+const { results: videoRows } = await db
+  .prepare('SELECT video_id, title, description, slug FROM youtube_videos ORDER BY published_at DESC')
+  .all();
+
+const videoSections: { key: string; label: string; videos: Video[] }[] = [];
+{
+  const grouped = new Map<string, { label: string; videos: Video[] }>();
+  for (const row of (videoRows || []) as VideoRow[]) {
+    const cleaned = cleanDescription(row.description ?? '');
+    const cat = categorize(row.title, cleaned);
+    const video: Video = {
+      id: row.video_id,
+      title: row.title,
+      slug: row.slug || videoSlug(row.title, row.video_id),
+    };
+    const bucket = grouped.get(cat.key);
+    if (bucket) bucket.videos.push(video);
+    else grouped.set(cat.key, { label: cat.label, videos: [video] });
+  }
+  for (const cat of VIDEO_CATEGORIES) {
+    const bucket = grouped.get(cat.key);
+    if (bucket && bucket.videos.length > 0) {
+      videoSections.push({ key: cat.key, label: cat.label, videos: bucket.videos });
+      grouped.delete(cat.key);
+    }
+  }
+  for (const [key, bucket] of grouped) {
+    videoSections.push({ key, label: bucket.label, videos: bucket.videos });
+  }
+}
+const totalVideos = videoSections.reduce((n, s) => n + s.videos.length, 0);
 
 Astro.response.headers.set('Cache-Control', 'public, max-age=300, s-maxage=3600, stale-while-revalidate=86400');
 
@@ -109,10 +144,66 @@ const extraHead = `<script type="application/ld+json">${itemListJsonLd}</script>
       </section>
     )}
 
-    {/* YouTube video sessions */}
-    <section class="space-y-6">
-      <h2 class="font-display text-2xl font-medium text-zinc-100 tracking-tight">Video Sessions</h2>
-      <SessionsContent client:idle />
-    </section>
+    {/* YouTube video sessions, categorized */}
+    {totalVideos > 0 && (
+      <div class="space-y-10">
+        <div class="flex items-baseline justify-between border-b border-white/5 pb-3">
+          <h2 class="font-display text-2xl font-medium text-zinc-100 tracking-tight">Video Sessions</h2>
+          <span class="text-xs text-zinc-500">{totalVideos} sessions</span>
+        </div>
+
+        <nav aria-label="Video categories" class="flex flex-wrap gap-2">
+          {videoSections.map((section) => (
+            <a
+              href={`#${section.key}`}
+              class="px-3 py-1.5 text-xs rounded-full bg-white/5 border border-white/10 text-zinc-300 hover:bg-white/10 hover:text-white transition-colors"
+            >
+              {section.label}
+              <span class="text-zinc-500 ml-1">({section.videos.length})</span>
+            </a>
+          ))}
+        </nav>
+
+        {videoSections.map((section) => (
+          <section id={section.key} class="space-y-6 scroll-mt-24">
+            <div class="flex items-baseline justify-between">
+              <h3 class="font-display text-xl font-medium text-zinc-100 tracking-tight">{section.label}</h3>
+              <span class="text-xs text-zinc-500">{section.videos.length} sessions</span>
+            </div>
+            <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+              {section.videos.map((video) => (
+                <a
+                  href={`/video-sessions/${video.slug}`}
+                  class="group block bg-zinc-900/40 border border-white/[0.06] hover:border-white/[0.12] rounded-2xl overflow-hidden transition-all duration-300 hover:bg-zinc-800/40 hover:-translate-y-1 hover:shadow-lg hover:shadow-black/20"
+                >
+                  <div class="relative aspect-video w-full overflow-hidden bg-zinc-800">
+                    <img
+                      src={thumbnailUrl(video.id, 'hq')}
+                      alt={video.title}
+                      loading="lazy"
+                      decoding="async"
+                      width={480}
+                      height={360}
+                      class="absolute inset-0 w-full h-full object-cover transition-transform duration-500 group-hover:scale-105"
+                    />
+                    <div class="absolute inset-0 bg-gradient-to-t from-black/50 via-transparent to-transparent"></div>
+                    <div class="absolute inset-0 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity duration-300">
+                      <div class="w-14 h-14 bg-white/10 backdrop-blur-md rounded-full flex items-center justify-center text-white border border-white/20">
+                        <iconify-icon icon="solar:play-linear" width="28" class="ml-1"></iconify-icon>
+                      </div>
+                    </div>
+                  </div>
+                  <div class="p-5">
+                    <h4 class="font-display text-zinc-100 font-medium tracking-tight line-clamp-2 group-hover:text-white transition-colors">
+                      {video.title}
+                    </h4>
+                  </div>
+                </a>
+              ))}
+            </div>
+          </section>
+        ))}
+      </div>
+    )}
   </div>
 </MainLayout>
