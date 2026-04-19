@@ -237,34 +237,57 @@ const extraHead = `<script type="application/ld+json">${itemListJsonLd}</script>
           </div>
         </div>
 
-        {/* Category chips — wrap on desktop, horizontal scroll with fade hint on mobile */}
-        <nav
-          aria-label="Filter by topic"
-          class="cat-nav flex gap-2 md:flex-wrap overflow-x-auto md:overflow-visible no-scrollbar pb-1 -mx-1 px-1 snap-x"
-        >
+        {/* Category chips — slidable carousel with prev/next arrows */}
+        <div class="cat-nav-wrap relative">
           <button
             type="button"
-            data-cat-chip="all"
-            aria-pressed="true"
-            class="cat-chip active-chip shrink-0 snap-start inline-flex items-center gap-2 px-4 py-2 rounded-full text-sm border transition"
+            id="cat-prev"
+            aria-label="Previous topics"
+            hidden
+            class="cat-arrow group absolute left-0 top-1/2 -translate-y-1/2 z-10 w-9 h-9 rounded-full bg-zinc-950/90 backdrop-blur border border-white/10 text-zinc-300 hover:text-[#c49245] hover:border-[#c49245]/40 flex items-center justify-center transition shadow-lg shadow-black/40"
           >
-            <iconify-icon icon="solar:widget-2-linear" width="16"></iconify-icon>
-            <span>All topics</span>
-            <span class="text-xs opacity-70">{totalCount}</span>
+            <iconify-icon icon="solar:alt-arrow-left-linear" width="18"></iconify-icon>
           </button>
-          {buckets.map((b) => (
+
+          <nav
+            id="cat-nav"
+            aria-label="Filter by topic"
+            class="cat-nav flex gap-2 overflow-x-auto no-scrollbar pb-1 pl-1 pr-1 snap-x scroll-smooth"
+          >
             <button
               type="button"
-              data-cat-chip={b.key}
-              aria-pressed="false"
-              class="cat-chip shrink-0 snap-start inline-flex items-center gap-2 px-4 py-2 rounded-full text-sm border transition"
+              data-cat-chip="all"
+              aria-pressed="true"
+              class="cat-chip active-chip shrink-0 snap-start inline-flex items-center gap-2 px-4 py-2 rounded-full text-sm border transition"
             >
-              <iconify-icon icon={iconFor(b.key)} width="16"></iconify-icon>
-              <span>{b.label}</span>
-              <span class="text-xs opacity-70">{b.items.length}</span>
+              <iconify-icon icon="solar:widget-2-linear" width="16"></iconify-icon>
+              <span>All topics</span>
+              <span class="text-xs opacity-70">{totalCount}</span>
             </button>
-          ))}
-        </nav>
+            {buckets.map((b) => (
+              <button
+                type="button"
+                data-cat-chip={b.key}
+                aria-pressed="false"
+                class="cat-chip shrink-0 snap-start inline-flex items-center gap-2 px-4 py-2 rounded-full text-sm border transition"
+              >
+                <iconify-icon icon={iconFor(b.key)} width="16"></iconify-icon>
+                <span>{b.label}</span>
+                <span class="text-xs opacity-70">{b.items.length}</span>
+              </button>
+            ))}
+          </nav>
+
+          <button
+            type="button"
+            id="cat-next"
+            aria-label="Next topics"
+            hidden
+            class="cat-arrow group absolute right-0 top-1/2 -translate-y-1/2 z-10 w-9 h-9 rounded-full bg-zinc-950/90 backdrop-blur border border-white/10 text-zinc-300 hover:text-[#c49245] hover:border-[#c49245]/40 flex items-center justify-center transition shadow-lg shadow-black/40"
+          >
+            <iconify-icon icon="solar:alt-arrow-right-linear" width="18"></iconify-icon>
+          </button>
+        </div>
       </div>
     </div>
 
@@ -420,12 +443,19 @@ const extraHead = `<script type="application/ld+json">${itemListJsonLd}</script>
 </MainLayout>
 
 <style>
-  /* On mobile, fade the right edge so users know the chip row scrolls */
-  @media (max-width: 767px) {
-    .cat-nav {
-      -webkit-mask-image: linear-gradient(to right, black calc(100% - 28px), transparent);
-      mask-image: linear-gradient(to right, black calc(100% - 28px), transparent);
-    }
+  /* Edge-fade masks reflect which sides are scrollable.
+     JS toggles data-overflow-left / data-overflow-right on the wrapper. */
+  .cat-nav-wrap[data-overflow-left="true"] .cat-nav {
+    -webkit-mask-image: linear-gradient(to right, transparent, black 32px);
+    mask-image: linear-gradient(to right, transparent, black 32px);
+  }
+  .cat-nav-wrap[data-overflow-right="true"] .cat-nav {
+    -webkit-mask-image: linear-gradient(to left, transparent, black 32px);
+    mask-image: linear-gradient(to left, transparent, black 32px);
+  }
+  .cat-nav-wrap[data-overflow-left="true"][data-overflow-right="true"] .cat-nav {
+    -webkit-mask-image: linear-gradient(to right, transparent, black 32px, black calc(100% - 32px), transparent);
+    mask-image: linear-gradient(to right, transparent, black 32px, black calc(100% - 32px), transparent);
   }
 
   .cat-chip {
@@ -621,5 +651,53 @@ const extraHead = `<script type="application/ld+json">${itemListJsonLd}</script>
     }
     applyHash();
     window.addEventListener('hashchange', applyHash);
+
+    // ── Topic chip carousel: prev/next arrows + edge fade masks ──
+    const catNav = document.getElementById('cat-nav');
+    const catWrap = catNav ? catNav.parentElement : null;
+    const prevBtn = document.getElementById('cat-prev');
+    const nextBtn = document.getElementById('cat-next');
+
+    function updateCarouselState() {
+      if (!catNav || !catWrap) return;
+      const max = catNav.scrollWidth - catNav.clientWidth;
+      const x = catNav.scrollLeft;
+      const hasLeft = x > 4;
+      const hasRight = x < max - 4;
+      catWrap.setAttribute('data-overflow-left', hasLeft ? 'true' : 'false');
+      catWrap.setAttribute('data-overflow-right', hasRight ? 'true' : 'false');
+      if (prevBtn) prevBtn.hidden = !hasLeft;
+      if (nextBtn) nextBtn.hidden = !hasRight;
+    }
+
+    function scrollByChips(direction) {
+      if (!catNav) return;
+      // Scroll by ~70% of the visible width for a natural page-through feel
+      const delta = Math.max(160, Math.floor(catNav.clientWidth * 0.7)) * direction;
+      catNav.scrollBy({ left: delta, behavior: 'smooth' });
+    }
+
+    if (catNav) {
+      catNav.addEventListener('scroll', updateCarouselState, { passive: true });
+      window.addEventListener('resize', updateCarouselState);
+      // Defer initial measure until fonts/icons settle
+      requestAnimationFrame(updateCarouselState);
+      setTimeout(updateCarouselState, 300);
+    }
+
+    if (prevBtn) prevBtn.addEventListener('click', () => scrollByChips(-1));
+    if (nextBtn) nextBtn.addEventListener('click', () => scrollByChips(1));
+
+    // When a chip becomes active, keep it visible in the carousel
+    catChips.forEach((chip) => {
+      chip.addEventListener('click', () => {
+        if (!catNav) return;
+        const r = chip.getBoundingClientRect();
+        const nr = catNav.getBoundingClientRect();
+        if (r.left < nr.left || r.right > nr.right) {
+          chip.scrollIntoView({ inline: 'center', block: 'nearest', behavior: 'smooth' });
+        }
+      });
+    });
   })();
 </script>
