@@ -11,39 +11,89 @@ const { results } = await db.prepare(
 const sessions: Session[] = (results || []).map((row: any) => rowToSession(row));
 
 interface VideoRow { video_id: string; title: string; description: string | null; slug: string | null }
-interface Video { id: string; title: string; slug: string }
 
 const { results: videoRows } = await db
   .prepare('SELECT video_id, title, description, slug FROM youtube_videos ORDER BY published_at DESC')
   .all();
 
-const videoSections: { key: string; label: string; videos: Video[] }[] = [];
-{
-  const grouped = new Map<string, { label: string; videos: Video[] }>();
-  for (const row of (videoRows || []) as VideoRow[]) {
-    const cleaned = cleanDescription(row.description ?? '');
-    const cat = categorize(row.title, cleaned);
-    const video: Video = {
-      id: row.video_id,
-      title: row.title,
-      slug: row.slug || videoSlug(row.title, row.video_id),
-    };
-    const bucket = grouped.get(cat.key);
-    if (bucket) bucket.videos.push(video);
-    else grouped.set(cat.key, { label: cat.label, videos: [video] });
-  }
-  for (const cat of VIDEO_CATEGORIES) {
-    const bucket = grouped.get(cat.key);
-    if (bucket && bucket.videos.length > 0) {
-      videoSections.push({ key: cat.key, label: cat.label, videos: bucket.videos });
-      grouped.delete(cat.key);
-    }
-  }
-  for (const [key, bucket] of grouped) {
-    videoSections.push({ key, label: bucket.label, videos: bucket.videos });
-  }
+type ItemKind = 'audio' | 'video';
+interface Item {
+  kind: ItemKind;
+  href: string;
+  title: string;
+  image: string;
+  categoryKey: string;
+  categoryLabel: string;
+  duration?: string;
+  description?: string;
+  search: string;
 }
-const totalVideos = videoSections.reduce((n, s) => n + s.videos.length, 0);
+
+const audioItems: Item[] = sessions.map((s) => {
+  const cat = categorize(s.title, `${s.description || ''} ${s.category || ''}`);
+  return {
+    kind: 'audio' as const,
+    href: `/session/${s.slug}`,
+    title: s.title,
+    image: s.featuredImage || '',
+    categoryKey: cat.key,
+    categoryLabel: cat.label,
+    duration: s.duration,
+    description: s.description,
+    search: `${s.title} ${s.description || ''} ${s.category || ''} ${cat.label}`.toLowerCase(),
+  };
+});
+
+const videoItems: Item[] = [];
+for (const row of (videoRows || []) as VideoRow[]) {
+  const cleaned = cleanDescription(row.description ?? '');
+  const cat = categorize(row.title, cleaned);
+  videoItems.push({
+    kind: 'video',
+    href: `/video-sessions/${row.slug || videoSlug(row.title, row.video_id)}`,
+    title: row.title,
+    image: thumbnailUrl(row.video_id, 'hq'),
+    categoryKey: cat.key,
+    categoryLabel: cat.label,
+    search: `${row.title} ${cat.label}`.toLowerCase(),
+  });
+}
+
+const allItems: Item[] = [...audioItems, ...videoItems];
+
+const categoryOrder = new Map<string, number>();
+VIDEO_CATEGORIES.forEach((c, i) => categoryOrder.set(c.key, i));
+
+interface CategoryBucket { key: string; label: string; items: Item[] }
+const bucketMap = new Map<string, CategoryBucket>();
+for (const item of allItems) {
+  const b = bucketMap.get(item.categoryKey);
+  if (b) b.items.push(item);
+  else bucketMap.set(item.categoryKey, { key: item.categoryKey, label: item.categoryLabel, items: [item] });
+}
+const buckets = Array.from(bucketMap.values()).sort((a, b) => {
+  const ai = categoryOrder.has(a.key) ? categoryOrder.get(a.key)! : 999;
+  const bi = categoryOrder.has(b.key) ? categoryOrder.get(b.key)! : 999;
+  return ai - bi;
+});
+
+const CATEGORY_ICONS: Record<string, string> = {
+  sleep: 'solar:moon-linear',
+  anxiety: 'solar:shield-check-linear',
+  morning: 'solar:sun-linear',
+  focus: 'solar:target-linear',
+  breathwork: 'solar:wind-linear',
+  'self-love': 'solar:heart-linear',
+  healing: 'solar:leaf-linear',
+  mindfulness: 'solar:stars-linear',
+  manifestation: 'solar:magic-stick-3-linear',
+  guided: 'solar:compass-linear',
+};
+const iconFor = (key: string) => CATEGORY_ICONS[key] || 'solar:bookmark-linear';
+
+const totalCount = allItems.length;
+const audioCount = audioItems.length;
+const videoCount = videoItems.length;
 
 Astro.response.headers.set('Cache-Control', 'public, max-age=300, s-maxage=3600, stale-while-revalidate=86400');
 
@@ -85,125 +135,483 @@ const extraHead = `<script type="application/ld+json">${itemListJsonLd}</script>
   canonical="https://dailymeditationguide.com/sessions"
   extraHead={extraHead}
 >
-  <div class="space-y-12 animate-[fade-enter_0.5s_ease-out]">
-    <header class="space-y-6">
-      <h1 class="font-display text-3xl md:text-5xl font-medium text-zinc-100 tracking-tight">
-        Guided Meditation Sessions
+  <div class="animate-[fade-enter_0.6s_ease-out]">
+    {/* ─────────────────────────── HERO ─────────────────────────── */}
+    <header class="relative pb-10 md:pb-14">
+      <div
+        aria-hidden="true"
+        class="absolute -top-16 left-1/2 -translate-x-1/2 w-[42rem] h-[42rem] max-w-none pointer-events-none opacity-50 blur-3xl -z-10"
+        style="background: radial-gradient(closest-side, rgba(196,146,69,0.16), rgba(150,93,128,0.06) 55%, transparent 75%);"
+      ></div>
+
+      <div class="flex items-center gap-3 text-[11px] uppercase tracking-[0.2em] text-zinc-500 font-medium mb-6">
+        <span class="h-px flex-1 max-w-12 bg-zinc-500/30"></span>
+        <span>The Library</span>
+        <span class="h-px flex-1 max-w-12 bg-zinc-500/30"></span>
+      </div>
+
+      <h1 class="font-display text-4xl md:text-6xl font-medium text-zinc-100 tracking-tight text-center max-w-3xl mx-auto leading-[1.05]">
+        Find the meditation <em class="italic text-[#c49245] font-normal">you need</em>, right now.
       </h1>
-      <p class="text-zinc-500 max-w-2xl text-lg">
-        Immerse yourself in our curated collection of guided meditations and visual journeys designed to help you find peace and clarity.
+      <p class="text-zinc-400 max-w-xl mx-auto text-center mt-5 text-base md:text-lg leading-relaxed">
+        A quiet library of guided audio sessions and visual journeys &mdash; organized by what you're looking for, not by format.
       </p>
-      <div class="text-zinc-400 max-w-3xl space-y-4 text-sm leading-relaxed border-t border-white/5 pt-6">
-        <p>
-          Our meditation library covers a range of practices to support your daily wellness routine. Whether you need help winding down for sleep, managing anxiety, sharpening focus, or simply finding a moment of calm, each session is crafted with care to guide you through a meaningful experience.
-        </p>
-        <p>
-          Browse audio sessions led by experienced guides, or explore our collection of visual meditation videos featuring ambient soundscapes and nature imagery. Sessions range from quick 5-minute breathing exercises to immersive 30-minute guided practices, so you can find the right fit for your schedule and goals.
-        </p>
+
+      <div class="flex items-center justify-center gap-6 mt-8 text-xs text-zinc-500">
+        <span class="flex items-center gap-2">
+          <iconify-icon icon="solar:headphones-round-linear" width="16"></iconify-icon>
+          {audioCount} guided audio
+        </span>
+        <span class="w-1 h-1 rounded-full bg-zinc-700"></span>
+        <span class="flex items-center gap-2">
+          <iconify-icon icon="solar:play-linear" width="16"></iconify-icon>
+          {videoCount} visual videos
+        </span>
       </div>
     </header>
 
-    {/* Server-rendered session links for SEO crawlability */}
-    {sessions.length > 0 && (
-      <section class="space-y-6">
-        <h2 class="font-display text-2xl font-medium text-zinc-100 tracking-tight">Meditation Sessions</h2>
-        <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-          {sessions.map((session) => (
-            <a
-              href={`/session/${session.slug}`}
-              class="group block bg-zinc-900/40 border border-white/[0.06] hover:border-white/[0.12] rounded-2xl overflow-hidden transition-all duration-300 hover:bg-zinc-800/40 hover:-translate-y-1"
+    {/* ─────────────────────── FILTER CONSOLE ─────────────────────── */}
+    <div
+      class="sticky top-20 md:top-20 z-30 -mx-6 px-6 py-4 backdrop-blur-xl bg-[#080706]/85 border-y border-white/[0.06]"
+    >
+      <div class="max-w-6xl mx-auto space-y-3">
+        {/* Search + type toggle row */}
+        <div class="flex flex-col sm:flex-row gap-3 items-stretch sm:items-center">
+          <label class="relative flex-1 group">
+            <span class="sr-only">Search sessions</span>
+            <iconify-icon
+              icon="solar:magnifer-linear"
+              width="18"
+              class="absolute left-4 top-1/2 -translate-y-1/2 text-zinc-500 group-focus-within:text-[#c49245] transition-colors pointer-events-none"
+            ></iconify-icon>
+            <input
+              id="session-search"
+              type="search"
+              placeholder="Search by topic, feeling, or keyword…"
+              autocomplete="off"
+              class="w-full bg-zinc-900/50 border border-white/[0.08] rounded-full pl-11 pr-10 py-3 text-sm text-zinc-100 placeholder:text-zinc-600 focus:outline-none focus:border-[#c49245]/50 focus:bg-zinc-900/80 focus:ring-2 focus:ring-[#c49245]/10 transition"
+            />
+            <button
+              id="session-search-clear"
+              type="button"
+              aria-label="Clear search"
+              hidden
+              class="absolute right-3 top-1/2 -translate-y-1/2 text-zinc-500 hover:text-zinc-200 transition-colors"
             >
-              {session.featuredImage && (
-                <div class="relative h-48 w-full bg-zinc-800 overflow-hidden">
-                  <img
-                    src={session.featuredImage}
-                    alt={session.title}
-                    loading="lazy"
-                    decoding="async"
-                    width={400}
-                    height={192}
-                    class="w-full h-full object-cover transition-transform duration-500 group-hover:scale-105"
-                  />
-                </div>
-              )}
-              <div class="p-5 space-y-2">
-                <h3 class="font-display text-zinc-200 font-medium tracking-tight line-clamp-2 group-hover:text-white transition-colors">
-                  {session.title}
-                </h3>
-                {session.description && (
-                  <p class="text-zinc-500 text-sm line-clamp-2">{session.description}</p>
-                )}
-                <div class="flex items-center gap-3 text-xs text-zinc-500 pt-1">
-                  {session.category && <span class="px-2 py-0.5 rounded-full bg-white/5 border border-white/5">{session.category}</span>}
-                  {session.duration && <span>{session.duration}</span>}
-                </div>
-              </div>
-            </a>
-          ))}
-        </div>
-      </section>
-    )}
+              <iconify-icon icon="solar:close-circle-bold" width="18"></iconify-icon>
+            </button>
+          </label>
 
-    {/* YouTube video sessions, categorized */}
-    {totalVideos > 0 && (
-      <div class="space-y-10">
-        <div class="flex items-baseline justify-between border-b border-white/5 pb-3">
-          <h2 class="font-display text-2xl font-medium text-zinc-100 tracking-tight">Video Sessions</h2>
-          <span class="text-xs text-zinc-500">{totalVideos} sessions</span>
-        </div>
-
-        <nav aria-label="Video categories" class="flex flex-wrap gap-2">
-          {videoSections.map((section) => (
-            <a
-              href={`#${section.key}`}
-              class="px-3 py-1.5 text-xs rounded-full bg-white/5 border border-white/10 text-zinc-300 hover:bg-white/10 hover:text-white transition-colors"
+          <div
+            role="tablist"
+            aria-label="Filter by format"
+            class="inline-flex p-1 rounded-full bg-zinc-900/50 border border-white/[0.08] text-sm self-start sm:self-auto"
+          >
+            <button
+              type="button"
+              role="tab"
+              data-type-btn="all"
+              aria-pressed="true"
+              class="type-btn active-type px-4 py-1.5 rounded-full text-zinc-400 transition"
+            >All</button>
+            <button
+              type="button"
+              role="tab"
+              data-type-btn="audio"
+              aria-pressed="false"
+              class="type-btn px-4 py-1.5 rounded-full text-zinc-400 transition flex items-center gap-1.5"
             >
-              {section.label}
-              <span class="text-zinc-500 ml-1">({section.videos.length})</span>
-            </a>
+              <iconify-icon icon="solar:headphones-round-linear" width="14"></iconify-icon>
+              Audio
+            </button>
+            <button
+              type="button"
+              role="tab"
+              data-type-btn="video"
+              aria-pressed="false"
+              class="type-btn px-4 py-1.5 rounded-full text-zinc-400 transition flex items-center gap-1.5"
+            >
+              <iconify-icon icon="solar:play-linear" width="14"></iconify-icon>
+              Video
+            </button>
+          </div>
+        </div>
+
+        {/* Category chips */}
+        <nav
+          aria-label="Filter by topic"
+          class="flex gap-2 overflow-x-auto no-scrollbar pb-1 -mx-1 px-1 snap-x"
+        >
+          <button
+            type="button"
+            data-cat-chip="all"
+            aria-pressed="true"
+            class="cat-chip active-chip shrink-0 snap-start inline-flex items-center gap-2 px-4 py-2 rounded-full text-sm border transition"
+          >
+            <iconify-icon icon="solar:widget-2-linear" width="16"></iconify-icon>
+            <span>All topics</span>
+            <span class="text-xs opacity-70">{totalCount}</span>
+          </button>
+          {buckets.map((b) => (
+            <button
+              type="button"
+              data-cat-chip={b.key}
+              aria-pressed="false"
+              class="cat-chip shrink-0 snap-start inline-flex items-center gap-2 px-4 py-2 rounded-full text-sm border transition"
+            >
+              <iconify-icon icon={iconFor(b.key)} width="16"></iconify-icon>
+              <span>{b.label}</span>
+              <span class="text-xs opacity-70">{b.items.length}</span>
+            </button>
           ))}
         </nav>
+      </div>
+    </div>
 
-        {videoSections.map((section) => (
-          <section id={section.key} class="space-y-6 scroll-mt-24">
-            <div class="flex items-baseline justify-between">
-              <h3 class="font-display text-xl font-medium text-zinc-100 tracking-tight">{section.label}</h3>
-              <span class="text-xs text-zinc-500">{section.videos.length} sessions</span>
+    {/* ─────────────────────── RESULT META ─────────────────────── */}
+    <div class="flex items-baseline justify-between mt-8 mb-6">
+      <p class="text-sm text-zinc-500">
+        <span id="result-count" class="text-zinc-300 font-medium">{totalCount} sessions</span>
+        <span class="text-zinc-600"> &middot; </span>
+        <span id="result-context">across {buckets.length} topics</span>
+      </p>
+      <button
+        id="reset-filters"
+        type="button"
+        hidden
+        class="text-xs text-zinc-400 hover:text-[#c49245] transition-colors inline-flex items-center gap-1"
+      >
+        <iconify-icon icon="solar:refresh-linear" width="14"></iconify-icon>
+        Reset filters
+      </button>
+    </div>
+
+    {/* ───────────────────────── GRID ───────────────────────── */}
+    <div id="sessions-grid" class="space-y-14">
+      {buckets.map((bucket) => (
+        <section data-cat-section={bucket.key} class="space-y-5 scroll-mt-40">
+          <div class="flex items-end justify-between gap-4 border-b border-white/[0.06] pb-3">
+            <div class="flex items-center gap-3">
+              <span
+                class="w-9 h-9 rounded-xl border border-white/[0.08] bg-zinc-900/40 flex items-center justify-center text-[#c49245]"
+                aria-hidden="true"
+              >
+                <iconify-icon icon={iconFor(bucket.key)} width="18"></iconify-icon>
+              </span>
+              <h2 class="font-display text-xl md:text-2xl font-medium text-zinc-100 tracking-tight">
+                {bucket.label}
+              </h2>
             </div>
-            <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-              {section.videos.map((video) => (
-                <a
-                  href={`/video-sessions/${video.slug}`}
-                  class="group block bg-zinc-900/40 border border-white/[0.06] hover:border-white/[0.12] rounded-2xl overflow-hidden transition-all duration-300 hover:bg-zinc-800/40 hover:-translate-y-1 hover:shadow-lg hover:shadow-black/20"
-                >
-                  <div class="relative aspect-video w-full overflow-hidden bg-zinc-800">
+            <span class="text-xs text-zinc-500 shrink-0" data-cat-count={bucket.key}>
+              {bucket.items.length} sessions
+            </span>
+          </div>
+
+          <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-5">
+            {bucket.items.map((item) => (
+              <a
+                href={item.href}
+                data-item-card
+                data-kind={item.kind}
+                data-category={item.categoryKey}
+                data-search={item.search}
+                class="group relative block bg-zinc-900/40 border border-white/[0.06] hover:border-[#c49245]/30 rounded-2xl overflow-hidden transition-all duration-300 hover:bg-zinc-900/70 hover:-translate-y-1 hover:shadow-[0_16px_40px_-12px_rgba(196,146,69,0.15)]"
+              >
+                <div class="relative aspect-video w-full overflow-hidden bg-zinc-800">
+                  {item.image ? (
                     <img
-                      src={thumbnailUrl(video.id, 'hq')}
-                      alt={video.title}
+                      src={item.image}
+                      alt={item.title}
                       loading="lazy"
                       decoding="async"
                       width={480}
-                      height={360}
-                      class="absolute inset-0 w-full h-full object-cover transition-transform duration-500 group-hover:scale-105"
+                      height={270}
+                      class="absolute inset-0 w-full h-full object-cover transition-transform duration-[600ms] group-hover:scale-[1.04]"
                     />
-                    <div class="absolute inset-0 bg-gradient-to-t from-black/50 via-transparent to-transparent"></div>
-                    <div class="absolute inset-0 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity duration-300">
-                      <div class="w-14 h-14 bg-white/10 backdrop-blur-md rounded-full flex items-center justify-center text-white border border-white/20">
-                        <iconify-icon icon="solar:play-linear" width="28" class="ml-1"></iconify-icon>
-                      </div>
+                  ) : (
+                    <div class="absolute inset-0 flex items-center justify-center text-zinc-700">
+                      <iconify-icon icon="solar:gallery-minimalistic-linear" width="40"></iconify-icon>
+                    </div>
+                  )}
+
+                  <div class="absolute inset-0 bg-gradient-to-t from-black/70 via-black/10 to-transparent"></div>
+
+                  {/* Type badge */}
+                  <span
+                    class={`absolute top-3 left-3 inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full backdrop-blur-md border text-[11px] font-medium tracking-wide uppercase ${
+                      item.kind === 'audio'
+                        ? 'bg-[#c49245]/15 border-[#c49245]/30 text-[#e4be7a]'
+                        : 'bg-[#965d80]/15 border-[#965d80]/30 text-[#c9a4bc]'
+                    }`}
+                  >
+                    <iconify-icon
+                      icon={item.kind === 'audio' ? 'solar:headphones-round-bold' : 'solar:play-bold'}
+                      width="12"
+                    ></iconify-icon>
+                    {item.kind === 'audio' ? 'Audio' : 'Video'}
+                  </span>
+
+                  {/* Duration for audio */}
+                  {item.duration && (
+                    <span class="absolute top-3 right-3 px-2 py-0.5 rounded-full bg-black/60 backdrop-blur-sm text-[11px] text-zinc-200 border border-white/10">
+                      {item.duration}
+                    </span>
+                  )}
+
+                  {/* Hover play affordance */}
+                  <div class="absolute inset-0 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity duration-300">
+                    <div class="w-14 h-14 bg-white/10 backdrop-blur-md rounded-full flex items-center justify-center text-white border border-white/20 shadow-lg">
+                      <iconify-icon icon="solar:play-bold" width="24" class="ml-0.5"></iconify-icon>
                     </div>
                   </div>
-                  <div class="p-5">
-                    <h4 class="font-display text-zinc-100 font-medium tracking-tight line-clamp-2 group-hover:text-white transition-colors">
-                      {video.title}
-                    </h4>
+                </div>
+
+                <div class="p-5 space-y-2">
+                  <h3 class="font-display text-zinc-100 font-medium tracking-tight line-clamp-2 group-hover:text-white transition-colors leading-snug">
+                    {item.title}
+                  </h3>
+                  {item.description && (
+                    <p class="text-zinc-500 text-sm line-clamp-2 leading-relaxed">{item.description}</p>
+                  )}
+                  <div class="flex items-center gap-2 pt-1 text-xs text-zinc-500">
+                    <iconify-icon icon={iconFor(item.categoryKey)} width="12"></iconify-icon>
+                    <span>{item.categoryLabel}</span>
                   </div>
-                </a>
-              ))}
-            </div>
-          </section>
-        ))}
+                </div>
+              </a>
+            ))}
+          </div>
+        </section>
+      ))}
+    </div>
+
+    {/* ─────────────────────── EMPTY STATE ─────────────────────── */}
+    <div
+      id="empty-state"
+      hidden
+      class="py-20 text-center animate-[fade-in_0.3s_ease-out]"
+    >
+      <div class="mx-auto w-16 h-16 rounded-full border border-white/[0.08] bg-zinc-900/40 flex items-center justify-center text-zinc-500 mb-5">
+        <iconify-icon icon="solar:magnifer-linear" width="26"></iconify-icon>
       </div>
-    )}
+      <h3 class="font-display text-xl text-zinc-200 font-medium tracking-tight">
+        Nothing matches your search
+      </h3>
+      <p class="text-zinc-500 text-sm max-w-sm mx-auto mt-2">
+        Try a different keyword, or browse by topic above. Every practice here is waiting when you're ready.
+      </p>
+      <button
+        id="empty-reset"
+        type="button"
+        class="mt-6 inline-flex items-center gap-2 px-5 py-2 rounded-full border border-white/10 bg-white/5 text-zinc-200 text-sm hover:border-[#c49245]/30 hover:bg-[#c49245]/10 hover:text-[#e4be7a] transition"
+      >
+        <iconify-icon icon="solar:refresh-linear" width="16"></iconify-icon>
+        Show all sessions
+      </button>
+    </div>
+
+    {/* ─────────────────────── FOOTNOTE ─────────────────────── */}
+    <div class="mt-20 pt-8 border-t border-white/[0.05] text-sm leading-relaxed text-zinc-500 max-w-2xl">
+      <p>
+        New sessions are added each week. If you're unsure where to start, the <a href="#morning" class="text-[#c49245] hover:text-[#e4be7a] underline-offset-4 hover:underline">Morning &amp; Energy</a> or <a href="#breathwork" class="text-[#c49245] hover:text-[#e4be7a] underline-offset-4 hover:underline">Breathwork</a> categories are gentle entry points for a daily practice.
+      </p>
+    </div>
   </div>
 </MainLayout>
+
+<style>
+  .cat-chip {
+    background: rgba(28, 24, 21, 0.4);
+    border-color: rgba(255, 255, 255, 0.08);
+    color: #a39787;
+  }
+  .cat-chip:hover {
+    border-color: rgba(255, 255, 255, 0.18);
+    color: #e2d9ce;
+    background: rgba(28, 24, 21, 0.7);
+  }
+  .cat-chip.active-chip {
+    background: linear-gradient(135deg, rgba(196, 146, 69, 0.18), rgba(150, 93, 128, 0.1));
+    border-color: rgba(196, 146, 69, 0.4);
+    color: #f2ede6;
+    box-shadow: 0 0 0 1px rgba(196, 146, 69, 0.15), 0 4px 16px -4px rgba(196, 146, 69, 0.25);
+  }
+
+  .type-btn.active-type {
+    background: rgba(196, 146, 69, 0.15);
+    color: #f2ede6;
+    box-shadow: inset 0 0 0 1px rgba(196, 146, 69, 0.25);
+  }
+  .type-btn:not(.active-type):hover {
+    color: #cfc3b3;
+  }
+
+  /* Staggered card reveal within each section */
+  section[data-cat-section] .grid > a {
+    animation: fade-enter 0.5s ease-out both;
+  }
+  section[data-cat-section] .grid > a:nth-child(1) { animation-delay: 0.02s; }
+  section[data-cat-section] .grid > a:nth-child(2) { animation-delay: 0.05s; }
+  section[data-cat-section] .grid > a:nth-child(3) { animation-delay: 0.08s; }
+  section[data-cat-section] .grid > a:nth-child(4) { animation-delay: 0.11s; }
+  section[data-cat-section] .grid > a:nth-child(5) { animation-delay: 0.14s; }
+  section[data-cat-section] .grid > a:nth-child(6) { animation-delay: 0.17s; }
+
+  @media (prefers-reduced-motion: reduce) {
+    section[data-cat-section] .grid > a,
+    .animate-\[fade-enter_0\.6s_ease-out\] {
+      animation: none !important;
+    }
+    [data-item-card]:hover {
+      transform: none !important;
+    }
+  }
+</style>
+
+<script is:inline>
+  (function () {
+    const searchInput = document.getElementById('session-search');
+    const clearBtn = document.getElementById('session-search-clear');
+    const catChips = document.querySelectorAll('[data-cat-chip]');
+    const typeBtns = document.querySelectorAll('[data-type-btn]');
+    const cards = document.querySelectorAll('[data-item-card]');
+    const sections = document.querySelectorAll('[data-cat-section]');
+    const catCounts = document.querySelectorAll('[data-cat-count]');
+    const countEl = document.getElementById('result-count');
+    const contextEl = document.getElementById('result-context');
+    const emptyEl = document.getElementById('empty-state');
+    const emptyResetBtn = document.getElementById('empty-reset');
+    const resetBtn = document.getElementById('reset-filters');
+
+    const state = { q: '', cat: 'all', type: 'all' };
+
+    function matches(card) {
+      if (state.type !== 'all' && card.dataset.kind !== state.type) return false;
+      if (state.cat !== 'all' && card.dataset.category !== state.cat) return false;
+      if (state.q && !(card.dataset.search || '').includes(state.q)) return false;
+      return true;
+    }
+
+    function apply() {
+      let total = 0;
+      const perCat = Object.create(null);
+
+      cards.forEach((card) => {
+        const ok = matches(card);
+        card.style.display = ok ? '' : 'none';
+        if (ok) {
+          total++;
+          const k = card.dataset.category;
+          perCat[k] = (perCat[k] || 0) + 1;
+        }
+      });
+
+      let visibleSections = 0;
+      sections.forEach((section) => {
+        const key = section.dataset.catSection;
+        const count = perCat[key] || 0;
+        section.style.display = count > 0 ? '' : 'none';
+        if (count > 0) visibleSections++;
+        const metaEl = section.querySelector('[data-cat-count]');
+        if (metaEl) metaEl.textContent = count === 1 ? '1 session' : count + ' sessions';
+      });
+
+      catCounts.forEach((el) => {
+        const key = el.getAttribute('data-cat-count');
+        const c = perCat[key] || 0;
+        el.textContent = c === 1 ? '1 session' : c + ' sessions';
+      });
+
+      if (countEl) countEl.textContent = total === 1 ? '1 session' : total + ' sessions';
+      if (contextEl) {
+        if (state.q || state.cat !== 'all' || state.type !== 'all') {
+          const bits = [];
+          if (state.q) bits.push('matching "' + state.q + '"');
+          if (state.type !== 'all') bits.push('in ' + state.type);
+          contextEl.textContent = bits.length ? bits.join(' ') : 'filtered';
+        } else {
+          contextEl.textContent = 'across ' + visibleSections + ' topics';
+        }
+      }
+
+      if (emptyEl) emptyEl.hidden = total !== 0;
+
+      const isFiltering = state.q || state.cat !== 'all' || state.type !== 'all';
+      if (resetBtn) resetBtn.hidden = !isFiltering;
+      if (clearBtn) clearBtn.hidden = !state.q;
+    }
+
+    function reset() {
+      state.q = '';
+      state.cat = 'all';
+      state.type = 'all';
+      if (searchInput) searchInput.value = '';
+      catChips.forEach((c) => {
+        const active = c.getAttribute('data-cat-chip') === 'all';
+        c.classList.toggle('active-chip', active);
+        c.setAttribute('aria-pressed', active ? 'true' : 'false');
+      });
+      typeBtns.forEach((b) => {
+        const active = b.getAttribute('data-type-btn') === 'all';
+        b.classList.toggle('active-type', active);
+        b.setAttribute('aria-pressed', active ? 'true' : 'false');
+      });
+      apply();
+    }
+
+    if (searchInput) {
+      searchInput.addEventListener('input', (e) => {
+        state.q = (e.target.value || '').toLowerCase().trim();
+        apply();
+      });
+    }
+
+    if (clearBtn) {
+      clearBtn.addEventListener('click', () => {
+        state.q = '';
+        if (searchInput) {
+          searchInput.value = '';
+          searchInput.focus();
+        }
+        apply();
+      });
+    }
+
+    catChips.forEach((chip) => {
+      chip.addEventListener('click', () => {
+        state.cat = chip.getAttribute('data-cat-chip') || 'all';
+        catChips.forEach((c) => {
+          const active = c === chip;
+          c.classList.toggle('active-chip', active);
+          c.setAttribute('aria-pressed', active ? 'true' : 'false');
+        });
+        apply();
+      });
+    });
+
+    typeBtns.forEach((btn) => {
+      btn.addEventListener('click', () => {
+        state.type = btn.getAttribute('data-type-btn') || 'all';
+        typeBtns.forEach((b) => {
+          const active = b === btn;
+          b.classList.toggle('active-type', active);
+          b.setAttribute('aria-pressed', active ? 'true' : 'false');
+        });
+        apply();
+      });
+    });
+
+    if (resetBtn) resetBtn.addEventListener('click', reset);
+    if (emptyResetBtn) emptyResetBtn.addEventListener('click', reset);
+
+    // Deep-linking: #sleep pre-selects a category chip
+    function applyHash() {
+      const hash = (location.hash || '').replace('#', '');
+      if (!hash) return;
+      const chip = document.querySelector('[data-cat-chip="' + hash + '"]');
+      if (chip) chip.click();
+    }
+    applyHash();
+    window.addEventListener('hashchange', applyHash);
+  })();
+</script>
