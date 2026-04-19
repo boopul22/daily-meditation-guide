@@ -237,10 +237,10 @@ const extraHead = `<script type="application/ld+json">${itemListJsonLd}</script>
           </div>
         </div>
 
-        {/* Category chips */}
+        {/* Category chips — wrap on desktop, horizontal scroll with fade hint on mobile */}
         <nav
           aria-label="Filter by topic"
-          class="flex gap-2 overflow-x-auto no-scrollbar pb-1 -mx-1 px-1 snap-x"
+          class="cat-nav flex gap-2 md:flex-wrap overflow-x-auto md:overflow-visible no-scrollbar pb-1 -mx-1 px-1 snap-x"
         >
           <button
             type="button"
@@ -420,6 +420,14 @@ const extraHead = `<script type="application/ld+json">${itemListJsonLd}</script>
 </MainLayout>
 
 <style>
+  /* On mobile, fade the right edge so users know the chip row scrolls */
+  @media (max-width: 767px) {
+    .cat-nav {
+      -webkit-mask-image: linear-gradient(to right, black calc(100% - 28px), transparent);
+      mask-image: linear-gradient(to right, black calc(100% - 28px), transparent);
+    }
+  }
+
   .cat-chip {
     background: rgba(28, 24, 21, 0.4);
     border-color: rgba(255, 255, 255, 0.08);
