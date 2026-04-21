@@ -1,6 +1,14 @@
 import React, { useState, useRef, useEffect } from 'react';
 import { useStore } from '@nanostores/react';
 import { $user, $authLoading, login, logout, fetchCurrentUser } from '../stores/authStore';
+import { ALL_CATEGORIES } from '../lib/videoCategories';
+
+const NAV_CATEGORIES = ALL_CATEGORIES.map((c) => ({
+  key: c.key,
+  label: c.label,
+  tagline: c.tagline,
+  accent: c.accent,
+}));
 
 type NotificationItem = {
   slug: string;
@@ -37,6 +45,8 @@ const Navbar: React.FC = () => {
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
   const [isDropdownOpen, setIsDropdownOpen] = useState(false);
   const [isNotifOpen, setIsNotifOpen] = useState(false);
+  const [isCategoriesOpen, setIsCategoriesOpen] = useState(false);
+  const [isMobileCategoriesOpen, setIsMobileCategoriesOpen] = useState(false);
   const [allSessions, setAllSessions] = useState<NotificationItem[]>([]);
   const [notifLoading, setNotifLoading] = useState(false);
   const [notifLoaded, setNotifLoaded] = useState(false);
@@ -45,6 +55,7 @@ const Navbar: React.FC = () => {
   const [searchQuery, setSearchQuery] = useState('');
   const dropdownRef = useRef<HTMLDivElement>(null);
   const notifRef = useRef<HTMLDivElement>(null);
+  const categoriesRef = useRef<HTMLDivElement>(null);
   const searchInputRef = useRef<HTMLInputElement>(null);
 
   const notifications = allSessions.slice(0, 6);
@@ -144,6 +155,9 @@ const Navbar: React.FC = () => {
       if (notifRef.current && !notifRef.current.contains(target)) {
         setIsNotifOpen(false);
       }
+      if (categoriesRef.current && !categoriesRef.current.contains(target)) {
+        setIsCategoriesOpen(false);
+      }
     }
     document.addEventListener('mousedown', handleClickOutside);
     return () => document.removeEventListener('mousedown', handleClickOutside);
@@ -171,6 +185,69 @@ const Navbar: React.FC = () => {
           <div className="hidden lg:flex items-center justify-center gap-7">
             <a href="/" className="text-sm font-medium text-zinc-400 hover:text-zinc-100 transition-colors">Practice</a>
             <a href="/sessions" className="text-sm font-medium text-zinc-400 hover:text-zinc-100 transition-colors">Sessions</a>
+
+            <div className="relative" ref={categoriesRef}>
+              <button
+                type="button"
+                onClick={() => setIsCategoriesOpen((v) => !v)}
+                aria-haspopup="menu"
+                aria-expanded={isCategoriesOpen}
+                className={`flex items-center gap-1 text-sm font-medium transition-colors ${
+                  isCategoriesOpen ? 'text-zinc-100' : 'text-zinc-400 hover:text-zinc-100'
+                }`}
+              >
+                Categories
+                <iconify-icon
+                  icon="solar:alt-arrow-down-linear"
+                  width="14"
+                  class={`transition-transform duration-200 ${isCategoriesOpen ? 'rotate-180' : ''}`}
+                ></iconify-icon>
+              </button>
+
+              {isCategoriesOpen && (
+                <div
+                  role="menu"
+                  className="absolute left-1/2 -translate-x-1/2 mt-4 w-[34rem] bg-zinc-950/95 backdrop-blur-xl border border-white/10 rounded-2xl shadow-2xl shadow-black/50 z-50 overflow-hidden animate-[fade-enter_0.15s_ease-out]"
+                >
+                  <div className="px-5 py-3.5 border-b border-white/5 flex items-center justify-between">
+                    <div className="flex items-center gap-2">
+                      <iconify-icon icon="solar:widget-4-linear" width="16" class="text-zinc-400"></iconify-icon>
+                      <p className="text-[13px] text-zinc-100 font-semibold tracking-tight">Browse by theme</p>
+                    </div>
+                    <a
+                      href="/categories"
+                      onClick={() => setIsCategoriesOpen(false)}
+                      className="text-[11px] text-zinc-400 hover:text-white font-medium"
+                    >
+                      All categories →
+                    </a>
+                  </div>
+                  <div className="grid grid-cols-2 p-2">
+                    {NAV_CATEGORIES.map((c) => (
+                      <a
+                        key={c.key}
+                        href={`/category/${c.key}`}
+                        onClick={() => setIsCategoriesOpen(false)}
+                        role="menuitem"
+                        className="group flex items-start gap-3 px-3 py-2.5 rounded-xl hover:bg-white/[0.04] transition-colors"
+                      >
+                        <span
+                          className="mt-1.5 w-1.5 h-1.5 rounded-full flex-shrink-0 transition-transform group-hover:scale-[1.8]"
+                          style={{ backgroundColor: c.accent, boxShadow: `0 0 12px ${c.accent}66` }}
+                        ></span>
+                        <div className="min-w-0">
+                          <p className="text-sm text-zinc-100 font-medium tracking-tight group-hover:text-white leading-tight">
+                            {c.label}
+                          </p>
+                          <p className="text-[11px] text-zinc-500 mt-0.5 line-clamp-1">{c.tagline}</p>
+                        </div>
+                      </a>
+                    ))}
+                  </div>
+                </div>
+              )}
+            </div>
+
             <a href="/infographics" className="text-sm font-medium text-zinc-400 hover:text-zinc-100 transition-colors">Infographics</a>
             <a href="/about" className="text-sm font-medium text-zinc-400 hover:text-zinc-100 transition-colors">About</a>
             <a href="/contact" className="text-sm font-medium text-zinc-400 hover:text-zinc-100 transition-colors">Contact</a>
@@ -316,6 +393,49 @@ const Navbar: React.FC = () => {
           <div className="flex flex-col gap-6 text-lg font-medium text-zinc-300">
             <a href="/" onClick={() => setIsMobileMenuOpen(false)} className="border-b border-white/5 pb-4">Practice</a>
             <a href="/sessions" onClick={() => setIsMobileMenuOpen(false)} className="border-b border-white/5 pb-4">Sessions</a>
+
+            <div className="border-b border-white/5 pb-4">
+              <button
+                type="button"
+                onClick={() => setIsMobileCategoriesOpen((v) => !v)}
+                aria-expanded={isMobileCategoriesOpen}
+                className="w-full flex items-center justify-between"
+              >
+                <span>Categories</span>
+                <iconify-icon
+                  icon="solar:alt-arrow-down-linear"
+                  width="18"
+                  class={`transition-transform duration-200 ${isMobileCategoriesOpen ? 'rotate-180' : ''}`}
+                ></iconify-icon>
+              </button>
+              {isMobileCategoriesOpen && (
+                <div className="mt-4 grid grid-cols-1 gap-1 animate-[fade-enter_0.2s_ease-out]">
+                  <a
+                    href="/categories"
+                    onClick={() => setIsMobileMenuOpen(false)}
+                    className="flex items-center justify-between px-3 py-2.5 rounded-lg bg-white/[0.03] border border-white/5 text-sm text-zinc-200"
+                  >
+                    <span>All categories</span>
+                    <iconify-icon icon="solar:arrow-right-linear" width="14"></iconify-icon>
+                  </a>
+                  {NAV_CATEGORIES.map((c) => (
+                    <a
+                      key={c.key}
+                      href={`/category/${c.key}`}
+                      onClick={() => setIsMobileMenuOpen(false)}
+                      className="flex items-center gap-3 px-3 py-2.5 rounded-lg hover:bg-white/[0.04] text-sm text-zinc-300"
+                    >
+                      <span
+                        className="w-1.5 h-1.5 rounded-full flex-shrink-0"
+                        style={{ backgroundColor: c.accent, boxShadow: `0 0 10px ${c.accent}66` }}
+                      ></span>
+                      {c.label}
+                    </a>
+                  ))}
+                </div>
+              )}
+            </div>
+
             <a href="/infographics" onClick={() => setIsMobileMenuOpen(false)} className="border-b border-white/5 pb-4">Infographics</a>
             <a href="/about" onClick={() => setIsMobileMenuOpen(false)} className="border-b border-white/5 pb-4">About</a>
             <a href="/contact" onClick={() => setIsMobileMenuOpen(false)} className="border-b border-white/5 pb-4">Contact</a>
