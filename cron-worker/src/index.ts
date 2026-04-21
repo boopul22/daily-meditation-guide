@@ -20,9 +20,13 @@ export default {
 
 async function runSync(env: Env): Promise<{ ok: boolean; status?: number; body?: string; error?: string }> {
   try {
-    const res = await fetch(env.SYNC_URL, {
+    const target = new URL(env.SYNC_URL);
+    const res = await fetch(target.toString(), {
       method: 'POST',
-      headers: { 'x-cron-secret': env.CRON_SECRET },
+      headers: {
+        'x-cron-secret': env.CRON_SECRET,
+        'Origin': target.origin,
+      },
     });
     const body = await res.text();
     return { ok: res.ok, status: res.status, body: body.slice(0, 500) };
