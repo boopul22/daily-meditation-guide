@@ -1,0 +1,182 @@
+---
+import MainLayout from '../layouts/MainLayout.astro';
+import {
+  ALL_CATEGORIES,
+  audioCategoryMatches,
+  categorize,
+  cleanDescription,
+  thumbnailUrl,
+  videoSlug,
+} from '../lib/videoCategories';
+
+interface VideoRow {
+  video_id: string;
+  title: string;
+  description: string;
+  slug: string;
+  published_at: string;
+}
+
+interface SessionRow {
+  slug: string;
+  title: string;
+  category: string;
+  featured_image: string;
+}
+
+const db = (Astro.locals as any).runtime.env.DB;
+const [{ results: videoRows }, { results: sessionRows }] = await Promise.all([
+  db
+    .prepare(
+      'SELECT video_id, title, description, slug, published_at FROM youtube_videos ORDER BY published_at DESC'
+    )
+    .all(),
+  db
+    .prepare(
+      "SELECT slug, title, category, featured_image FROM sessions WHERE status = 'published' ORDER BY published_at DESC"
+    )
+    .all(),
+]);
+
+const videos = (videoRows || []) as VideoRow[];
+const sessions = (sessionRows || []) as SessionRow[];
+
+const categoryCards = ALL_CATEGORIES.map((cat) => {
+  const matchedVideos = videos
+    .map((v) => ({
+      ...v,
+      description: cleanDescription(v.description ?? ''),
+      slug: v.slug || videoSlug(v.title, v.video_id),
+      cat: categorize(v.title, cleanDescription(v.description ?? '')),
+    }))
+    .filter((v) => v.cat.key === cat.key);
+
+  const matchedSessions = sessions.filter((s) => audioCategoryMatches(s.category, cat.key));
+
+  const preview = matchedVideos[0];
+
+  return {
+    ...cat,
+    totalCount: matchedVideos.length + matchedSessions.length,
+    videoCount: matchedVideos.length,
+    audioCount: matchedSessions.length,
+    previewImage: preview ? thumbnailUrl(preview.video_id, 'hq') : null,
+    previewTitle: preview?.title ?? matchedSessions[0]?.title ?? null,
+  };
+}).filter((c) => c.totalCount > 0);
+
+const totalAll = categoryCards.reduce((sum, c) => sum + c.totalCount, 0);
+
+const siteUrl = 'https://dailymeditationguide.com';
+const pageUrl = `${siteUrl}/categories`;
+
+const itemListJsonLd = JSON.stringify({
+  '@context': 'https://schema.org',
+  '@type': 'CollectionPage',
+  name: 'Meditation Categories',
+  description:
+    'Every theme in the Daily Meditation Guide library — sleep, anxiety, focus, breathwork, self-love, healing, mindfulness, manifestation, and morning practice.',
+  url: pageUrl,
+  mainEntity: {
+    '@type': 'ItemList',
+    numberOfItems: categoryCards.length,
+    itemListElement: categoryCards.map((c, i) => ({
+      '@type': 'ListItem',
+      position: i + 1,
+      name: `${c.label} Meditations`,
+      url: `${siteUrl}/category/${c.key}`,
+    })),
+  },
+});
+
+const breadcrumbJsonLd = JSON.stringify({
+  '@context': 'https://schema.org',
+  '@type': 'BreadcrumbList',
+  itemListElement: [
+    { '@type': 'ListItem', position: 1, name: 'Home', item: `${siteUrl}/` },
+    { '@type': 'ListItem', position: 2, name: 'Categories', item: pageUrl },
+  ],
+});
+
+const extraHead = `<script type="application/ld+json">${itemListJsonLd}</script><script type="application/ld+json">${breadcrumbJsonLd}</script>`;
+
+Astro.response.headers.set(
+  'Cache-Control',
+  'public, max-age=300, s-maxage=3600, stale-while-revalidate=86400'
+);
+---
+
+<MainLayout
+  title="All Meditation Categories"
+  description="Browse the Daily Meditation Guide library by theme — sleep, anxiety, morning, focus, breathwork, self-love, healing, mindfulness, and manifestation practices."
+  canonical={pageUrl}
+  extraHead={extraHead}
+>
+  <div class="relative animate-[fade-enter_0.5s_ease-out]">
+    <nav class="text-xs text-zinc-500 flex items-center gap-2 mb-10" aria-label="Breadcrumb">
+      <a href="/" class="hover:text-zinc-300 transition-colors">Home</a>
+      <span class="text-zinc-700">/</span>
+      <span class="text-zinc-300">Categories</span>
+    </nav>
+
+    <header class="mb-16 space-y-6 max-w-3xl">
+      <div class="text-[0.7rem] uppercase tracking-[0.25em] text-zinc-500">The library, organized</div>
+      <h1 class="font-display text-5xl md:text-7xl leading-[0.95] tracking-tight text-zinc-100">
+        Browse by <em class="italic font-normal text-zinc-400">theme.</em>
+      </h1>
+      <p class="font-serif italic text-xl md:text-2xl text-zinc-400 leading-snug">
+        Every practice, grouped by the moment it was made for.
+      </p>
+      <p class="text-zinc-500 leading-relaxed">
+        {totalAll} guided meditations across {categoryCards.length} themes. Pick the one that matches where you are right now — not where you think you should be.
+      </p>
+    </header>
+
+    <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+      {categoryCards.map((c) => (
+        <a
+          href={`/category/${c.key}`}
+          class="group relative overflow-hidden rounded-3xl border border-white/[0.07] bg-zinc-900/40 hover:border-white/[0.18] hover:-translate-y-1 transition-all duration-400"
+          style={`--accent: ${c.accent}; --accent-glow: ${c.accentGlow};`}
+        >
+          <div class="aspect-[4/3] relative overflow-hidden bg-zinc-950">
+            {c.previewImage ? (
+              <img src={c.previewImage} alt={c.previewTitle ?? c.label} loading="lazy" class="absolute inset-0 w-full h-full object-cover opacity-70 group-hover:opacity-90 group-hover:scale-105 transition-all duration-700" />
+            ) : (
+              <div class="absolute inset-0" style="background: radial-gradient(circle at 30% 30%, var(--accent-glow), transparent 70%);"></div>
+            )}
+            <div class="absolute inset-0 bg-gradient-to-t from-zinc-950 via-zinc-950/40 to-transparent"></div>
+            <div class="absolute inset-0" style="background: radial-gradient(ellipse at 80% 10%, var(--accent-glow), transparent 60%);"></div>
+
+            <div class="absolute top-5 left-5 flex items-center gap-2">
+              <span class="w-2 h-2 rounded-full" style="background: var(--accent);"></span>
+              <span class="text-[0.65rem] uppercase tracking-[0.22em] text-white/90">{c.kicker}</span>
+            </div>
+
+            <div class="absolute top-5 right-5 px-2.5 py-1 rounded-full text-[0.7rem] font-medium backdrop-blur-md bg-black/40 border border-white/15 text-zinc-100">
+              {c.totalCount}
+            </div>
+
+            <div class="absolute bottom-0 left-0 right-0 p-6 space-y-3">
+              <h2 class="font-display text-3xl md:text-4xl tracking-tight leading-[0.95] text-zinc-100 group-hover:text-white transition-colors">
+                {c.label}
+              </h2>
+              <p class="font-serif italic text-sm text-zinc-400 leading-snug line-clamp-2">{c.tagline}</p>
+            </div>
+          </div>
+
+          <div class="flex items-center justify-between px-6 py-4 border-t border-white/[0.06]">
+            <div class="text-xs text-zinc-500">
+              {c.videoCount} video{c.videoCount !== 1 ? 's' : ''}
+              {c.audioCount > 0 && <> &middot; {c.audioCount} audio</>}
+            </div>
+            <div class="flex items-center gap-1.5 text-xs text-zinc-400 group-hover:text-white transition-colors">
+              Enter
+              <iconify-icon icon="solar:arrow-right-linear" width="14" class="transition-transform group-hover:translate-x-1"></iconify-icon>
+            </div>
+          </div>
+        </a>
+      ))}
+    </div>
+  </div>
+</MainLayout>

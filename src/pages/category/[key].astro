@@ -1,0 +1,391 @@
+---
+import MainLayout from '../../layouts/MainLayout.astro';
+import {
+  ALL_CATEGORIES,
+  audioCategoryMatches,
+  categorize,
+  cleanDescription,
+  getCategoryByKey,
+  thumbnailUrl,
+  videoSlug,
+} from '../../lib/videoCategories';
+
+export const prerender = false;
+
+interface VideoRow {
+  video_id: string;
+  title: string;
+  description: string;
+  slug: string;
+  published_at: string;
+}
+
+interface SessionRow {
+  slug: string;
+  title: string;
+  description: string;
+  author: string;
+  duration: string;
+  category: string;
+  featured_image: string;
+  published_at: string;
+}
+
+const { key } = Astro.params;
+const category = key ? getCategoryByKey(key) : null;
+
+if (!category) {
+  return new Response('Category not found', { status: 404 });
+}
+
+const db = (Astro.locals as any).runtime.env.DB;
+
+const [{ results: videoRows }, { results: sessionRows }] = await Promise.all([
+  db
+    .prepare(
+      'SELECT video_id, title, description, slug, published_at FROM youtube_videos ORDER BY published_at DESC'
+    )
+    .all(),
+  db
+    .prepare(
+      "SELECT slug, title, description, author, duration, category, featured_image, published_at FROM sessions WHERE status = 'published' ORDER BY published_at DESC"
+    )
+    .all(),
+]);
+
+function excerpt(text: string, max = 150): string {
+  const cleaned = text.replace(/\s+/g, ' ').trim();
+  if (cleaned.length <= max) return cleaned;
+  const cut = cleaned.slice(0, max);
+  const lastSpace = cut.lastIndexOf(' ');
+  return (lastSpace > 60 ? cut.slice(0, lastSpace) : cut) + '…';
+}
+
+const videos = (videoRows || []) as VideoRow[];
+const sessions = (sessionRows || []) as SessionRow[];
+
+const videosInCategory = videos
+  .map((v) => ({
+    ...v,
+    description: cleanDescription(v.description ?? ''),
+    slug: v.slug || videoSlug(v.title, v.video_id),
+    cat: categorize(v.title, cleanDescription(v.description ?? '')),
+  }))
+  .filter((v) => v.cat.key === category.key);
+
+const sessionsInCategory = sessions.filter((s) => audioCategoryMatches(s.category, category.key));
+
+const totalCount = videosInCategory.length + sessionsInCategory.length;
+const mostRecent = videosInCategory[0];
+
+// Other categories to surface at bottom (with counts)
+const otherCategoryCards = ALL_CATEGORIES.filter((c) => c.key !== category.key).map((c) => {
+  const vCount = videos.filter((v) => categorize(v.title, cleanDescription(v.description ?? '')).key === c.key).length;
+  const sCount = sessions.filter((s) => audioCategoryMatches(s.category, c.key)).length;
+  return { ...c, count: vCount + sCount };
+});
+
+const siteUrl = 'https://dailymeditationguide.com';
+const pageUrl = `${siteUrl}/category/${category.key}`;
+const metaDescription = `${category.description} ${totalCount} guided meditations from the Daily Meditation Guide library.`.slice(0, 200);
+const pageTitle = /meditat/i.test(category.label)
+  ? category.label
+  : `${category.label} Meditations`;
+
+const itemListJsonLd = JSON.stringify({
+  '@context': 'https://schema.org',
+  '@type': 'CollectionPage',
+  name: pageTitle,
+  description: category.description,
+  url: pageUrl,
+  inLanguage: 'en',
+  isPartOf: {
+    '@type': 'WebSite',
+    name: 'Daily Meditation Guide',
+    url: siteUrl,
+  },
+  mainEntity: {
+    '@type': 'ItemList',
+    numberOfItems: totalCount,
+    itemListElement: [
+      ...sessionsInCategory.slice(0, 50).map((s, i) => ({
+        '@type': 'ListItem',
+        position: i + 1,
+        name: s.title,
+        url: `${siteUrl}/session/${s.slug}`,
+      })),
+      ...videosInCategory.slice(0, 50).map((v, i) => ({
+        '@type': 'ListItem',
+        position: sessionsInCategory.length + i + 1,
+        name: v.title,
+        url: `${siteUrl}/video-sessions/${v.slug}`,
+      })),
+    ],
+  },
+});
+
+const breadcrumbJsonLd = JSON.stringify({
+  '@context': 'https://schema.org',
+  '@type': 'BreadcrumbList',
+  itemListElement: [
+    { '@type': 'ListItem', position: 1, name: 'Home', item: `${siteUrl}/` },
+    { '@type': 'ListItem', position: 2, name: 'Categories', item: `${siteUrl}/categories` },
+    { '@type': 'ListItem', position: 3, name: category.label, item: pageUrl },
+  ],
+});
+
+const extraHead = `<script type="application/ld+json">${itemListJsonLd}</script><script type="application/ld+json">${breadcrumbJsonLd}</script>`;
+
+Astro.response.headers.set(
+  'Cache-Control',
+  'public, max-age=300, s-maxage=3600, stale-while-revalidate=86400'
+);
+
+// Split videos: first one is the editorial lead, rest form the grid
+const leadVideo = videosInCategory[0];
+const restVideos = videosInCategory.slice(1);
+---
+
+<MainLayout
+  title={pageTitle}
+  description={metaDescription}
+  canonical={pageUrl}
+  ogImage={mostRecent ? thumbnailUrl(mostRecent.video_id, 'hq') : undefined}
+  extraHead={extraHead}
+>
+  <div
+    class="relative animate-[fade-enter_0.6s_ease-out]"
+    style={`--accent: ${category.accent}; --accent-glow: ${category.accentGlow};`}
+  >
+    {/* Ambient glow backdrop — tinted to category */}
+    <div aria-hidden="true" class="pointer-events-none absolute -top-32 left-1/2 -translate-x-1/2 w-[900px] h-[600px] rounded-full blur-[140px] opacity-60"
+      style="background: radial-gradient(ellipse at center, var(--accent-glow), transparent 70%);"></div>
+
+    <nav class="relative text-xs text-zinc-500 flex items-center gap-2 mb-12" aria-label="Breadcrumb">
+      <a href="/" class="hover:text-zinc-300 transition-colors">Home</a>
+      <span class="text-zinc-700">/</span>
+      <a href="/categories" class="hover:text-zinc-300 transition-colors">Categories</a>
+      <span class="text-zinc-700">/</span>
+      <span class="text-zinc-300">{category.label}</span>
+    </nav>
+
+    {/* Editorial hero */}
+    <header class="relative pb-16 md:pb-20 border-b border-white/[0.06] mb-16">
+      <div class="grid md:grid-cols-[auto_1fr] gap-8 md:gap-16 items-end">
+        <div class="space-y-6 md:max-w-2xl">
+          <div class="flex items-center gap-3">
+            <span class="inline-block w-8 h-px" style="background: var(--accent);"></span>
+            <span class="text-[0.7rem] uppercase tracking-[0.22em] font-medium" style="color: var(--accent);">
+              {category.kicker}
+            </span>
+          </div>
+
+          <h1 class="font-display text-5xl md:text-7xl leading-[0.95] tracking-tight text-zinc-100">
+            {category.label.split(' & ').map((part, i, arr) => (
+              <span>
+                {i === arr.length - 1 && arr.length > 1 ? <em class="italic font-normal" style="color: var(--accent);">{part}</em> : part}
+                {i < arr.length - 1 && <span class="text-zinc-600"> &amp; </span>}
+              </span>
+            ))}
+          </h1>
+
+          <p class="font-serif italic text-xl md:text-2xl text-zinc-400 leading-snug max-w-xl">
+            {category.tagline}
+          </p>
+
+          <p class="text-zinc-500 leading-relaxed max-w-xl">
+            {category.description}
+          </p>
+        </div>
+
+        {/* Counter card on large screens */}
+        <div class="hidden md:flex flex-col items-end gap-3 pt-6">
+          <div class="text-[0.65rem] uppercase tracking-[0.3em] text-zinc-600">In this collection</div>
+          <div class="font-display text-7xl text-zinc-100 tracking-tighter leading-none">
+            {totalCount.toString().padStart(2, '0')}
+          </div>
+          <div class="text-xs text-zinc-500 text-right">
+            {videosInCategory.length} video{videosInCategory.length !== 1 ? 's' : ''}
+            {sessionsInCategory.length > 0 && <> &middot; {sessionsInCategory.length} audio</>}
+          </div>
+        </div>
+
+        {/* Mobile counter */}
+        <div class="md:hidden flex items-center gap-4 text-sm text-zinc-400">
+          <span class="font-display text-3xl text-zinc-100">{totalCount}</span>
+          <span class="text-zinc-500">
+            {videosInCategory.length} video{videosInCategory.length !== 1 ? 's' : ''}
+            {sessionsInCategory.length > 0 && <> &middot; {sessionsInCategory.length} audio</>}
+          </span>
+        </div>
+      </div>
+    </header>
+
+    {/* Audio sessions strip (only if any) */}
+    {sessionsInCategory.length > 0 && (
+      <section class="mb-20">
+        <div class="flex items-baseline justify-between mb-6">
+          <h2 class="font-display text-2xl text-zinc-100 tracking-tight">Audio sessions</h2>
+          <span class="text-xs text-zinc-500">{sessionsInCategory.length} guided</span>
+        </div>
+        <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-5">
+          {sessionsInCategory.map((s) => (
+            <a
+              href={`/session/${s.slug}`}
+              class="group relative block overflow-hidden rounded-2xl border border-white/[0.07] bg-zinc-900/40 hover:border-white/20 hover:-translate-y-0.5 transition-all duration-300"
+            >
+              <div class="aspect-[5/3] overflow-hidden bg-zinc-800 relative">
+                {s.featured_image ? (
+                  <img src={s.featured_image} alt={s.title} loading="lazy" class="w-full h-full object-cover group-hover:scale-[1.03] transition-transform duration-500" />
+                ) : (
+                  <div class="w-full h-full" style="background: radial-gradient(circle at 30% 30%, var(--accent-glow), transparent 60%), linear-gradient(135deg, #1a1a1d, #0a0a0b);"></div>
+                )}
+                <div class="absolute top-3 left-3 px-2 py-1 rounded-full text-[0.65rem] uppercase tracking-[0.15em] font-medium backdrop-blur-md bg-black/40 border border-white/10 text-zinc-200 flex items-center gap-1.5">
+                  <span class="w-1 h-1 rounded-full" style="background: var(--accent);"></span>
+                  Audio
+                </div>
+                {s.duration && (
+                  <div class="absolute bottom-3 right-3 px-2 py-1 rounded-md text-[0.7rem] font-medium backdrop-blur-md bg-black/50 border border-white/10 text-zinc-100">
+                    {s.duration}
+                  </div>
+                )}
+              </div>
+              <div class="p-5 space-y-1.5">
+                <h3 class="font-display text-zinc-100 text-lg tracking-tight leading-snug line-clamp-2 group-hover:text-white transition-colors">
+                  {s.title}
+                </h3>
+                <p class="text-xs text-zinc-500">{s.author}</p>
+              </div>
+            </a>
+          ))}
+        </div>
+      </section>
+    )}
+
+    {/* Video lead card */}
+    {leadVideo && (
+      <section class="mb-16">
+        <div class="flex items-baseline justify-between mb-6">
+          <h2 class="font-display text-2xl text-zinc-100 tracking-tight">Video library</h2>
+          <span class="text-xs text-zinc-500">{videosInCategory.length} total</span>
+        </div>
+
+        <a
+          href={`/video-sessions/${leadVideo.slug}`}
+          class="group relative block overflow-hidden rounded-3xl border border-white/[0.08] bg-zinc-900/40 hover:border-white/20 transition-all duration-500"
+        >
+          <div class="grid md:grid-cols-[1.4fr_1fr] gap-0">
+            <div class="relative aspect-video md:aspect-auto overflow-hidden bg-zinc-800">
+              <img
+                src={thumbnailUrl(leadVideo.video_id, 'hq')}
+                alt={leadVideo.title}
+                loading="eager"
+                width="960"
+                height="540"
+                class="absolute inset-0 w-full h-full object-cover transition-transform duration-700 group-hover:scale-[1.04]"
+              />
+              <div class="absolute inset-0 bg-gradient-to-tr from-black/60 via-black/10 to-transparent"></div>
+              <div class="absolute inset-0 flex items-center justify-center">
+                <div class="w-16 h-16 md:w-20 md:h-20 rounded-full backdrop-blur-md bg-white/10 border flex items-center justify-center transition-all duration-500 group-hover:scale-110"
+                  style="border-color: var(--accent); box-shadow: 0 0 40px var(--accent-glow);">
+                  <iconify-icon icon="solar:play-linear" width="32" class="text-white ml-1"></iconify-icon>
+                </div>
+              </div>
+            </div>
+
+            <div class="p-6 md:p-10 flex flex-col justify-between gap-6">
+              <div class="space-y-3">
+                <div class="text-[0.65rem] uppercase tracking-[0.22em]" style="color: var(--accent);">
+                  Featured session
+                </div>
+                <h3 class="font-display text-2xl md:text-3xl text-zinc-100 tracking-tight leading-tight group-hover:text-white transition-colors">
+                  {leadVideo.title}
+                </h3>
+                {leadVideo.description && (
+                  <p class="text-sm text-zinc-500 leading-relaxed line-clamp-4">
+                    {excerpt(leadVideo.description, 240)}
+                  </p>
+                )}
+              </div>
+              <div class="flex items-center gap-2 text-xs text-zinc-400 group-hover:text-zinc-200 transition-colors">
+                Begin session
+                <iconify-icon icon="solar:arrow-right-linear" width="14" class="transition-transform group-hover:translate-x-1"></iconify-icon>
+              </div>
+            </div>
+          </div>
+        </a>
+      </section>
+    )}
+
+    {/* The rest of the grid */}
+    {restVideos.length > 0 && (
+      <section class="mb-24">
+        <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+          {restVideos.map((v) => (
+            <a
+              href={`/video-sessions/${v.slug}`}
+              class="group block bg-zinc-900/40 border border-white/[0.06] hover:border-white/[0.14] rounded-2xl overflow-hidden transition-all duration-300 hover:-translate-y-1"
+            >
+              <div class="relative aspect-video w-full overflow-hidden bg-zinc-800">
+                <img
+                  src={thumbnailUrl(v.video_id, 'hq')}
+                  alt={v.title}
+                  loading="lazy"
+                  decoding="async"
+                  width="480"
+                  height="360"
+                  class="absolute inset-0 w-full h-full object-cover transition-transform duration-500 group-hover:scale-105"
+                />
+                <div class="absolute inset-0 bg-gradient-to-t from-black/55 via-transparent to-transparent"></div>
+                <div class="absolute inset-0 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity duration-300">
+                  <div class="w-12 h-12 rounded-full backdrop-blur-md bg-white/10 border border-white/20 flex items-center justify-center text-white">
+                    <iconify-icon icon="solar:play-linear" width="22" class="ml-0.5"></iconify-icon>
+                  </div>
+                </div>
+              </div>
+              <div class="p-5 space-y-2">
+                <h3 class="font-display text-zinc-100 tracking-tight line-clamp-2 group-hover:text-white transition-colors">
+                  {v.title}
+                </h3>
+                {v.description && (
+                  <p class="text-zinc-500 text-sm line-clamp-2">{excerpt(v.description)}</p>
+                )}
+              </div>
+            </a>
+          ))}
+        </div>
+      </section>
+    )}
+
+    {/* Empty state — unlikely but defensive */}
+    {totalCount === 0 && (
+      <section class="py-24 text-center space-y-4 border border-dashed border-white/10 rounded-2xl">
+        <p class="font-display text-2xl text-zinc-300 italic">Nothing here yet.</p>
+        <p class="text-zinc-500">This category is still being curated. Explore another theme below.</p>
+      </section>
+    )}
+
+    {/* Explore other categories */}
+    <section class="pt-12 border-t border-white/[0.06]">
+      <div class="flex items-baseline justify-between mb-8">
+        <h2 class="font-display text-2xl text-zinc-100 tracking-tight">Explore other themes</h2>
+        <a href="/categories" class="text-xs text-zinc-500 hover:text-zinc-200 transition-colors">All categories →</a>
+      </div>
+      <div class="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-3">
+        {otherCategoryCards.filter((c) => c.count > 0).map((c) => (
+          <a
+            href={`/category/${c.key}`}
+            class="group flex items-center justify-between p-4 rounded-xl border border-white/[0.06] bg-zinc-900/30 hover:bg-zinc-900/60 hover:border-white/[0.14] transition-all"
+            style={`--c-accent: ${c.accent};`}
+          >
+            <div class="flex items-center gap-3 min-w-0">
+              <span class="w-1.5 h-8 rounded-full flex-shrink-0 transition-all group-hover:h-10" style="background: var(--c-accent);"></span>
+              <span class="font-display text-zinc-200 tracking-tight truncate group-hover:text-white transition-colors">{c.label}</span>
+            </div>
+            <span class="text-xs text-zinc-500 flex-shrink-0 ml-2">{c.count}</span>
+          </a>
+        ))}
+      </div>
+    </section>
+  </div>
+</MainLayout>

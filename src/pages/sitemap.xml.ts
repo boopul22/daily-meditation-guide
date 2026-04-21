@@ -1,5 +1,6 @@
 import type { APIContext } from 'astro';
 import { SITE_URL, escapeXml, toW3CDate } from '../lib/xml';
+import { ALL_CATEGORIES } from '../lib/videoCategories';
 
 interface SitemapRow {
   slug: string;
@@ -10,6 +11,7 @@ const STATIC_PAGES = [
   { path: '/', lastmod: '2026-04-13' },
   { path: '/sessions', lastmod: '2026-04-13' },
   { path: '/video-sessions', lastmod: '2026-04-13' },
+  { path: '/categories', lastmod: '2026-04-21' },
   { path: '/infographics', lastmod: '2026-04-13' },
   { path: '/about', lastmod: '2026-04-13' },
   { path: '/contact', lastmod: '2026-04-13' },
@@ -71,6 +73,13 @@ export async function GET(context: APIContext) {
   </url>`
   ).join('\n');
 
+  const categoryEntries = ALL_CATEGORIES.map(
+    cat => `  <url>
+    <loc>${SITE_URL}/category/${cat.key}</loc>
+    <lastmod>${latestDate}</lastmod>
+  </url>`
+  ).join('\n');
+
   // Paginated infographics listing pages (page 2..N)
   const totalPages = Math.max(1, Math.ceil(infographics.length / INFOGRAPHICS_PAGE_SIZE));
   const infographicPages: string[] = [];
@@ -84,6 +93,7 @@ export async function GET(context: APIContext) {
   const xml = `<?xml version="1.0" encoding="UTF-8"?>
 <urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
 ${staticEntries}
+${categoryEntries}
 ${sessionEntries}
 ${videoEntries}
 ${infographicEntries}
