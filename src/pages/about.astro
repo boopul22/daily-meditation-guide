@@ -21,16 +21,16 @@ const whatIDo = [
 ];
 
 const projects = [
-  { name: "ExtractPics", desc: "Extract and download images from any website instantly. Supports batch processing and smart filtering.", link: "https://www.extractpics.com/" },
-  { name: "ImageToURL", desc: "Convert any image to URL instantly. Free image hosting with global CDN delivery.", link: "https://imagetourl.cloud/" },
-  { name: "StoriesPDF", desc: "Discover and download captivated PDF stories for all ages.", link: "#" },
-  { name: "TamilKathai", desc: "A collection of wonderful Tamil stories and cultural narratives.", link: "#" },
+  { name: "ExtractPics", desc: "Extract and download images from any website instantly. Supports batch processing and smart filtering." },
+  { name: "ImageToURL", desc: "Convert any image to URL instantly. Free image hosting with global CDN delivery." },
+  { name: "StoriesPDF", desc: "Discover and download captivated PDF stories for all ages." },
+  { name: "TamilKathai", desc: "A collection of wonderful Tamil stories and cultural narratives." },
 ];
 
 const connectLinks = [
   { label: "GitHub", val: "Projects & Code", icon: "brandico:github", link: "https://github.com/boopul22" },
   { label: "Instagram", val: "Life, Fitness & AI", icon: "brandico:instagram", link: "https://www.instagram.com/bipul.skill/" },
-  { label: "Personal Website", val: "bipul.online", icon: "solar:globe-linear", link: "https://bipul.online/" },
+  { label: "Personal Website", val: "bipul.online", icon: "solar:globe-linear", link: null },
   { label: "Email", val: "blog.boopul@gmail.com", icon: "solar:letter-linear", link: "mailto:blog.boopul@gmail.com" },
 ];
 
@@ -179,13 +179,10 @@ const philosophy = ["Start small", "Stay consistent", "Build quietly", "Let resu
         <h2 class="font-display text-3xl font-medium text-zinc-100 tracking-tight">My Other Projects</h2>
         <div class="grid md:grid-cols-2 gap-6">
           {projects.map((project) => (
-            <a href={project.link} class="block p-8 rounded-3xl border border-white/5 bg-zinc-900/20 hover:bg-zinc-900/40 transition-all duration-300 group">
-              <div class="flex justify-between items-start mb-4">
-                <h3 class="text-xl font-medium text-zinc-200 group-hover:text-indigo-300 transition-colors">{project.name}</h3>
-                <iconify-icon icon="solar:arrow-right-up-linear" class="text-zinc-500 group-hover:text-zinc-300 transition-colors"></iconify-icon>
-              </div>
+            <div class="block p-8 rounded-3xl border border-white/5 bg-zinc-900/20 transition-all duration-300">
+              <h3 class="text-xl font-medium text-zinc-200 mb-4">{project.name}</h3>
               <p class="text-zinc-400 text-sm leading-relaxed">{project.desc}</p>
-            </a>
+            </div>
           ))}
         </div>
       </section>
@@ -197,15 +194,27 @@ const philosophy = ["Start small", "Stay consistent", "Build quietly", "Let resu
 
         <div class="grid md:grid-cols-2 gap-4">
           {connectLinks.map((item) => (
-            <a href={item.link} class="flex items-center gap-4 p-4 rounded-xl border border-white/5 bg-zinc-900/30 hover:bg-zinc-900/50 transition-colors">
-              <div class="w-10 h-10 rounded-lg bg-zinc-900 flex items-center justify-center text-zinc-400">
-                <iconify-icon icon={item.icon} width="20"></iconify-icon>
+            item.link ? (
+              <a href={item.link} class="flex items-center gap-4 p-4 rounded-xl border border-white/5 bg-zinc-900/30 hover:bg-zinc-900/50 transition-colors">
+                <div class="w-10 h-10 rounded-lg bg-zinc-900 flex items-center justify-center text-zinc-400">
+                  <iconify-icon icon={item.icon} width="20"></iconify-icon>
+                </div>
+                <div>
+                  <p class="text-zinc-200 font-medium text-sm">{item.label}</p>
+                  <p class="text-zinc-500 text-xs">{item.val}</p>
+                </div>
+              </a>
+            ) : (
+              <div class="flex items-center gap-4 p-4 rounded-xl border border-white/5 bg-zinc-900/30">
+                <div class="w-10 h-10 rounded-lg bg-zinc-900 flex items-center justify-center text-zinc-400">
+                  <iconify-icon icon={item.icon} width="20"></iconify-icon>
+                </div>
+                <div>
+                  <p class="text-zinc-200 font-medium text-sm">{item.label}</p>
+                  <p class="text-zinc-500 text-xs">{item.val}</p>
+                </div>
               </div>
-              <div>
-                <p class="text-zinc-200 font-medium text-sm">{item.label}</p>
-                <p class="text-zinc-500 text-xs">{item.val}</p>
-              </div>
-            </a>
+            )
           ))}
         </div>
       </section>
