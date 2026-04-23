@@ -54,7 +54,6 @@ export async function syncYouTubeVideos(
 
   do {
     const page = await fetchPage(apiKey, pageToken);
-    const insertedBefore = result.inserted;
 
     for (const item of page.items) {
       result.scanned++;
@@ -99,10 +98,7 @@ export async function syncYouTubeVideos(
     }
 
     pageToken = page.nextPageToken;
-    const insertedThisPage = result.inserted - insertedBefore;
-    if (!options.fullBackfill && insertedThisPage === 0) {
-      break;
-    }
+    if (!options.fullBackfill) break;
   } while (pageToken);
 
   return result;
