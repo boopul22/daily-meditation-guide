@@ -2,6 +2,24 @@ import React, { useState, useEffect } from 'react';
 
 const COOKIE_CONSENT_KEY = 'dmg_cookie_consent';
 
+type ConsentState = 'granted' | 'denied';
+
+declare global {
+    interface Window {
+        gtag?: (...args: unknown[]) => void;
+    }
+}
+
+function updateGtagConsent(state: ConsentState) {
+    if (typeof window === 'undefined' || typeof window.gtag !== 'function') return;
+    window.gtag('consent', 'update', {
+        ad_storage: state,
+        ad_user_data: state,
+        ad_personalization: state,
+        analytics_storage: state,
+    });
+}
+
 const CookieConsent: React.FC = () => {
     const [visible, setVisible] = useState(false);
 
@@ -14,11 +32,13 @@ const CookieConsent: React.FC = () => {
 
     const handleAccept = () => {
         localStorage.setItem(COOKIE_CONSENT_KEY, 'accepted');
+        updateGtagConsent('granted');
         setVisible(false);
     };
 
     const handleDecline = () => {
         localStorage.setItem(COOKIE_CONSENT_KEY, 'declined');
+        updateGtagConsent('denied');
         setVisible(false);
     };
 
@@ -30,11 +50,10 @@ const CookieConsent: React.FC = () => {
                 <div className="flex flex-col md:flex-row items-start md:items-center gap-4">
                     <div className="flex-1">
                         <p className="text-sm text-zinc-300 leading-relaxed">
-                            We use cookies to enhance your experience and serve personalized advertisements through Google AdSense. By clicking "Accept," you consent to our use of cookies. Read our{' '}
+                            We use cookies for analytics and personalized advertisements (Google AdSense). You can accept all cookies or decline non-essential ones — essential cookies remain enabled for security and core functionality. Read our{' '}
                             <a href="/privacy" className="text-indigo-400 hover:text-indigo-300 transition-colors">
                                 Privacy Policy
-                            </a>{' '}
-                            for more information.
+                            </a>.
                         </p>
                     </div>
                     <div className="flex items-center gap-3 shrink-0">

@@ -85,6 +85,46 @@ const fullTitle = title === 'Daily Meditation Guide' ? title : `${title} | Daily
     />
   </noscript>
   <Fragment set:html={extraHead} />
+
+  <!-- Google Consent Mode v2 defaults — MUST run before any Google tag (gtag/AdSense) -->
+  <script is:inline>
+    window.dataLayer = window.dataLayer || [];
+    function gtag(){dataLayer.push(arguments);}
+    window.gtag = gtag;
+    gtag('consent', 'default', {
+      ad_storage: 'denied',
+      ad_user_data: 'denied',
+      ad_personalization: 'denied',
+      analytics_storage: 'denied',
+      functionality_storage: 'granted',
+      security_storage: 'granted',
+      wait_for_update: 500,
+    });
+    try {
+      var saved = localStorage.getItem('dmg_cookie_consent');
+      if (saved === 'accepted') {
+        gtag('consent', 'update', {
+          ad_storage: 'granted',
+          ad_user_data: 'granted',
+          ad_personalization: 'granted',
+          analytics_storage: 'granted',
+        });
+      }
+    } catch (e) {}
+    gtag('js', new Date());
+    gtag('config', 'G-7BGLP6TF2H');
+  </script>
+
+  <!-- Google AdSense -->
+  <meta name="google-adsense-account" content="ca-pub-7803867089582138" />
+  <script
+    async
+    src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-7803867089582138"
+    crossorigin="anonymous"
+  ></script>
+
+  <!-- Google Analytics (GA4) -->
+  <script async src="https://www.googletagmanager.com/gtag/js?id=G-7BGLP6TF2H"></script>
   <script type="application/ld+json" set:html={JSON.stringify({
     "@context": "https://schema.org",
     "@type": "Organization",
@@ -105,6 +145,7 @@ const fullTitle = title === 'Daily Meditation Guide' ? title : `${title} | Daily
     "contactPoint": {
       "@type": "ContactPoint",
       "contactType": "customer support",
+      "email": "blog.boopul@gmail.com",
       "url": "https://dailymeditationguide.com/contact"
     },
     "sameAs": [
@@ -126,14 +167,5 @@ const fullTitle = title === 'Daily Meditation Guide' ? title : `${title} | Daily
   <AudioManager client:idle />
   <PlayerBar client:idle />
   <CookieConsent client:visible />
-
-  <!-- Google tag (gtag.js) - loaded after content for better LCP -->
-  <script async src="https://www.googletagmanager.com/gtag/js?id=G-7BGLP6TF2H"></script>
-  <script is:inline>
-    window.dataLayer = window.dataLayer || [];
-    function gtag(){dataLayer.push(arguments);}
-    gtag('js', new Date());
-    gtag('config', 'G-7BGLP6TF2H');
-  </script>
 </body>
 </html>
