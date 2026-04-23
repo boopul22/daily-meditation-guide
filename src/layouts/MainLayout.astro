@@ -64,9 +64,11 @@ const fullTitle = title === 'Daily Meditation Guide' ? title : `${title} | Daily
   <link rel="apple-touch-icon" sizes="180x180" href="/apple-touch-icon.png" />
   <link rel="manifest" href="/site.webmanifest" />
   <meta name="theme-color" content="#080706" />
-  <script src="https://code.iconify.design/iconify-icon/1.0.7/iconify-icon.min.js" defer></script>
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link rel="preconnect" href="https://api.iconify.design" crossorigin />
+  <link rel="dns-prefetch" href="https://code.iconify.design" />
+  <script src="https://code.iconify.design/iconify-icon/1.0.7/iconify-icon.min.js" defer></script>
   <link
     rel="preload"
     as="style"
@@ -115,16 +117,39 @@ const fullTitle = title === 'Daily Meditation Guide' ? title : `${title} | Daily
     gtag('config', 'G-7BGLP6TF2H');
   </script>
 
-  <!-- Google AdSense -->
+  <!-- Google AdSense (deferred to idle to improve LCP/TBT) -->
   <meta name="google-adsense-account" content="ca-pub-7803867089582138" />
-  <script
-    async
-    src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-7803867089582138"
-    crossorigin="anonymous"
-  ></script>
 
-  <!-- Google Analytics (GA4) -->
-  <script async src="https://www.googletagmanager.com/gtag/js?id=G-7BGLP6TF2H"></script>
+  <!-- Lazy-load GA + AdSense after LCP to reduce main-thread work during initial render -->
+  <script is:inline>
+    (function () {
+      var loaded = false;
+      function loadThirdParty() {
+        if (loaded) return;
+        loaded = true;
+        var ga = document.createElement('script');
+        ga.async = true;
+        ga.src = 'https://www.googletagmanager.com/gtag/js?id=G-7BGLP6TF2H';
+        document.head.appendChild(ga);
+        var ads = document.createElement('script');
+        ads.async = true;
+        ads.crossOrigin = 'anonymous';
+        ads.src = 'https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-7803867089582138';
+        document.head.appendChild(ads);
+      }
+      var events = ['scroll', 'pointerdown', 'keydown', 'touchstart'];
+      function onInteract() {
+        events.forEach(function (e) { window.removeEventListener(e, onInteract, { passive: true }); });
+        loadThirdParty();
+      }
+      events.forEach(function (e) { window.addEventListener(e, onInteract, { passive: true, once: true }); });
+      if ('requestIdleCallback' in window) {
+        requestIdleCallback(loadThirdParty, { timeout: 4000 });
+      } else {
+        setTimeout(loadThirdParty, 2500);
+      }
+    })();
+  </script>
   <script type="application/ld+json" set:html={JSON.stringify({
     "@context": "https://schema.org",
     "@type": "Organization",

@@ -9,6 +9,10 @@ import {
   thumbnailUrl,
   videoSlug,
 } from '../../lib/videoCategories';
+import { optimizedImage, optimizedSrcSet } from '../../lib/image';
+
+const CATEGORY_CARD_WIDTHS = [320, 480, 640, 800];
+const CATEGORY_CARD_SIZES = '(max-width: 640px) calc(100vw - 48px), (max-width: 1024px) calc(50vw - 40px), 360px';
 
 export const prerender = false;
 
@@ -236,7 +240,17 @@ const restVideos = videosInCategory.slice(1);
             >
               <div class="aspect-[5/3] overflow-hidden bg-zinc-800 relative">
                 {s.featured_image ? (
-                  <img src={s.featured_image} alt={s.title} loading="lazy" class="w-full h-full object-cover group-hover:scale-[1.03] transition-transform duration-500" />
+                  <img
+                    src={optimizedImage(s.featured_image, { width: 480, height: 288, fit: 'cover' })}
+                    srcset={optimizedSrcSet(s.featured_image, CATEGORY_CARD_WIDTHS, { fit: 'cover' })}
+                    sizes={CATEGORY_CARD_SIZES}
+                    alt={s.title}
+                    loading="lazy"
+                    decoding="async"
+                    width={480}
+                    height={288}
+                    class="w-full h-full object-cover group-hover:scale-[1.03] transition-transform duration-500"
+                  />
                 ) : (
                   <div class="w-full h-full" style="background: radial-gradient(circle at 30% 30%, var(--accent-glow), transparent 60%), linear-gradient(135deg, #1a1a1d, #0a0a0b);"></div>
                 )}

@@ -3,7 +3,10 @@ import { useStore } from '@nanostores/react';
 import type { Session } from '../types';
 import type { TOCItem } from '../utils/tocUtils';
 import { playSession, $currentTrack, $isPlaying } from '../stores/playerStore';
+import { optimizedImage, optimizedSrcSet } from '../lib/image';
 import TableOfContents from './TableOfContents';
+
+const DETAIL_WIDTHS = [400, 600, 800];
 
 interface DetailInteractiveProps {
   session: Session;
@@ -78,7 +81,7 @@ export default function DetailInteractive({ session, processedContent, headings,
           <div className="flex items-center gap-4 border-b border-white/5 pb-8">
             {session.authorPicture ? (
               <img
-                src={session.authorPicture}
+                src={optimizedImage(session.authorPicture, { width: 80, height: 80, fit: 'cover' })}
                 alt={session.author}
                 loading="lazy"
                 decoding="async"
@@ -119,7 +122,17 @@ export default function DetailInteractive({ session, processedContent, headings,
             <div className="rounded-2xl overflow-hidden bg-zinc-900 border border-white/10 shadow-2xl shadow-black/50">
               <div className={`h-52 bg-gradient-to-br ${gradientClass} to-zinc-900 relative transition-colors duration-500`}>
                 {session.featuredImage ? (
-                  <img src={session.featuredImage} alt={session.title} loading="lazy" decoding="async" width={400} height={208} className="absolute inset-0 w-full h-full object-cover" />
+                  <img
+                    src={optimizedImage(session.featuredImage, { width: 600, height: 312, fit: 'cover' })}
+                    srcSet={optimizedSrcSet(session.featuredImage, DETAIL_WIDTHS, { fit: 'cover' })}
+                    sizes="(max-width: 1024px) calc(100vw - 48px), 400px"
+                    alt={session.title}
+                    loading="lazy"
+                    decoding="async"
+                    width={400}
+                    height={208}
+                    className="absolute inset-0 w-full h-full object-cover"
+                  />
                 ) : (
                   <div className="absolute inset-0"></div>
                 )}
@@ -213,7 +226,17 @@ export default function DetailInteractive({ session, processedContent, headings,
           <div className="mb-8 rounded-2xl overflow-hidden bg-zinc-900 border border-white/10 shadow-2xl shadow-black/50">
             <div className={`h-48 bg-gradient-to-br ${gradientClass} to-zinc-900 relative transition-colors duration-500`}>
               {session.featuredImage ? (
-                <img src={session.featuredImage} alt={session.title} loading="lazy" decoding="async" width={400} height={192} className="absolute inset-0 w-full h-full object-cover" />
+                <img
+                  src={optimizedImage(session.featuredImage, { width: 600, height: 288, fit: 'cover' })}
+                  srcSet={optimizedSrcSet(session.featuredImage, DETAIL_WIDTHS, { fit: 'cover' })}
+                  sizes="400px"
+                  alt={session.title}
+                  loading="lazy"
+                  decoding="async"
+                  width={400}
+                  height={192}
+                  className="absolute inset-0 w-full h-full object-cover"
+                />
               ) : (
                 <div className="absolute inset-0 bg-[url('/noise.svg')] opacity-40"></div>
               )}

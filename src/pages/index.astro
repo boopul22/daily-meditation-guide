@@ -2,6 +2,7 @@
 import MainLayout from '../layouts/MainLayout.astro';
 import HomeContent from '../components/HomeContent';
 import { rowToSession, SESSION_SELECT_WITH_AUTHOR } from '../lib/db';
+import { optimizedImage, optimizedSrcSet } from '../lib/image';
 import type { Session } from '../types';
 
 const db = Astro.locals.runtime.env.DB;
@@ -48,9 +49,17 @@ const websiteJsonLd = JSON.stringify({
 
 let extraHead = `<script type="application/ld+json">${websiteJsonLd}</script>`;
 
-// Preload hero LCP image
+// Preload hero LCP image (transformed + responsive)
+const HERO_WIDTHS = [400, 600, 800, 1000, 1200];
+const HERO_SIZES = '(max-width: 1024px) calc(100vw - 48px), 50vw';
 if (latestSession?.featuredImage) {
-  extraHead += `<link rel="preload" as="image" href="${latestSession.featuredImage}" fetchpriority="high" />`;
+  const heroSrc = optimizedImage(latestSession.featuredImage, { width: 800, height: 667, fit: 'cover' });
+  const heroSrcSet = optimizedSrcSet(latestSession.featuredImage, HERO_WIDTHS, { fit: 'cover' });
+  if (heroSrcSet) {
+    extraHead += `<link rel="preload" as="image" href="${heroSrc}" imagesrcset="${heroSrcSet}" imagesizes="${HERO_SIZES}" fetchpriority="high" />`;
+  } else {
+    extraHead += `<link rel="preload" as="image" href="${heroSrc}" fetchpriority="high" />`;
+  }
 }
 ---
 
@@ -93,14 +102,15 @@ if (latestSession?.featuredImage) {
       >
         {latestSession?.featuredImage ? (
           <img
-            src={latestSession.featuredImage}
+            src={optimizedImage(latestSession.featuredImage, { width: 800, height: 667, fit: 'cover' })}
+            srcset={optimizedSrcSet(latestSession.featuredImage, HERO_WIDTHS, { fit: 'cover' })}
             alt={latestSession.title}
             loading="eager"
             fetchpriority="high"
             decoding="async"
             width={600}
             height={500}
-            sizes="(max-width: 1024px) calc(100vw - 48px), 50vw"
+            sizes={HERO_SIZES}
             class="absolute inset-0 w-full h-full object-cover transition-transform duration-500 group-hover:scale-105"
           />
         ) : (

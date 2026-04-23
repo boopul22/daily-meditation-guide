@@ -1,8 +1,12 @@
 import type { Session } from '../types';
+import { optimizedImage, optimizedSrcSet } from '../lib/image';
 
 interface SessionCardProps {
   session: Session;
 }
+
+const CARD_WIDTHS = [320, 480, 640, 800];
+const AVATAR_WIDTHS = [20, 40, 60];
 
 const colorMap: Record<string, string> = {
   indigo: 'from-indigo-900/40 group-hover:text-indigo-300',
@@ -26,7 +30,8 @@ export default function SessionCard({ session }: SessionCardProps) {
       <div className="relative h-[19rem] w-full rounded-xl overflow-hidden mb-4 bg-zinc-800">
         {session.featuredImage ? (
           <img
-            src={session.featuredImage}
+            src={optimizedImage(session.featuredImage, { width: 480, height: 456, fit: 'cover' })}
+            srcSet={optimizedSrcSet(session.featuredImage, CARD_WIDTHS, { fit: 'cover' })}
             alt={session.title}
             loading="lazy"
             decoding="async"
@@ -59,12 +64,14 @@ export default function SessionCard({ session }: SessionCardProps) {
         <div className="flex items-center gap-2">
           {session.authorPicture ? (
             <img
-              src={session.authorPicture}
+              src={optimizedImage(session.authorPicture, { width: 40, height: 40, fit: 'cover' })}
+              srcSet={optimizedSrcSet(session.authorPicture, AVATAR_WIDTHS, { fit: 'cover' })}
               alt={session.author}
               loading="lazy"
               decoding="async"
               width={20}
               height={20}
+              sizes="20px"
               className="w-5 h-5 rounded-full object-cover border border-white/10"
             />
           ) : (

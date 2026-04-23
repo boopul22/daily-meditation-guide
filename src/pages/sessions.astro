@@ -2,7 +2,11 @@
 import MainLayout from '../layouts/MainLayout.astro';
 import { rowToSession, SESSION_SELECT_WITH_AUTHOR } from '../lib/db';
 import { thumbnailUrl, videoSlug, categorize, cleanDescription, VIDEO_CATEGORIES } from '../lib/videoCategories';
+import { optimizedImage, optimizedSrcSet } from '../lib/image';
 import type { Session } from '../types';
+
+const LIST_WIDTHS = [320, 480, 640, 800];
+const LIST_SIZES = '(max-width: 640px) calc(100vw - 48px), (max-width: 1024px) calc(50vw - 40px), 360px';
 
 const db = Astro.locals.runtime.env.DB;
 const { results } = await db.prepare(
@@ -343,7 +347,9 @@ const extraHead = `<script type="application/ld+json">${itemListJsonLd}</script>
                 <div class="relative aspect-video w-full overflow-hidden bg-zinc-800">
                   {item.image ? (
                     <img
-                      src={item.image}
+                      src={optimizedImage(item.image, { width: 480, height: 270, fit: 'cover' })}
+                      srcset={optimizedSrcSet(item.image, LIST_WIDTHS, { fit: 'cover' })}
+                      sizes={LIST_SIZES}
                       alt={item.title}
                       loading="lazy"
                       decoding="async"

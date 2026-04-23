@@ -2,6 +2,7 @@ import React, { useState, useRef, useEffect } from 'react';
 import { useStore } from '@nanostores/react';
 import { $user, $authLoading, login, logout, fetchCurrentUser } from '../stores/authStore';
 import { ALL_CATEGORIES } from '../lib/videoCategories';
+import { optimizedImage } from '../lib/image';
 
 const NAV_CATEGORIES = ALL_CATEGORIES.map((c) => ({
   key: c.key,
@@ -172,8 +173,9 @@ const Navbar: React.FC = () => {
             className="flex items-center gap-2.5 group cursor-pointer flex-shrink-0"
           >
             <img
-              src="/favicon-192x192.png"
-              alt="Daily Meditation Guide"
+              src="/favicon-32x32.png"
+              alt=""
+              aria-hidden="true"
               width={28}
               height={28}
               className="w-7 h-7 rounded-full ring-1 ring-zinc-700 group-hover:ring-zinc-500 transition-colors"
@@ -303,9 +305,11 @@ const Navbar: React.FC = () => {
                         >
                           {n.featuredImage ? (
                             <img
-                              src={n.featuredImage}
+                              src={optimizedImage(n.featuredImage, { width: 96, height: 96, fit: 'cover' })}
                               alt=""
                               loading="lazy"
+                              width={48}
+                              height={48}
                               className="w-12 h-12 rounded-lg object-cover border border-white/5 flex-shrink-0"
                             />
                           ) : (
@@ -489,7 +493,7 @@ const Navbar: React.FC = () => {
                         className="flex items-start gap-3 px-4 py-3 hover:bg-white/[0.04] border-b border-white/5 last:border-b-0"
                       >
                         {n.featuredImage ? (
-                          <img src={n.featuredImage} alt="" loading="lazy" className="w-12 h-12 rounded-lg object-cover border border-white/5 flex-shrink-0" />
+                          <img src={optimizedImage(n.featuredImage, { width: 96, height: 96, fit: 'cover' })} alt="" loading="lazy" width={48} height={48} className="w-12 h-12 rounded-lg object-cover border border-white/5 flex-shrink-0" />
                         ) : (
                           <div className="w-12 h-12 rounded-lg bg-gradient-to-br from-indigo-500/20 to-purple-500/20 border border-white/5 flex items-center justify-center flex-shrink-0">
                             <iconify-icon icon="solar:meditation-linear" width="20" class="text-indigo-300"></iconify-icon>
@@ -600,7 +604,7 @@ const Navbar: React.FC = () => {
                     className="flex items-start gap-3 px-5 py-3 hover:bg-white/[0.04] border-b border-white/5 last:border-b-0 group"
                   >
                     {s.featuredImage ? (
-                      <img src={s.featuredImage} alt="" loading="lazy" className="w-14 h-14 rounded-lg object-cover border border-white/5 flex-shrink-0" />
+                      <img src={optimizedImage(s.featuredImage, { width: 112, height: 112, fit: 'cover' })} alt="" loading="lazy" width={56} height={56} className="w-14 h-14 rounded-lg object-cover border border-white/5 flex-shrink-0" />
                     ) : (
                       <div className="w-14 h-14 rounded-lg bg-gradient-to-br from-indigo-500/20 to-purple-500/20 border border-white/5 flex items-center justify-center flex-shrink-0">
                         <iconify-icon icon="solar:meditation-linear" width="22" class="text-indigo-300"></iconify-icon>

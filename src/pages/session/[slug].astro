@@ -2,6 +2,7 @@
 import MainLayout from '../../layouts/MainLayout.astro';
 import DetailInteractive from '../../components/DetailInteractive';
 import { rowToSession, SESSION_SELECT_WITH_AUTHOR } from '../../lib/db';
+import { optimizedImage, optimizedSrcSet } from '../../lib/image';
 import { processContentForTOC } from '../../utils/tocUtils';
 import type { Session } from '../../types';
 
@@ -56,9 +57,16 @@ const pageImage = session?.featuredImage || '/og-image.jpg';
 // Build JSON-LD only for valid sessions
 let extraHead = '';
 if (session) {
-  // Hero image preload for LCP
+  // Hero image preload for LCP (transformed + responsive)
   if (session.featuredImage) {
-    extraHead += `<link rel="preload" as="image" href="${session.featuredImage}" fetchpriority="high" />`;
+    const lcpWidths = [400, 600, 800];
+    const lcpSrc = optimizedImage(session.featuredImage, { width: 600, height: 312, fit: 'cover' });
+    const lcpSrcSet = optimizedSrcSet(session.featuredImage, lcpWidths, { fit: 'cover' });
+    if (lcpSrcSet) {
+      extraHead += `<link rel="preload" as="image" href="${lcpSrc}" imagesrcset="${lcpSrcSet}" imagesizes="(max-width: 1024px) calc(100vw - 48px), 400px" fetchpriority="high" />`;
+    } else {
+      extraHead += `<link rel="preload" as="image" href="${lcpSrc}" fetchpriority="high" />`;
+    }
   }
 
   // Article JSON-LD with AudioObject
