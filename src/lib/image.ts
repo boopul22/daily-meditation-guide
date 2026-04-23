@@ -29,18 +29,21 @@ function buildOptions(opts: ImageOptions): string {
   return parts.join(',');
 }
 
-export function optimizedImage(src: string | undefined | null, opts: ImageOptions): string {
-  if (!src || !canTransform(src)) return src ?? '';
-  return `/cdn-cgi/image/${buildOptions(opts)}${src.startsWith('/') ? src : '/' + src}`;
+// Cloudflare Image Resizing (/cdn-cgi/image/...) requires a Pro plan or a
+// Cloudflare Images subscription. This zone is on the Free plan, so those
+// transform URLs 404 in production. Return the original src and skip srcset
+// until the plan is upgraded or Cloudflare Images is enabled.
+export function optimizedImage(src: string | undefined | null, _opts: ImageOptions): string {
+  return src ?? '';
 }
 
 export function optimizedSrcSet(
-  src: string | undefined | null,
-  widths: number[],
-  opts: Omit<ImageOptions, 'width'> = {},
+  _src: string | undefined | null,
+  _widths: number[],
+  _opts: Omit<ImageOptions, 'width'> = {},
 ): string {
-  if (!src || !canTransform(src)) return '';
-  return widths
-    .map((w) => `${optimizedImage(src, { ...opts, width: w })} ${w}w`)
-    .join(', ');
+  return '';
 }
+
+void canTransform;
+void buildOptions;
