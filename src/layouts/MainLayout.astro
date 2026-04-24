@@ -66,6 +66,9 @@ const fullTitle = title === 'Daily Meditation Guide' ? title : `${title} | Daily
   <meta name="theme-color" content="#080706" />
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link rel="preconnect" href="https://www.googletagmanager.com" crossorigin />
+  <link rel="preconnect" href="https://pagead2.googlesyndication.com" crossorigin />
+  <link rel="dns-prefetch" href="https://googleads.g.doubleclick.net" />
   <script src="/vendor/iconify-icon-1.0.7.min.js" defer></script>
   <link
     rel="preload"
@@ -118,7 +121,7 @@ const fullTitle = title === 'Daily Meditation Guide' ? title : `${title} | Daily
   <!-- Google AdSense (deferred to idle to improve LCP/TBT) -->
   <meta name="google-adsense-account" content="ca-pub-7803867089582138" />
 
-  <!-- Lazy-load GA + AdSense after LCP to reduce main-thread work during initial render -->
+  <!-- Lazy-load GA + AdSense on first interaction (or bounce/timeout) to cut unused JS at initial paint -->
   <script is:inline>
     (function () {
       var loaded = false;
@@ -135,17 +138,17 @@ const fullTitle = title === 'Daily Meditation Guide' ? title : `${title} | Daily
         ads.src = 'https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-7803867089582138';
         document.head.appendChild(ads);
       }
-      var events = ['scroll', 'pointerdown', 'keydown', 'touchstart'];
+      var events = ['scroll', 'pointerdown', 'keydown', 'touchstart', 'mousemove', 'wheel'];
       function onInteract() {
-        events.forEach(function (e) { window.removeEventListener(e, onInteract, { passive: true }); });
+        events.forEach(function (e) { window.removeEventListener(e, onInteract); });
         loadThirdParty();
       }
       events.forEach(function (e) { window.addEventListener(e, onInteract, { passive: true, once: true }); });
-      if ('requestIdleCallback' in window) {
-        requestIdleCallback(loadThirdParty, { timeout: 4000 });
-      } else {
-        setTimeout(loadThirdParty, 2500);
-      }
+      document.addEventListener('visibilitychange', function () {
+        if (document.visibilityState === 'hidden') loadThirdParty();
+      }, { once: true });
+      window.addEventListener('pagehide', loadThirdParty, { once: true });
+      setTimeout(loadThirdParty, 8000);
     })();
   </script>
   <script type="application/ld+json" set:html={JSON.stringify({
