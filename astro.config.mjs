@@ -7,7 +7,7 @@ export default defineConfig({
   output: 'server',
   trailingSlash: 'never',
   build: {
-    inlineStylesheets: 'always',
+    inlineStylesheets: 'auto',
   },
   adapter: cloudflare({
     platformProxy: {
