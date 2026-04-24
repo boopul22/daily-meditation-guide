@@ -158,6 +158,6 @@ if (latestSession?.featuredImage) {
     </section>
 
     {/* Interactive content: filters + grid */}
-    <HomeContent client:idle sessions={slimSessions} videos={videos} />
+    <HomeContent client:visible sessions={slimSessions} videos={videos} />
   </div>
 </MainLayout>

@@ -23,7 +23,7 @@ export const onRequest = defineMiddleware(async (context, next) => {
   // Content Security Policy
   response.headers.set('Content-Security-Policy', [
     "default-src 'self'",
-    "script-src 'self' 'unsafe-inline' https://static.cloudflareinsights.com https://www.googletagmanager.com https://pagead2.googlesyndication.com https://adservice.google.com",
+    "script-src 'self' 'unsafe-inline' https://static.cloudflareinsights.com https://www.googletagmanager.com https://pagead2.googlesyndication.com https://adservice.google.com https://ep1.adtrafficquality.google https://ep2.adtrafficquality.google",
     "style-src 'self' 'unsafe-inline' https://fonts.googleapis.com",
     "font-src 'self' https://fonts.gstatic.com",
     "img-src 'self' https://pub-141831e61e69445289222976a15b6fb3.r2.dev https://img.youtube.com https://www.googletagmanager.com https://www.google-analytics.com https://pagead2.googlesyndication.com data:",

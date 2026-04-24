@@ -77,7 +77,14 @@ const Navbar: React.FC = () => {
   const loading = useStore($authLoading);
 
   useEffect(() => {
-    fetchCurrentUser();
+    const win = window as Window & {
+      requestIdleCallback?: (cb: () => void, opts?: { timeout: number }) => number;
+      cancelIdleCallback?: (id: number) => void;
+    };
+    const schedule = win.requestIdleCallback ?? ((cb: () => void) => window.setTimeout(cb, 1));
+    const cancel = win.cancelIdleCallback ?? window.clearTimeout;
+    const id = schedule(() => fetchCurrentUser(), { timeout: 2000 });
+    return () => cancel(id);
   }, []);
 
   const loadSessions = async () => {
@@ -181,11 +188,12 @@ const Navbar: React.FC = () => {
             className="flex items-center gap-2.5 group cursor-pointer flex-shrink-0"
           >
             <img
-              src="/favicon-32x32.png"
+              src="/favicon-48x48.png"
               alt=""
               aria-hidden="true"
               width={28}
               height={28}
+              decoding="async"
               className="w-7 h-7 rounded-full ring-1 ring-zinc-700 group-hover:ring-zinc-500 transition-colors"
             />
             <span className="text-zinc-100 font-semibold tracking-tight text-[15px] hidden sm:inline">Daily Meditation Guide</span>
