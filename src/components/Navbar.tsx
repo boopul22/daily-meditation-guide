@@ -103,7 +103,14 @@ const Navbar: React.FC = () => {
   };
 
   useEffect(() => {
-    loadSessions();
+    const win = window as Window & {
+      requestIdleCallback?: (cb: () => void, opts?: { timeout: number }) => number;
+      cancelIdleCallback?: (id: number) => void;
+    };
+    const schedule = win.requestIdleCallback ?? ((cb: () => void) => window.setTimeout(cb, 1));
+    const cancel = win.cancelIdleCallback ?? window.clearTimeout;
+    const id = schedule(() => loadSessions(), { timeout: 3000 });
+    return () => cancel(id);
   }, []);
 
   const openNotifications = () => {
@@ -170,6 +177,7 @@ const Navbar: React.FC = () => {
         <div className="max-w-7xl mx-auto px-6 h-16 flex items-center justify-between gap-4 lg:grid lg:grid-cols-[auto_1fr_auto]">
           <a
             href="/"
+            aria-label="Daily Meditation Guide — home"
             className="flex items-center gap-2.5 group cursor-pointer flex-shrink-0"
           >
             <img
