@@ -1,7 +1,7 @@
 ---
 import MainLayout from '../../layouts/MainLayout.astro';
 import { rowToInfographic } from '../../lib/db';
-import { absoluteImage } from '../../lib/rss';
+import { optimizedImage, optimizedImageAbs } from '../../lib/image';
 import type { Infographic } from '../../types';
 
 const { slug } = Astro.params;
@@ -31,12 +31,13 @@ const pageTitle = infographic?.seoTitle || infographic?.title || 'Infographic No
 const pageDescription = infographic
   ? (infographic.seoDescription || infographic.description || `${infographic.title} — a mindfulness and meditation infographic.`)
   : 'The infographic you are looking for could not be found.';
-const absoluteImg = infographic ? absoluteImage(infographic.imageUrl) : `${siteUrl}/og-image.jpg`;
+const absoluteImg = optimizedImageAbs(infographic?.imageUrl, { width: 1200, fit: 'scale-down' }, '/og-image.jpg');
 
 let extraHead = '';
 if (infographic) {
   if (infographic.imageUrl) {
-    extraHead += `<link rel="preload" as="image" href="${infographic.imageUrl}" fetchpriority="high" />`;
+    const preloadSrc = optimizedImage(infographic.imageUrl, { width: 800, fit: 'scale-down' });
+    extraHead += `<link rel="preload" as="image" href="${preloadSrc}" fetchpriority="high" />`;
   }
 
   const imageJsonLd = JSON.stringify({

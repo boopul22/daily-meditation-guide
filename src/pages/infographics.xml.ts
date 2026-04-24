@@ -1,6 +1,6 @@
 import type { APIContext } from 'astro';
 import { SITE_URL, SITE_NAME, escapeXml, toRFC2822 } from '../lib/xml';
-import { absoluteImage } from '../lib/rss';
+import { optimizedImageAbs } from '../lib/image';
 
 interface FeedRow {
   slug: string;
@@ -24,7 +24,7 @@ export async function GET(context: APIContext) {
   const lastBuildDate = results.length > 0 ? toRFC2822(results[0].published_at) : new Date().toUTCString();
 
   const items = results.map(row => {
-    const imageUrl = escapeXml(absoluteImage(row.image_url));
+    const imageUrl = escapeXml(optimizedImageAbs(row.image_url, { width: 1200, fit: 'scale-down' }));
     const indexUrl = `${SITE_URL}/`;
     const slugGuid = `${SITE_URL}/infographic/${escapeXml(row.slug)}`;
     return `    <item>

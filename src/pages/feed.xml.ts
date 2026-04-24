@@ -1,6 +1,6 @@
 import type { APIContext } from 'astro';
 import { SITE_URL, SITE_NAME, SITE_DESCRIPTION, escapeXml, toRFC2822 } from '../lib/xml';
-import { absoluteImage } from '../lib/rss';
+import { optimizedImageAbs } from '../lib/image';
 
 interface FeedRow {
   slug: string;
@@ -39,7 +39,7 @@ export async function GET(context: APIContext) {
   const entries: FeedEntry[] = [];
 
   for (const row of sessions) {
-    const imageUrl = escapeXml(absoluteImage(row.featured_image));
+    const imageUrl = escapeXml(optimizedImageAbs(row.featured_image, { width: 1200 }));
     entries.push({
       published_at: row.published_at,
       xml: `    <item>

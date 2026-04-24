@@ -2,7 +2,7 @@
 import MainLayout from '../../layouts/MainLayout.astro';
 import DetailInteractive from '../../components/DetailInteractive';
 import { rowToSession, SESSION_SELECT_WITH_AUTHOR } from '../../lib/db';
-import { optimizedImage, optimizedSrcSet } from '../../lib/image';
+import { optimizedImage, optimizedSrcSet, optimizedImageAbs } from '../../lib/image';
 import { processContentForTOC } from '../../utils/tocUtils';
 import type { Session } from '../../types';
 
@@ -52,7 +52,7 @@ const pageTitle = session?.title || 'Session Not Found';
 const pageDescription = session
   ? (session.description || `Listen to ${session.title} by ${session.author}. A ${session.duration} ${session.category} meditation session.`)
   : 'The meditation session you are looking for could not be found.';
-const pageImage = session?.featuredImage || '/og-image.jpg';
+const ogImageAbs = optimizedImageAbs(session?.featuredImage, { width: 1200 }, '/og-image.jpg');
 
 // Build JSON-LD only for valid sessions
 let extraHead = '';
@@ -77,13 +77,13 @@ if (session) {
     "description": pageDescription,
     "url": pageUrl,
     "mainEntityOfPage": pageUrl,
-    "image": pageImage.startsWith('http') ? pageImage : `${siteUrl}${pageImage}`,
+    "image": ogImageAbs,
     ...(session.category && { "articleSection": session.category }),
     ...(session.author && {
       "author": {
         "@type": "Person",
         "name": session.author,
-        ...(session.authorPicture && { "image": session.authorPicture.startsWith('http') ? session.authorPicture : `${siteUrl}${session.authorPicture}` }),
+        ...(session.authorPicture && { "image": optimizedImageAbs(session.authorPicture, { width: 240 }) }),
         "url": `${siteUrl}/about`
       }
     }),
@@ -130,7 +130,7 @@ if (session) {
   description={pageDescription}
   canonical={session ? pageUrl : undefined}
   ogType={session ? "article" : undefined}
-  ogImage={session ? (pageImage.startsWith('http') ? pageImage : `${siteUrl}${pageImage}`) : undefined}
+  ogImage={session ? ogImageAbs : undefined}
   noindex={!session}
   extraHead={extraHead}
   articlePublishedTime={session?.publishedAt || session?.createdAt || undefined}

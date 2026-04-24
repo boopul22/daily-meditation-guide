@@ -1,6 +1,8 @@
+import { SITE_URL } from './xml';
+
 type FitMode = 'cover' | 'contain' | 'scale-down' | 'crop' | 'pad';
 
-interface ImageOptions {
+export interface ImageOptions {
   width: number;
   height?: number;
   quality?: number;
@@ -8,18 +10,20 @@ interface ImageOptions {
   format?: 'auto' | 'webp' | 'avif';
 }
 
-const DEFAULT_QUALITY = 75;
+const DEFAULT_QUALITY = 80;
 const DEFAULT_FIT: FitMode = 'cover';
-const DEFAULT_FORMAT = 'auto';
-const TRANSFORMABLE_PREFIXES = ['/api/image/', 'https://pub-141831e61e69445289222976a15b6fb3.r2.dev/'];
+const DEFAULT_FORMAT: ImageOptions['format'] = 'auto';
 
+// Only same-origin /api/image/ paths are transformed. External URLs
+// (R2 public URL, YouTube thumbnails, etc.) pass through unchanged because
+// CF Transformations on a Free zone is restricted to same-zone sources.
 function canTransform(src: string): boolean {
   if (!src) return false;
-  return TRANSFORMABLE_PREFIXES.some((p) => src.startsWith(p));
+  return src.startsWith('/api/image/');
 }
 
 function buildOptions(opts: ImageOptions): string {
-  const parts: string[] = [
+  const parts = [
     `format=${opts.format ?? DEFAULT_FORMAT}`,
     `width=${Math.round(opts.width)}`,
     `quality=${opts.quality ?? DEFAULT_QUALITY}`,
@@ -29,21 +33,41 @@ function buildOptions(opts: ImageOptions): string {
   return parts.join(',');
 }
 
-// Cloudflare Image Resizing (/cdn-cgi/image/...) requires a Pro plan or a
-// Cloudflare Images subscription. This zone is on the Free plan, so those
-// transform URLs 404 in production. Return the original src and skip srcset
-// until the plan is upgraded or Cloudflare Images is enabled.
-export function optimizedImage(src: string | undefined | null, _opts: ImageOptions): string {
-  return src ?? '';
+function transformPath(src: string, opts: ImageOptions): string {
+  return `/cdn-cgi/image/${buildOptions(opts)}${src}`;
+}
+
+export function optimizedImage(src: string | undefined | null, opts: ImageOptions): string {
+  if (!src) return '';
+  if (!canTransform(src)) return src;
+  return transformPath(src, opts);
 }
 
 export function optimizedSrcSet(
-  _src: string | undefined | null,
-  _widths: number[],
-  _opts: Omit<ImageOptions, 'width'> = {},
+  src: string | undefined | null,
+  widths: number[],
+  opts: Omit<ImageOptions, 'width'> = {},
 ): string {
-  return '';
+  if (!src || !canTransform(src)) return '';
+  const unique = Array.from(new Set(widths.map((w) => Math.round(w)))).sort((a, b) => a - b);
+  return unique.map((w) => `${transformPath(src, { ...opts, width: w })} ${w}w`).join(', ');
 }
 
-void canTransform;
-void buildOptions;
+/**
+ * Absolute (origin-prefixed) transformed URL for og:image, twitter:image,
+ * Schema.org image fields, RSS enclosures, etc. — anywhere the URL is read
+ * by an external consumer (Facebook scraper, Google bot, RSS reader).
+ *
+ * Pass-throughs cover external sources (YouTube thumbs, full https URLs)
+ * and missing sources (returns SITE_URL + fallback).
+ */
+export function optimizedImageAbs(
+  src: string | undefined | null,
+  opts: ImageOptions,
+  fallback = '/meditation.png',
+): string {
+  if (!src) return `${SITE_URL}${fallback}`;
+  if (/^https?:\/\//i.test(src)) return src;
+  if (canTransform(src)) return `${SITE_URL}${transformPath(src, opts)}`;
+  return `${SITE_URL}${src.startsWith('/') ? '' : '/'}${src}`;
+}

@@ -1,5 +1,4 @@
 import type { Session, Infographic, Author } from '../types';
-import { convertToWebP } from './convertToWebP';
 
 const API_BASE = '/api';
 
@@ -117,11 +116,8 @@ export async function updateAuthor(id: string, data: Partial<Author>): Promise<A
 }
 
 export async function uploadImage(file: File): Promise<string> {
-  // Convert JPEG/PNG to WebP client-side before uploading
-  const processedFile = await convertToWebP(file);
-
   const formData = new FormData();
-  formData.append('file', processedFile);
+  formData.append('file', file);
 
   const res = await fetch(`${API_BASE}/upload`, {
     method: 'POST',
