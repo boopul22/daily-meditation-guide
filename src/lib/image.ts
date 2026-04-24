@@ -33,14 +33,19 @@ function buildOptions(opts: ImageOptions): string {
   return parts.join(',');
 }
 
-function transformPath(src: string, opts: ImageOptions): string {
-  return `/cdn-cgi/image/${buildOptions(opts)}${src}`;
+// Always absolute. /cdn-cgi/image/ is enabled only on the prod zone, so
+// preview deploys (*.pages.dev, hash subdomains) must point at prod for
+// transforms. Prod renders cross to itself with a full host — negligible
+// HTML overhead, no CORS implications since both endpoints are same-origin
+// from the browser's POV when on prod, and CF still caches per-key.
+function transformUrl(src: string, opts: ImageOptions): string {
+  return `${SITE_URL}/cdn-cgi/image/${buildOptions(opts)}${src}`;
 }
 
 export function optimizedImage(src: string | undefined | null, opts: ImageOptions): string {
   if (!src) return '';
   if (!canTransform(src)) return src;
-  return transformPath(src, opts);
+  return transformUrl(src, opts);
 }
 
 export function optimizedSrcSet(
@@ -50,7 +55,7 @@ export function optimizedSrcSet(
 ): string {
   if (!src || !canTransform(src)) return '';
   const unique = Array.from(new Set(widths.map((w) => Math.round(w)))).sort((a, b) => a - b);
-  return unique.map((w) => `${transformPath(src, { ...opts, width: w })} ${w}w`).join(', ');
+  return unique.map((w) => `${transformUrl(src, { ...opts, width: w })} ${w}w`).join(', ');
 }
 
 /**
@@ -68,6 +73,6 @@ export function optimizedImageAbs(
 ): string {
   if (!src) return `${SITE_URL}${fallback}`;
   if (/^https?:\/\//i.test(src)) return src;
-  if (canTransform(src)) return `${SITE_URL}${transformPath(src, opts)}`;
+  if (canTransform(src)) return transformUrl(src, opts);
   return `${SITE_URL}${src.startsWith('/') ? '' : '/'}${src}`;
 }
