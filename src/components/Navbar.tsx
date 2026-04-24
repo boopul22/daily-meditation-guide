@@ -109,17 +109,6 @@ const Navbar: React.FC = () => {
     }
   };
 
-  useEffect(() => {
-    const win = window as Window & {
-      requestIdleCallback?: (cb: () => void, opts?: { timeout: number }) => number;
-      cancelIdleCallback?: (id: number) => void;
-    };
-    const schedule = win.requestIdleCallback ?? ((cb: () => void) => window.setTimeout(cb, 1));
-    const cancel = win.cancelIdleCallback ?? window.clearTimeout;
-    const id = schedule(() => loadSessions(), { timeout: 3000 });
-    return () => cancel(id);
-  }, []);
-
   const openNotifications = () => {
     setIsNotifOpen(true);
     if (!notifLoaded) loadSessions();
