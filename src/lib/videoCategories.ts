@@ -2,6 +2,10 @@ export interface CategoryDef {
   key: string;
   label: string;
   keywords: RegExp;
+  // Optional high-confidence signals checked *before* the normal keyword pass.
+  // Lets a defining theme (e.g. an Afrobeat affirmation series) win over
+  // incidental words like "morning" or "breathe" that appear in its titles.
+  priority?: RegExp;
   kicker: string;
   tagline: string;
   description: string;
@@ -109,15 +113,20 @@ export const VIDEO_CATEGORIES: CategoryDef[] = [
   },
   {
     key: 'manifestation',
-    label: 'Manifestation & Intention',
-    keywords: /\b(manifest|intention|visualiz|abundance|gratitude|creativ|affirm|dream)/i,
-    kicker: 'From direction to devotion',
-    tagline: 'Set an intention with the whole body, not just the head.',
+    label: 'Manifestation & Affirmations',
+    keywords:
+      /\b(manifest|intention|visualiz|abundance|gratitude|creativ|affirm|dream|prosper|blessing|good fortune|good luck|miracle|magnetic|the universe|high\s?vibe|soft\s?life)/i,
+    // The Afrobeat affirmation / manifestation series: these markers identify it
+    // even when the title leads with "Morning", "wake", or "breathe".
+    priority:
+      /\b(affirmations?|manifest\w*|abundance|afrobeat|prosper\w*|blessings?|good vibes|positive energy|high\s?vibes?|soft\s?life|the universe|wealth|good fortune|good luck|miracles?|magnetic)\b|#(manifestation|abundance|softlife|highvibes|faith|goodvibes)/i,
+    kicker: 'Speak it, feel it, become it',
+    tagline: 'Affirmations and visualizations that tune you to abundance.',
     description:
-      'Visualization and intention-setting meditations for writers, builders, and anyone shaping a next chapter. Grounded in imagery and gratitude — not magical thinking.',
+      'Afrobeat affirmation tracks and manifestation meditations for wealth, confidence, and a softer life. Speak it, feel it, become it — energy set to a rhythm you can actually feel.',
     accent: '#D4A96A',
     accentGlow: 'rgba(212, 169, 106, 0.28)',
-    audioAliases: ['manifestation', 'intention', 'gratitude'],
+    audioAliases: ['manifestation', 'intention', 'gratitude', 'affirmations'],
   },
 ];
 
@@ -138,6 +147,11 @@ export const ALL_CATEGORIES: CategoryDef[] = [...VIDEO_CATEGORIES, FALLBACK_CATE
 
 export function categorize(title: string, description: string = ''): CategoryDef {
   const haystack = `${title}\n${description}`;
+  // First pass: high-confidence theme signals win over incidental keywords.
+  for (const cat of VIDEO_CATEGORIES) {
+    if (cat.priority?.test(haystack)) return cat;
+  }
+  // Second pass: ordinary keyword matching, first match wins.
   for (const cat of VIDEO_CATEGORIES) {
     if (cat.keywords.test(haystack)) return cat;
   }
