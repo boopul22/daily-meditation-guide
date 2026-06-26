@@ -227,6 +227,34 @@ const RichTextEditor: React.FC<RichTextEditorProps> = ({ content, onChange, sess
     }
   }, [editor]);
 
+  const editImageAlt = useCallback(() => {
+    if (!editor) return;
+    if (!editor.isActive('image')) {
+      window.alert('Click an image first, then press ALT to edit its alt text.');
+      return;
+    }
+    const current = editor.getAttributes('image').alt || '';
+    const alt = window.prompt('Alt text (for SEO & accessibility):', current);
+    if (alt !== null) editor.chain().focus().updateAttributes('image', { alt }).run();
+  }, [editor]);
+
+  // Double-click an image to edit its alt text inline
+  useEffect(() => {
+    if (!editor) return;
+    const dom = editor.view.dom;
+    const handleDblClick = (ev: MouseEvent) => {
+      const img = (ev.target as HTMLElement).closest('img');
+      if (!img) return;
+      const pos = editor.view.posAtDOM(img, 0);
+      editor.chain().focus().setNodeSelection(pos).run();
+      const current = editor.getAttributes('image').alt || '';
+      const alt = window.prompt('Alt text (for SEO & accessibility):', current);
+      if (alt !== null) editor.chain().focus().updateAttributes('image', { alt }).run();
+    };
+    dom.addEventListener('dblclick', handleDblClick);
+    return () => dom.removeEventListener('dblclick', handleDblClick);
+  }, [editor]);
+
   const openGrid = () => {
     if (tableButtonRef.current) {
       const rect = tableButtonRef.current.getBoundingClientRect();
@@ -357,6 +385,13 @@ const RichTextEditor: React.FC<RichTextEditorProps> = ({ content, onChange, sess
           ) : (
             <iconify-icon icon="solar:gallery-linear" width="16"></iconify-icon>
           )}
+        </ToolbarButton>
+        <ToolbarButton
+          onClick={editImageAlt}
+          active={editor.isActive('image')}
+          title="Edit selected image's alt text"
+        >
+          ALT
         </ToolbarButton>
         <ToolbarButton
           onClick={() => editor.chain().focus().setHorizontalRule().run()}
