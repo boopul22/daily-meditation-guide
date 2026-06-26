@@ -108,7 +108,7 @@ const CategoryCombobox: React.FC<CategoryComboboxProps> = ({ value, onChange, op
 interface FormData {
   title: string; slug: string; authorId: string; duration: string;
   category: string; color: string; description: string;
-  featuredImage: string; audioUrl: string; fullContent: string;
+  featuredImage: string; altText: string; audioUrl: string; fullContent: string;
   relatedSessions: string[];
   faqItems: FAQItem[];
 }
@@ -184,7 +184,7 @@ const AdminSessionForm: React.FC<AdminSessionFormProps> = ({ slug }) => {
   const [form, setForm] = useState<FormData>({
     title: '', slug: '', authorId: '', duration: '',
     category: DEFAULT_CATEGORIES[0], color: COLORS[0], description: '',
-    featuredImage: '', audioUrl: '', fullContent: '',
+    featuredImage: '', altText: '', audioUrl: '', fullContent: '',
     relatedSessions: [],
     faqItems: [],
   });
@@ -206,7 +206,7 @@ const AdminSessionForm: React.FC<AdminSessionFormProps> = ({ slug }) => {
             authorId: session.authorId || '',
             duration: session.duration, category: session.category,
             color: session.color, description: session.description,
-            featuredImage: session.featuredImage || '', audioUrl: session.audioUrl || '',
+            featuredImage: session.featuredImage || '', altText: session.altText || '', audioUrl: session.audioUrl || '',
             fullContent: session.fullContent, relatedSessions: session.relatedSessions,
             faqItems: session.faqItems || [],
           });
@@ -342,7 +342,7 @@ const AdminSessionForm: React.FC<AdminSessionFormProps> = ({ slug }) => {
         authorId: session.authorId || '',
         duration: session.duration, category: session.category,
         color: session.color, description: session.description,
-        featuredImage: session.featuredImage || '', audioUrl: session.audioUrl || '',
+        featuredImage: session.featuredImage || '', altText: session.altText || '', audioUrl: session.audioUrl || '',
         fullContent: session.fullContent, relatedSessions: session.relatedSessions,
         faqItems: session.faqItems || [],
       });
@@ -746,6 +746,11 @@ const AdminSessionForm: React.FC<AdminSessionFormProps> = ({ slug }) => {
         {form.featuredImage && (
           <img src={form.featuredImage} alt="" className="mt-1.5 rounded-lg h-20 w-full object-cover border border-white/10" onError={e => (e.currentTarget.style.display = 'none')} />
         )}
+      </div>
+
+      <div>
+        <span className="sf-label">Alt text</span>
+        <input value={form.altText} onChange={e => handleChange('altText', e.target.value)} placeholder="Describe the image for accessibility and image search" className="sf-input !text-xs" />
       </div>
 
       <div>

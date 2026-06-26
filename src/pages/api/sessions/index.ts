@@ -61,8 +61,8 @@ export async function POST(context: APIContext) {
   }
 
   await db.prepare(
-    `INSERT INTO sessions (id, slug, title, author, role, author_id, duration, duration_sec, category, color, description, featured_image, audio_url, full_content, related_sessions, faq_items, status, published_at, created_at, updated_at, version, last_updated_by)
-     VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`
+    `INSERT INTO sessions (id, slug, title, author, role, author_id, duration, duration_sec, category, color, description, featured_image, alt_text, audio_url, full_content, related_sessions, faq_items, status, published_at, created_at, updated_at, version, last_updated_by)
+     VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`
   ).bind(
     id,
     slug,
@@ -76,6 +76,7 @@ export async function POST(context: APIContext) {
     body.color,
     body.description,
     body.featuredImage || '',
+    body.altText || '',
     body.audioUrl || '',
     body.fullContent || '',
     JSON.stringify(body.relatedSessions || []),

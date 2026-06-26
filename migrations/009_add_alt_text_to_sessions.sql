@@ -1,0 +1,1 @@
+ALTER TABLE sessions ADD COLUMN alt_text TEXT NOT NULL DEFAULT '';

@@ -498,7 +498,7 @@ const Navbar: React.FC = () => {
                         className="flex items-start gap-3 px-4 py-3 hover:bg-white/[0.04] border-b border-white/5 last:border-b-0"
                       >
                         {n.featuredImage ? (
-                          <img src={optimizedImage(n.featuredImage, { width: 96, height: 96, fit: 'cover' })} alt="" loading="lazy" width={48} height={48} className="w-12 h-12 rounded-lg object-cover border border-white/5 flex-shrink-0" />
+                          <img src={optimizedImage(n.featuredImage, { width: 96, height: 96, fit: 'cover' })} alt={n.title} loading="lazy" width={48} height={48} className="w-12 h-12 rounded-lg object-cover border border-white/5 flex-shrink-0" />
                         ) : (
                           <div className="w-12 h-12 rounded-lg bg-gradient-to-br from-indigo-500/20 to-purple-500/20 border border-white/5 flex items-center justify-center flex-shrink-0">
                             <iconify-icon icon="solar:meditation-linear" width="20" class="text-indigo-300"></iconify-icon>
@@ -609,7 +609,7 @@ const Navbar: React.FC = () => {
                     className="flex items-start gap-3 px-5 py-3 hover:bg-white/[0.04] border-b border-white/5 last:border-b-0 group"
                   >
                     {s.featuredImage ? (
-                      <img src={optimizedImage(s.featuredImage, { width: 112, height: 112, fit: 'cover' })} alt="" loading="lazy" width={56} height={56} className="w-14 h-14 rounded-lg object-cover border border-white/5 flex-shrink-0" />
+                      <img src={optimizedImage(s.featuredImage, { width: 112, height: 112, fit: 'cover' })} alt={s.title} loading="lazy" width={56} height={56} className="w-14 h-14 rounded-lg object-cover border border-white/5 flex-shrink-0" />
                     ) : (
                       <div className="w-14 h-14 rounded-lg bg-gradient-to-br from-indigo-500/20 to-purple-500/20 border border-white/5 flex items-center justify-center flex-shrink-0">
                         <iconify-icon icon="solar:meditation-linear" width="22" class="text-indigo-300"></iconify-icon>

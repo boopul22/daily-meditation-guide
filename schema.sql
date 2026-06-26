@@ -13,6 +13,7 @@ CREATE TABLE sessions (
   color TEXT NOT NULL,
   description TEXT NOT NULL,
   featured_image TEXT NOT NULL DEFAULT '',
+  alt_text TEXT NOT NULL DEFAULT '',
   audio_url TEXT NOT NULL DEFAULT '',
   full_content TEXT NOT NULL DEFAULT '',
   related_sessions TEXT NOT NULL DEFAULT '[]',

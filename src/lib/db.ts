@@ -16,6 +16,7 @@ export function rowToSession(row: any): Session {
     color: row.color,
     description: row.description,
     featuredImage: row.featured_image,
+    altText: row.alt_text || '',
     audioUrl: row.audio_url,
     fullContent: row.full_content,
     relatedSessions: row.related_sessions ? JSON.parse(row.related_sessions) : [],

@@ -27,7 +27,7 @@ const PlayerBar: React.FC = () => {
         <div className="flex items-center gap-3 md:gap-4 w-1/3 md:w-1/4 shrink-0">
           <div className="w-10 h-10 md:w-12 md:h-12 rounded-md bg-zinc-800 flex items-center justify-center relative overflow-hidden group shrink-0">
             {currentTrack.featuredImage ? (
-              <img src={optimizedImage(currentTrack.featuredImage, { width: 96, height: 96, fit: 'cover' })} alt="" loading="lazy" width={48} height={48} className="absolute inset-0 w-full h-full object-cover" />
+              <img src={optimizedImage(currentTrack.featuredImage, { width: 96, height: 96, fit: 'cover' })} alt={currentTrack.title} loading="lazy" width={48} height={48} className="absolute inset-0 w-full h-full object-cover" />
             ) : (
               <>
                 <div className={`absolute inset-0 bg-gradient-to-br from-${currentTrack.color}-500/20 to-purple-500/20`}></div>

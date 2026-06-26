@@ -122,7 +122,7 @@ export async function PUT(context: APIContext) {
     await db.prepare(
       `UPDATE sessions SET
         slug = ?, title = ?, author = ?, role = ?, author_id = ?, duration = ?, duration_sec = ?,
-        category = ?, color = ?, description = ?, featured_image = ?, audio_url = ?,
+        category = ?, color = ?, description = ?, featured_image = ?, alt_text = ?, audio_url = ?,
         full_content = ?, related_sessions = ?, faq_items = ?, status = ?, published_at = ?,
         updated_at = ?, version = ?, last_updated_by = ?
        WHERE id = ?`
@@ -138,6 +138,7 @@ export async function PUT(context: APIContext) {
       body.color ?? existing.color,
       body.description ?? existing.description,
       body.featuredImage ?? existing.featured_image ?? '',
+      body.altText ?? existing.alt_text ?? '',
       body.audioUrl ?? existing.audio_url ?? '',
       body.fullContent ?? existing.full_content ?? '',
       JSON.stringify(body.relatedSessions ?? existingRelated),

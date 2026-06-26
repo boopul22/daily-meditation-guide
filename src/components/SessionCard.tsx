@@ -32,7 +32,7 @@ export default function SessionCard({ session }: SessionCardProps) {
           <img
             src={optimizedImage(session.featuredImage, { width: 480, height: 456, fit: 'cover' })}
             srcSet={optimizedSrcSet(session.featuredImage, CARD_WIDTHS, { fit: 'cover' })}
-            alt={session.title}
+            alt={session.altText || session.title}
             loading="lazy"
             decoding="async"
             width={400}

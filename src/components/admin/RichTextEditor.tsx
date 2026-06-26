@@ -217,7 +217,8 @@ const RichTextEditor: React.FC<RichTextEditorProps> = ({ content, onChange, sess
     setUploading(true);
     try {
       const url = await uploadImage(file);
-      editor.chain().focus().setImage({ src: url, alt: file.name }).run();
+      const alt = window.prompt('Alt text (for SEO & accessibility):', file.name) || file.name;
+      editor.chain().focus().setImage({ src: url, alt }).run();
     } catch (err: any) {
       alert(`Image upload failed: ${err.message}`);
     } finally {

@@ -37,6 +37,7 @@ export interface Session {
   color: string;
   description: string;
   featuredImage: string;
+  altText?: string;
   audioUrl: string;
   fullContent: string;
   relatedSessions: string[];

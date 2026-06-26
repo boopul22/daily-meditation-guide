@@ -126,7 +126,7 @@ export default function DetailInteractive({ session, processedContent, headings,
                     src={optimizedImage(session.featuredImage, { width: 600, height: 312, fit: 'cover' })}
                     srcSet={optimizedSrcSet(session.featuredImage, DETAIL_WIDTHS, { fit: 'cover' })}
                     sizes="(max-width: 1024px) calc(100vw - 48px), 400px"
-                    alt={session.title}
+                    alt={session.altText || session.title}
                     loading="lazy"
                     decoding="async"
                     width={400}
