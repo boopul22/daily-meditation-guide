@@ -24,7 +24,7 @@ function FAQAccordion({ question, answer }: { question: string; answer: string }
         onClick={() => setOpen(!open)}
         className="w-full flex items-center justify-between gap-4 px-5 py-4 text-left"
       >
-        <span className="text-sm font-medium text-zinc-200">{question}</span>
+        <h3 className="m-0 text-sm font-medium text-zinc-200">{question}</h3>
         <iconify-icon
           icon="solar:alt-arrow-down-linear"
           width="16"
