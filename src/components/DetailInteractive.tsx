@@ -58,6 +58,11 @@ export default function DetailInteractive({ session, processedContent, headings,
   const gradientClass = bgGradients[session.color] || 'from-zinc-900/50';
   const isCurrent = currentTrack?.id === session.id;
 
+  const hasFaq = session.faqItems && session.faqItems.length > 0;
+  const tocHeadings: TOCItem[] = hasFaq
+    ? [...headings, { id: 'faq', text: 'FAQ', level: 2 }]
+    : headings;
+
   return (
     <article className="grid grid-cols-1 lg:grid-cols-12 gap-12">
 
@@ -173,7 +178,7 @@ export default function DetailInteractive({ session, processedContent, headings,
 
         {/* Mobile TOC */}
         <div className="block lg:hidden mt-8">
-          <TableOfContents headings={headings} />
+          <TableOfContents headings={tocHeadings} />
         </div>
 
         {/* Blog Body */}
@@ -183,8 +188,8 @@ export default function DetailInteractive({ session, processedContent, headings,
         />
 
         {/* FAQ Section */}
-        {session.faqItems && session.faqItems.length > 0 && (
-          <section className="pt-8 border-t border-white/5">
+        {hasFaq && (
+          <section id="faq" className="scroll-mt-24 pt-8 border-t border-white/5">
             <h2 className="font-display text-xl font-medium text-zinc-100 mb-6 flex items-center gap-2">
               <iconify-icon icon="solar:chat-round-dots-linear" width="22" class="text-indigo-400"></iconify-icon>
               Frequently Asked Questions
@@ -284,7 +289,7 @@ export default function DetailInteractive({ session, processedContent, headings,
         <div className="sticky top-24 space-y-8">
 
           {/* Table of Contents */}
-          <TableOfContents headings={headings} />
+          <TableOfContents headings={tocHeadings} />
 
           {/* Related Sessions */}
           {relatedSessions.length > 0 && (

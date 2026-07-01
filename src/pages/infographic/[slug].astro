@@ -116,9 +116,6 @@ const whatsappUrl = `https://wa.me/?text=${encodeURIComponent(shareText + ' ' + 
         <h1 class="font-display text-2xl sm:text-3xl md:text-4xl font-medium text-zinc-100 tracking-tight leading-tight">
           {infographic.title}
         </h1>
-        {infographic.description && (
-          <p class="text-zinc-400 text-base md:text-lg leading-relaxed">{infographic.description}</p>
-        )}
         {infographic.tags && infographic.tags.length > 0 && (
           <div class="flex flex-wrap items-center gap-1.5 pt-1">
             {infographic.tags.map((tag) => (
