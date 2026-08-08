@@ -1,0 +1,42 @@
+---
+import ToolLayout from '../../components/tools/ToolLayout.astro';
+import BreathPacer from '../../components/tools/BreathPacer';
+import RelatedSessions from '../../components/tools/RelatedSessions.astro';
+import ToolEmailCapture from '../../components/tools/ToolEmailCapture';
+import { TOOLS } from '../../lib/tools/catalog';
+
+const siblings = TOOLS.filter((t) => t.patternId && t.patternId !== 'box').slice(0, 4).map((t) => ({
+  href: t.href,
+  label: t.shortTitle,
+}));
+
+Astro.response.headers.set('Cache-Control', 'public, max-age=300, s-maxage=3600, stale-while-revalidate=86400');
+---
+
+<ToolLayout
+  title="Box Breathing Timer — Free Online"
+  description="Free box breathing timer (4-4-4-4) with audio cues. No signup. Calm focus in minutes."
+  canonical="https://dailymeditationguide.com/tools/box-breathing-timer"
+  h1="Box Breathing Timer"
+  lead="Follow the circle through equal inhale, hold, exhale, and hold. Free, private, and built for eyes-closed practice with optional audio cues."
+  howToSteps={[
+    'Press Start and follow the expanding circle.',
+    'Optional: enable audio cues or Eyes-closed mode.',
+    'Breathe comfortably — shorten counts if you strain.',
+    'When finished, try a guided session from the suggestions below.',
+  ]}
+  faq={[
+    { question: 'What is box breathing?', answer: 'Box breathing uses equal counts — typically four seconds inhale, hold, exhale, and hold — forming a square rhythm that steadies attention.' },
+{ question: 'Do I need an account?', answer: 'No. This timer runs entirely in your browser with no signup.' },
+{ question: 'Can I use it with eyes closed?', answer: 'Yes. Turn on audio cues and Eyes-closed mode so you can follow by sound.' }
+  ]}
+  relatedCategoryHref="/category/breathwork"
+  relatedCategoryLabel="Breathwork sessions"
+  siblingLinks={siblings}
+>
+  <BreathPacer client:load slot="tool" initialPattern="box" />
+  <div slot="after-tool" class="space-y-6 mt-6">
+    <RelatedSessions categoryHints={['breathwork', 'focus', 'anxiety']} />
+    <ToolEmailCapture client:visible toolSlug="box-breathing-timer" />
+  </div>
+</ToolLayout>

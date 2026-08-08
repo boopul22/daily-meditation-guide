@@ -1,0 +1,156 @@
+---
+import MainLayout from '../../layouts/MainLayout.astro';
+
+interface FaqItem {
+  question: string;
+  answer: string;
+}
+
+interface Props {
+  title: string;
+  description: string;
+  canonical: string;
+  h1: string;
+  lead: string;
+  howToTitle?: string;
+  howToSteps?: string[];
+  faq?: FaqItem[];
+  jsonLdExtra?: Record<string, unknown> | Record<string, unknown>[];
+  relatedCategoryHref?: string;
+  relatedCategoryLabel?: string;
+  siblingLinks?: { href: string; label: string }[];
+}
+
+const {
+  title,
+  description,
+  canonical,
+  h1,
+  lead,
+  howToTitle = 'How to use this tool',
+  howToSteps = [],
+  faq = [],
+  jsonLdExtra,
+  relatedCategoryHref,
+  relatedCategoryLabel,
+  siblingLinks = [],
+} = Astro.props;
+
+const faqJsonLd = faq.length
+  ? {
+      '@context': 'https://schema.org',
+      '@type': 'FAQPage',
+      mainEntity: faq.map((item) => ({
+        '@type': 'Question',
+        name: item.question,
+        acceptedAnswer: { '@type': 'Answer', text: item.answer },
+      })),
+    }
+  : null;
+
+const webAppJsonLd = {
+  '@context': 'https://schema.org',
+  '@type': 'WebApplication',
+  name: title,
+  description,
+  url: canonical,
+  applicationCategory: 'HealthApplication',
+  operatingSystem: 'Any',
+  offers: { '@type': 'Offer', price: '0', priceCurrency: 'USD' },
+  isAccessibleForFree: true,
+};
+
+const extras = Array.isArray(jsonLdExtra) ? jsonLdExtra : jsonLdExtra ? [jsonLdExtra] : [];
+const scripts = [webAppJsonLd, faqJsonLd, ...extras].filter(Boolean);
+const extraHead = scripts.map((s) => `<script type="application/ld+json">${JSON.stringify(s)}</script>`).join('');
+---
+
+<MainLayout title={title} description={description} canonical={canonical} extraHead={extraHead}>
+  <article class="max-w-3xl mx-auto space-y-10 animate-[fade-enter_0.4s_ease-out]">
+    <header class="space-y-4 text-center sm:text-left">
+      <p class="text-xs uppercase tracking-widest text-indigo-400/90 font-medium">Free tool · No signup</p>
+      <h1 class="font-display text-3xl md:text-4xl lg:text-5xl font-medium text-zinc-100 tracking-tight leading-tight">
+        {h1}
+      </h1>
+      <p class="text-zinc-500 text-base md:text-lg font-light leading-relaxed max-w-2xl">
+        {lead}
+      </p>
+    </header>
+
+    <div class="rounded-3xl border border-white/[0.06] bg-zinc-900/30 p-4 sm:p-8">
+      <slot name="tool" />
+    </div>
+
+    <slot name="after-tool" />
+
+    {
+      howToSteps.length > 0 && (
+        <section class="space-y-4">
+          <h2 class="font-display text-xl text-zinc-100 font-medium">{howToTitle}</h2>
+          <ol class="list-decimal list-inside space-y-2 text-sm text-zinc-400 leading-relaxed">
+            {howToSteps.map((step) => (
+              <li>{step}</li>
+            ))}
+          </ol>
+        </section>
+      )
+    }
+
+    <slot name="content" />
+
+    {
+      faq.length > 0 && (
+        <section class="space-y-4">
+          <h2 class="font-display text-xl text-zinc-100 font-medium">FAQ</h2>
+          <div class="space-y-3">
+            {faq.map((item) => (
+              <details class="group rounded-2xl border border-white/[0.06] bg-zinc-900/20 px-4 py-3">
+                <summary class="cursor-pointer text-sm font-medium text-zinc-200 list-none flex justify-between gap-3">
+                  <span>{item.question}</span>
+                  <span class="text-zinc-500 group-open:rotate-45 transition-transform">+</span>
+                </summary>
+                <p class="mt-2 text-sm text-zinc-400 leading-relaxed">{item.answer}</p>
+              </details>
+            ))}
+          </div>
+        </section>
+      )
+    }
+
+    {
+      (siblingLinks.length > 0 || relatedCategoryHref) && (
+        <section class="space-y-3 pt-2 border-t border-white/[0.06]">
+          <h2 class="font-display text-lg text-zinc-100 font-medium">More free tools</h2>
+          <div class="flex flex-wrap gap-2">
+            {siblingLinks.map((link) => (
+              <a
+                href={link.href}
+                class="px-3 py-1.5 rounded-full border border-white/10 text-xs text-zinc-300 hover:bg-white/5 hover:text-zinc-100 transition-colors"
+              >
+                {link.label}
+              </a>
+            ))}
+            {relatedCategoryHref && (
+              <a
+                href={relatedCategoryHref}
+                class="px-3 py-1.5 rounded-full border border-indigo-500/30 text-xs text-indigo-300 hover:bg-indigo-500/10 transition-colors"
+              >
+                {relatedCategoryLabel || 'Browse related sessions'}
+              </a>
+            )}
+            <a
+              href="/tools"
+              class="px-3 py-1.5 rounded-full border border-white/10 text-xs text-zinc-400 hover:text-zinc-100 transition-colors"
+            >
+              All tools
+            </a>
+          </div>
+        </section>
+      )
+    }
+
+    <p class="text-[11px] text-zinc-600 leading-relaxed">
+      Wellness tool only — not medical advice. If you feel lightheaded, return to normal breathing. Seek professional help for ongoing anxiety, panic, or sleep disorders.
+    </p>
+  </article>
+</MainLayout>

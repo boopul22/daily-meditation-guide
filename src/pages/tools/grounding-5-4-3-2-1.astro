@@ -1,0 +1,42 @@
+---
+import ToolLayout from '../../components/tools/ToolLayout.astro';
+import GroundingWalkthrough from '../../components/tools/GroundingWalkthrough';
+import RelatedSessions from '../../components/tools/RelatedSessions.astro';
+import ToolEmailCapture from '../../components/tools/ToolEmailCapture';
+import { TOOLS } from '../../lib/tools/catalog';
+
+const siblings = TOOLS.filter((t) => ['physiological-sigh', 'box-breathing-timer', 'breathing-technique-quiz'].includes(t.slug)).map((t) => ({
+  href: t.href,
+  label: t.shortTitle,
+}));
+
+Astro.response.headers.set('Cache-Control', 'public, max-age=300, s-maxage=3600, stale-while-revalidate=86400');
+---
+
+<ToolLayout
+  title="5-4-3-2-1 Grounding Exercise — Free Interactive Tool"
+  description="Free interactive 5-4-3-2-1 grounding exercise for anxiety. Step-by-step sensory walkthrough. No signup."
+  canonical="https://dailymeditationguide.com/tools/grounding-5-4-3-2-1"
+  h1="5-4-3-2-1 Grounding Exercise"
+  lead="When the mind races, name what you can see, feel, hear, smell, and taste — one sense at a time. Free, private, and designed for acute overwhelm."
+  howToSteps={[
+    'Press Start grounding.',
+    'Fill in what you notice for each sense (or skip a slot if stuck).',
+    'Move through all five steps at your own pace.',
+    'Follow up with a guided anxiety session if you want more support.',
+  ]}
+  faq={[
+    { question: 'What is the 5-4-3-2-1 technique?', answer: 'A sensory grounding method: five things you see, four you feel, three you hear, two you smell, and one you taste.' },
+    { question: 'Does this replace therapy?', answer: 'No. It is a short self-help walkthrough for in-the-moment spikes, not treatment for anxiety disorders.' },
+    { question: 'Do I have to type answers?', answer: 'Typing helps attention, but you can skip slots if typing feels hard.' },
+  ]}
+  relatedCategoryHref="/category/anxiety"
+  relatedCategoryLabel="Anxiety sessions"
+  siblingLinks={siblings}
+>
+  <GroundingWalkthrough client:load slot="tool" />
+  <div slot="after-tool" class="space-y-6 mt-6">
+    <RelatedSessions categoryHints={['anxiety', 'breathwork']} />
+    <ToolEmailCapture client:visible toolSlug="grounding-5-4-3-2-1" />
+  </div>
+</ToolLayout>

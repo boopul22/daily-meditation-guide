@@ -1,6 +1,7 @@
 import type { APIContext } from 'astro';
 import { SITE_URL, escapeXml, toW3CDate } from '../lib/xml';
 import { ALL_CATEGORIES } from '../lib/videoCategories';
+import { TOOLS, TOOL_HREF_LASTMOD } from '../lib/tools/catalog';
 
 interface SitemapRow {
   slug: string;
@@ -8,7 +9,10 @@ interface SitemapRow {
 }
 
 const STATIC_PAGES = [
-  { path: '/', lastmod: '2026-04-13' },
+  { path: '/', lastmod: TOOL_HREF_LASTMOD },
+  { path: '/tools', lastmod: TOOL_HREF_LASTMOD },
+  { path: '/tools/guides', lastmod: TOOL_HREF_LASTMOD },
+  ...TOOLS.map((t) => ({ path: t.href, lastmod: TOOL_HREF_LASTMOD })),
   { path: '/sessions', lastmod: '2026-04-13' },
   { path: '/video-sessions', lastmod: '2026-04-13' },
   { path: '/categories', lastmod: '2026-04-21' },

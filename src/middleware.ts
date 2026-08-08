@@ -15,13 +15,20 @@ export const onRequest = defineMiddleware(async (context, next) => {
 
   // Security headers for all responses
   response.headers.set('X-Content-Type-Options', 'nosniff');
-  response.headers.set('X-Frame-Options', 'SAMEORIGIN');
   response.headers.set('Referrer-Policy', 'strict-origin-when-cross-origin');
   response.headers.set('Strict-Transport-Security', 'max-age=31536000; includeSubDomains; preload');
   response.headers.set('Cross-Origin-Opener-Policy', 'same-origin');
 
+  const isEmbed = path.startsWith('/embed/');
+  if (isEmbed) {
+    // Allow third-party sites to iframe free tool embeds (backlink / distribution)
+    response.headers.delete('X-Frame-Options');
+  } else {
+    response.headers.set('X-Frame-Options', 'SAMEORIGIN');
+  }
+
   // Content Security Policy
-  response.headers.set('Content-Security-Policy', [
+  const csp = [
     "default-src 'self'",
     "script-src 'self' 'unsafe-inline' https://static.cloudflareinsights.com https://www.googletagmanager.com https://pagead2.googlesyndication.com https://adservice.google.com https://ep1.adtrafficquality.google https://ep2.adtrafficquality.google",
     "style-src 'self' 'unsafe-inline'",
@@ -32,8 +39,13 @@ export const onRequest = defineMiddleware(async (context, next) => {
     "object-src 'none'",
     "base-uri 'self'",
     "form-action 'self'",
-  ].join('; '));
+    isEmbed ? 'frame-ancestors *' : "frame-ancestors 'self'",
+  ];
+  response.headers.set('Content-Security-Policy', csp.join('; '));
 
+  if (isEmbed) {
+    response.headers.set('X-Robots-Tag', 'noindex, nofollow');
+  }
   // /api/image/* serves user-facing images and must be indexable by Googlebot-Image
   const isPublicImage = path.startsWith('/api/image/');
 

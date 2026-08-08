@@ -1,0 +1,36 @@
+---
+import BreathPacer from '../../components/tools/BreathPacer';
+import '../../styles/globals.css';
+
+export const prerender = false;
+
+const pattern = Astro.url.searchParams.get('pattern') || 'box';
+const allowed = new Set(['box', '4-7-8', 'sigh', 'coherent']);
+const initial = allowed.has(pattern) ? pattern : 'box';
+
+Astro.response.headers.set('Content-Security-Policy', "frame-ancestors *");
+Astro.response.headers.set('Cache-Control', 'public, max-age=300, s-maxage=3600');
+---
+
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta name="robots" content="noindex" />
+    <title>Embed Breath Pacer | Daily Meditation Guide</title>
+    <style>
+      html, body { margin: 0; background: #080706; color: #e4e4e7; font-family: system-ui, sans-serif; }
+    </style>
+  </head>
+  <body class="p-3">
+    <div class="max-w-md mx-auto">
+      <BreathPacer client:load initialPattern={initial} compact showPatternSwitcher={false} />
+      <p class="text-center text-[10px] text-zinc-600 mt-3">
+        <a href={`https://dailymeditationguide.com/tools/${initial === 'box' ? 'box-breathing-timer' : initial === '4-7-8' ? '4-7-8-breathing-timer' : initial === 'sigh' ? 'physiological-sigh' : 'coherent-breathing'}`} target="_blank" rel="noopener" class="text-zinc-500 hover:text-zinc-300">
+          Open on Daily Meditation Guide
+        </a>
+      </p>
+    </div>
+  </body>
+</html>

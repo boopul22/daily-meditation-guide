@@ -1,0 +1,41 @@
+---
+import ToolLayout from '../../components/tools/ToolLayout.astro';
+import BreathPacer from '../../components/tools/BreathPacer';
+import RelatedSessions from '../../components/tools/RelatedSessions.astro';
+import ToolEmailCapture from '../../components/tools/ToolEmailCapture';
+import { TOOLS } from '../../lib/tools/catalog';
+
+const siblings = TOOLS.filter((t) => t.patternId && t.patternId !== 'coherent').slice(0, 4).map((t) => ({
+  href: t.href,
+  label: t.shortTitle,
+}));
+
+Astro.response.headers.set('Cache-Control', 'public, max-age=300, s-maxage=3600, stale-while-revalidate=86400');
+---
+
+<ToolLayout
+  title="Coherent Breathing Timer — Free Online"
+  description="Free coherent breathing timer near six breaths per minute. Steady inhale/exhale for calm focus."
+  canonical="https://dailymeditationguide.com/tools/coherent-breathing"
+  h1="Coherent Breathing Timer"
+  lead="Even inhale and exhale near 5.5 seconds each — about six breaths a minute for steady nervous-system practice."
+  howToSteps={[
+    'Press Start and follow the expanding circle.',
+    'Optional: enable audio cues or Eyes-closed mode.',
+    'Breathe comfortably — shorten counts if you strain.',
+    'When finished, try a guided session from the suggestions below.',
+  ]}
+  faq={[
+    { question: 'What is coherent breathing?', answer: 'A balanced rhythm around five to six breaths per minute, often used for HRV and calm focus.' },
+{ question: 'Is it the same as box breathing?', answer: 'No. Coherent breathing usually skips the holds and keeps inhale and exhale even.' }
+  ]}
+  relatedCategoryHref="/category/breathwork"
+  relatedCategoryLabel="Breathwork sessions"
+  siblingLinks={siblings}
+>
+  <BreathPacer client:load slot="tool" initialPattern="coherent" />
+  <div slot="after-tool" class="space-y-6 mt-6">
+    <RelatedSessions categoryHints={['breathwork', 'focus']} />
+    <ToolEmailCapture client:visible toolSlug="coherent-breathing" />
+  </div>
+</ToolLayout>

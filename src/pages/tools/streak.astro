@@ -1,0 +1,29 @@
+---
+import ToolLayout from '../../components/tools/ToolLayout.astro';
+import StreakLite from '../../components/tools/StreakLite';
+
+Astro.response.headers.set('Cache-Control', 'public, max-age=300, s-maxage=3600, stale-while-revalidate=86400');
+---
+
+<ToolLayout
+  title="Meditation Streak Tracker — Private & Free"
+  description="Private local-only meditation streak tracker. No account, no cloud. Mark today’s practice in one tap."
+  canonical="https://dailymeditationguide.com/tools/streak"
+  h1="Meditation Streak Tracker"
+  lead="A tiny private streak counter stored only in your browser. No gamified notifications, no account."
+  howToSteps={[
+    'Practice with any tool or session.',
+    'Tap “I practiced today”.',
+    'Come back tomorrow — your streak lives on this device.',
+  ]}
+  faq={[
+    { question: 'Where is my data stored?', answer: 'Only in localStorage on this browser. Clearing site data resets the streak.' },
+    { question: 'Can I sync across devices?', answer: 'Not in v1 — by design, to keep it private and free of accounts.' },
+  ]}
+  siblingLinks={[
+    { href: '/tools/box-breathing-timer', label: 'Box Breathing' },
+    { href: '/tools/session-finder', label: 'Session Finder' },
+  ]}
+>
+  <StreakLite client:load slot="tool" />
+</ToolLayout>

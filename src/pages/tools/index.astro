@@ -1,0 +1,123 @@
+---
+import MainLayout from '../../layouts/MainLayout.astro';
+import { TOOLS, featuredTools } from '../../lib/tools/catalog';
+
+const featured = featuredTools();
+const intents = [
+  { id: 'all', label: 'All' },
+  { id: 'anxiety', label: 'Anxiety' },
+  { id: 'sleep', label: 'Sleep' },
+  { id: 'focus', label: 'Focus' },
+] as const;
+
+Astro.response.headers.set('Cache-Control', 'public, max-age=300, s-maxage=3600, stale-while-revalidate=86400');
+---
+
+<MainLayout
+  title="Free Mindfulness Tools"
+  description="Free online breathing timers, grounding exercises, and meditation utilities. No signup. Guided sessions when you want more."
+  canonical="https://dailymeditationguide.com/tools"
+  extraHead={`<script type="application/ld+json">${JSON.stringify({
+    "@context": "https://schema.org",
+    "@type": "CollectionPage",
+    "name": "Free Mindfulness Tools",
+    "url": "https://dailymeditationguide.com/tools",
+    "description": "Free breathing timers, grounding exercises, and meditation utilities.",
+  })}</script>`}
+>
+  <div class="max-w-5xl mx-auto space-y-12 animate-[fade-enter_0.4s_ease-out]">
+    <header class="space-y-4 text-center max-w-2xl mx-auto">
+      <p class="text-xs uppercase tracking-widest text-indigo-400 font-medium">Free · No signup</p>
+      <h1 class="font-display text-4xl md:text-5xl text-zinc-100 font-medium tracking-tight">
+        Mindfulness tools
+      </h1>
+      <p class="text-zinc-500 text-base md:text-lg font-light leading-relaxed">
+        Instant breath pacers and grounding walks. Use them free — then continue with guided sessions when you want a voice beside you.
+      </p>
+    </header>
+
+    <div class="flex flex-wrap justify-center gap-2" id="tool-filters">
+      {intents.map((intent) => (
+        <button
+          type="button"
+          data-intent={intent.id}
+          class={`tool-filter px-3 py-1.5 rounded-full text-xs border transition-colors ${
+            intent.id === 'all'
+              ? 'is-active bg-zinc-100 text-zinc-950 border-transparent'
+              : 'border-white/10 text-zinc-400 hover:text-zinc-200'
+          }`}
+        >
+          {intent.label}
+        </button>
+      ))}
+    </div>
+
+    <div class="grid sm:grid-cols-2 lg:grid-cols-3 gap-4" id="tool-grid">
+      {TOOLS.map((tool) => (
+        <a
+          href={tool.href}
+          data-intents={tool.intent.join(',')}
+          class="tool-card group rounded-3xl border border-white/[0.06] bg-zinc-900/30 p-5 hover:border-white/15 transition-colors space-y-3"
+        >
+          <div class="flex items-center gap-2">
+            <span
+              class="w-2 h-2 rounded-full"
+              style={`background:${tool.accent};box-shadow:0 0 12px ${tool.accent}66`}
+            />
+            <iconify-icon icon={tool.icon} width="18" class="text-zinc-400"></iconify-icon>
+          </div>
+          <h2 class="font-display text-lg text-zinc-100 group-hover:text-white tracking-tight">{tool.shortTitle}</h2>
+          <p class="text-sm text-zinc-500 leading-relaxed line-clamp-3">{tool.description}</p>
+          <span class="inline-flex text-xs text-indigo-400 font-medium">Open free →</span>
+        </a>
+      ))}
+    </div>
+
+    <section class="rounded-3xl border border-indigo-500/20 bg-indigo-500/5 p-6 sm:p-8 text-center space-y-3">
+      <h2 class="font-display text-xl text-zinc-100">Not sure where to start?</h2>
+      <p class="text-sm text-zinc-400">Take the 30-second quiz — we’ll recommend a technique.</p>
+      <a href="/tools/breathing-technique-quiz" class="inline-flex px-5 py-2.5 rounded-full bg-zinc-100 text-zinc-950 text-sm font-medium">
+        Take the quiz
+      </a>
+    </section>
+
+    {
+      featured.length > 0 && (
+        <p class="text-center text-xs text-zinc-600">
+          Prefer guidance? Explore the{' '}
+          <a href="/sessions" class="text-zinc-400 hover:text-zinc-200">
+            session library
+          </a>{' '}
+          or{' '}
+          <a href="/video-sessions" class="text-zinc-400 hover:text-zinc-200">
+            video sessions
+          </a>
+          .
+        </p>
+      )
+    }
+  </div>
+
+  <script is:inline>
+    (function () {
+      var buttons = document.querySelectorAll('.tool-filter');
+      var cards = document.querySelectorAll('.tool-card');
+      buttons.forEach(function (btn) {
+        btn.addEventListener('click', function () {
+          var intent = btn.getAttribute('data-intent');
+          buttons.forEach(function (b) {
+            b.classList.remove('is-active', 'bg-zinc-100', 'text-zinc-950', 'border-transparent');
+            b.classList.add('border-white/10', 'text-zinc-400');
+          });
+          btn.classList.add('is-active', 'bg-zinc-100', 'text-zinc-950', 'border-transparent');
+          btn.classList.remove('border-white/10', 'text-zinc-400');
+          cards.forEach(function (card) {
+            var intents = (card.getAttribute('data-intents') || '').split(',');
+            var show = intent === 'all' || intents.indexOf(intent) !== -1;
+            card.style.display = show ? '' : 'none';
+          });
+        });
+      });
+    })();
+  </script>
+</MainLayout>

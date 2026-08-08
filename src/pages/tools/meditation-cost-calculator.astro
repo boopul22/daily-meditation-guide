@@ -1,0 +1,29 @@
+---
+import ToolLayout from '../../components/tools/ToolLayout.astro';
+import CostCalculator from '../../components/tools/CostCalculator';
+
+Astro.response.headers.set('Cache-Control', 'public, max-age=300, s-maxage=3600, stale-while-revalidate=86400');
+---
+
+<ToolLayout
+  title="Meditation App Cost Calculator — Free"
+  description="Estimate what Calm, Headspace, or Insight Timer costs over years — then try free breathing tools and sessions."
+  canonical="https://dailymeditationguide.com/tools/meditation-cost-calculator"
+  h1="Meditation App Cost Calculator"
+  lead="Subscription apps add up. See the multi-year cost, then use free timers and guided sessions here instead."
+  howToSteps={[
+    'Pick an app plan.',
+    'Choose how many years to project.',
+    'Compare with free tools on this site.',
+  ]}
+  faq={[
+    { question: 'Are prices exact?', answer: 'They are illustrative averages and change by region and promotions. Check each app for current pricing.' },
+    { question: 'Is Daily Meditation Guide free?', answer: 'Tools and library access are free. Optional donations via Ko-fi support the project.' },
+  ]}
+  siblingLinks={[
+    { href: '/tools', label: 'Free tools' },
+    { href: '/sessions', label: 'Session library' },
+  ]}
+>
+  <CostCalculator client:load slot="tool" />
+</ToolLayout>

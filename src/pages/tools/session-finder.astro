@@ -1,0 +1,43 @@
+---
+import ToolLayout from '../../components/tools/ToolLayout.astro';
+import SessionFinder from '../../components/tools/SessionFinder';
+import { SESSION_SELECT_WITH_AUTHOR, rowToSession } from '../../lib/db';
+
+const db = Astro.locals.runtime.env.DB;
+const res = await db
+  .prepare(`${SESSION_SELECT_WITH_AUTHOR} WHERE s.status = 'published' ORDER BY s.published_at DESC LIMIT 80`)
+  .all();
+const sessions = ((res.results || []) as any[]).map(rowToSession).map((s) => ({
+  slug: s.slug,
+  title: s.title,
+  category: s.category,
+  duration: s.duration,
+  durationSec: s.durationSec,
+  description: s.description,
+}));
+
+Astro.response.headers.set('Cache-Control', 'public, max-age=300, s-maxage=3600, stale-while-revalidate=86400');
+---
+
+<ToolLayout
+  title="Meditation Session Finder — Free"
+  description="Find a guided meditation by goal and time. Free matcher into the Daily Meditation Guide library."
+  canonical="https://dailymeditationguide.com/tools/session-finder"
+  h1="Meditation Session Finder"
+  lead="Tell us your goal and how many minutes you have. We’ll match a guided session from our library."
+  howToSteps={[
+    'Pick a goal (sleep, anxiety, focus, breathwork, or anything).',
+    'Choose a max duration.',
+    'Open a matching session and press play.',
+  ]}
+  faq={[
+    { question: 'Are sessions free?', answer: 'Yes. Matched sessions open in our free library.' },
+    { question: 'What if nothing matches?', answer: 'Widen the duration or browse the full sessions page.' },
+  ]}
+  siblingLinks={[
+    { href: '/tools', label: 'All tools' },
+    { href: '/sessions', label: 'Full library' },
+  ]}
+>
+  <SessionFinder client:load slot="tool" sessions={sessions} />
+</ToolLayout>

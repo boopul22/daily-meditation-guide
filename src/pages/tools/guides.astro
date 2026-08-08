@@ -1,0 +1,37 @@
+---
+/**
+ * Lightweight supporting guide index for tool keywords (Phase 4).
+ * Each tool page already carries how-to + FAQ; this hub links them for internal SEO.
+ */
+import MainLayout from '../../layouts/MainLayout.astro';
+import { TOOLS } from '../../lib/tools/catalog';
+
+Astro.response.headers.set('Cache-Control', 'public, max-age=300, s-maxage=3600, stale-while-revalidate=86400');
+---
+
+<MainLayout
+  title="Mindfulness Tool Guides"
+  description="How-to guides for free breathing timers, grounding exercises, and meditation tools on Daily Meditation Guide."
+  canonical="https://dailymeditationguide.com/tools/guides"
+>
+  <div class="max-w-3xl mx-auto space-y-8 animate-[fade-enter_0.4s_ease-out]">
+    <header class="space-y-3">
+      <p class="text-xs uppercase tracking-widest text-indigo-400">Guides</p>
+      <h1 class="font-display text-4xl text-zinc-100 font-medium tracking-tight">Tool guides</h1>
+      <p class="text-zinc-500 leading-relaxed">
+        Short how-tos live on each free tool page (steps + FAQ). Start here, then open the interactive practice.
+      </p>
+    </header>
+    <ul class="space-y-3">
+      {TOOLS.map((t) => (
+        <li>
+          <a href={t.href} class="block rounded-2xl border border-white/[0.06] bg-zinc-900/30 px-4 py-3 hover:border-white/15 transition-colors">
+            <span class="text-sm text-zinc-100 font-medium">{t.title}</span>
+            <span class="block text-xs text-zinc-500 mt-1">{t.description}</span>
+          </a>
+        </li>
+      ))}
+    </ul>
+    <a href="/tools" class="inline-flex text-sm text-indigo-400 hover:text-indigo-300">← Back to all tools</a>
+  </div>
+</MainLayout>

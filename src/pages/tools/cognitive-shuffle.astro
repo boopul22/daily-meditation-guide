@@ -1,0 +1,36 @@
+---
+import ToolLayout from '../../components/tools/ToolLayout.astro';
+import CognitiveShuffle from '../../components/tools/CognitiveShuffle';
+import RelatedSessions from '../../components/tools/RelatedSessions.astro';
+
+Astro.response.headers.set('Cache-Control', 'public, max-age=300, s-maxage=3600, stale-while-revalidate=86400');
+---
+
+<ToolLayout
+  title="Cognitive Shuffle Sleep Generator — Free"
+  description="Free cognitive shuffle word generator to quiet racing thoughts at bedtime. Soft random words, no signup."
+  canonical="https://dailymeditationguide.com/tools/cognitive-shuffle"
+  h1="Cognitive Shuffle Sleep Generator"
+  lead="Racing thoughts at bedtime? Softly picture each neutral word as it appears — no story required — until sleep takes over."
+  howToSteps={[
+    'Dim the screen and press Start.',
+    'Gently imagine each word without forcing a narrative.',
+    'If a word sticks, wait for the next one.',
+    'Pair with a guided sleep session if you want a voice.',
+  ]}
+  faq={[
+    { question: 'What is cognitive shuffle?', answer: 'A sleep technique that presents unrelated images/words to interrupt rumination and help the mind drift.' },
+    { question: 'Is this the same as counting sheep?', answer: 'Similar idea, but random neutral words reduce the urge to keep a sequence going.' },
+  ]}
+  relatedCategoryHref="/category/sleep"
+  relatedCategoryLabel="Sleep sessions"
+  siblingLinks={[
+    { href: '/tools/4-7-8-breathing-timer', label: '4-7-8 Timer' },
+    { href: '/tools/pmr-timer', label: 'PMR Timer' },
+  ]}
+>
+  <CognitiveShuffle client:load slot="tool" />
+  <div slot="after-tool" class="mt-6">
+    <RelatedSessions categoryHints={['sleep']} />
+  </div>
+</ToolLayout>

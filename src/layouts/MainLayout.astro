@@ -103,7 +103,10 @@ const fullTitle = title === 'Daily Meditation Guide' ? title : `${title} | Daily
   </style>
   <Fragment set:html={extraHead} />
 
-  <!-- Google Consent Mode v2 defaults — MUST run before any Google tag (gtag/AdSense) -->
+  <!-- Google AdSense account meta -->
+  <meta name="google-adsense-account" content="ca-pub-7803867089582138" />
+
+  <!-- Google tag (gtag.js) — Consent Mode defaults FIRST, then load GA immediately -->
   <script is:inline>
     window.dataLayer = window.dataLayer || [];
     function gtag(){dataLayer.push(arguments);}
@@ -128,41 +131,44 @@ const fullTitle = title === 'Daily Meditation Guide' ? title : `${title} | Daily
         });
       }
     } catch (e) {}
+  </script>
+  <script async src="https://www.googletagmanager.com/gtag/js?id=G-7BGLP6TF2H"></script>
+  <script is:inline>
     gtag('js', new Date());
-    gtag('config', 'G-7BGLP6TF2H');
+    gtag('config', 'G-7BGLP6TF2H', {
+      anonymize_ip: true,
+      send_page_view: true,
+    });
   </script>
 
-  <!-- Google AdSense (deferred to idle to improve LCP/TBT) -->
-  <meta name="google-adsense-account" content="ca-pub-7803867089582138" />
-
-  <!-- Lazy-load GA + AdSense on first interaction (or bounce/timeout) to cut unused JS at initial paint -->
+  <!-- AdSense: load after consent accepted, or after first interaction if already accepted -->
   <script is:inline>
     (function () {
-      var loaded = false;
-      function loadThirdParty() {
-        if (loaded) return;
-        loaded = true;
-        var ga = document.createElement('script');
-        ga.async = true;
-        ga.src = 'https://www.googletagmanager.com/gtag/js?id=G-7BGLP6TF2H';
-        document.head.appendChild(ga);
+      var adsLoaded = false;
+      function loadAds() {
+        if (adsLoaded) return;
+        try {
+          if (localStorage.getItem('dmg_cookie_consent') !== 'accepted') return;
+        } catch (e) { return; }
+        adsLoaded = true;
         var ads = document.createElement('script');
         ads.async = true;
         ads.crossOrigin = 'anonymous';
         ads.src = 'https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-7803867089582138';
         document.head.appendChild(ads);
       }
-      var events = ['scroll', 'pointerdown', 'keydown', 'touchstart', 'mousemove', 'wheel'];
-      function onInteract() {
-        events.forEach(function (e) { window.removeEventListener(e, onInteract); });
-        loadThirdParty();
-      }
-      events.forEach(function (e) { window.addEventListener(e, onInteract, { passive: true, once: true }); });
-      document.addEventListener('visibilitychange', function () {
-        if (document.visibilityState === 'hidden') loadThirdParty();
-      }, { once: true });
-      window.addEventListener('pagehide', loadThirdParty, { once: true });
-      setTimeout(loadThirdParty, 8000);
+      window.__dmgLoadAds = loadAds;
+      try {
+        if (localStorage.getItem('dmg_cookie_consent') === 'accepted') {
+          var events = ['scroll', 'pointerdown', 'keydown', 'touchstart'];
+          function onInteract() {
+            events.forEach(function (e) { window.removeEventListener(e, onInteract); });
+            loadAds();
+          }
+          events.forEach(function (e) { window.addEventListener(e, onInteract, { passive: true, once: true }); });
+          setTimeout(loadAds, 3000);
+        }
+      } catch (e) {}
     })();
   </script>
   <script type="application/ld+json" set:html={JSON.stringify({

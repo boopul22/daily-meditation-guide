@@ -1,0 +1,42 @@
+---
+import ToolLayout from '../../components/tools/ToolLayout.astro';
+import BreathPacer from '../../components/tools/BreathPacer';
+import RelatedSessions from '../../components/tools/RelatedSessions.astro';
+import ToolEmailCapture from '../../components/tools/ToolEmailCapture';
+import { TOOLS } from '../../lib/tools/catalog';
+
+const siblings = TOOLS.filter((t) => t.patternId && t.patternId !== 'sigh').slice(0, 4).map((t) => ({
+  href: t.href,
+  label: t.shortTitle,
+}));
+
+Astro.response.headers.set('Cache-Control', 'public, max-age=300, s-maxage=3600, stale-while-revalidate=86400');
+---
+
+<ToolLayout
+  title="Physiological Sigh Timer — Free Stress Reset"
+  description="Free physiological sigh timer: double inhale, long exhale. Fast stress downshift with visual + audio cues."
+  canonical="https://dailymeditationguide.com/tools/physiological-sigh"
+  h1="Physiological Sigh Timer"
+  lead="Two inhales through the nose, then a long slow exhale. A short pattern for acute stress — often useful in 1–3 breaths."
+  howToSteps={[
+    'Press Start and follow the expanding circle.',
+    'Optional: enable audio cues or Eyes-closed mode.',
+    'Breathe comfortably — shorten counts if you strain.',
+    'When finished, try a guided session from the suggestions below.',
+  ]}
+  faq={[
+    { question: 'What is a physiological sigh?', answer: 'A natural breath pattern with a double inhale and long exhale that helps reinflate alveoli and calm arousal.' },
+{ question: 'How fast does it work?', answer: 'Many people feel a shift after one to three sighs. It is not a cure for panic disorders.' },
+{ question: 'Should I force the hold?', answer: 'No holds here — inhale, top-up inhale, then a long easy exhale.' }
+  ]}
+  relatedCategoryHref="/category/anxiety"
+  relatedCategoryLabel="Anxiety sessions"
+  siblingLinks={siblings}
+>
+  <BreathPacer client:load slot="tool" initialPattern="sigh" />
+  <div slot="after-tool" class="space-y-6 mt-6">
+    <RelatedSessions categoryHints={['anxiety', 'breathwork']} />
+    <ToolEmailCapture client:visible toolSlug="physiological-sigh" />
+  </div>
+</ToolLayout>

@@ -4,6 +4,7 @@ import DetailInteractive from '../../components/DetailInteractive';
 import { rowToSession, SESSION_SELECT_WITH_AUTHOR } from '../../lib/db';
 import { optimizedImage, optimizedSrcSet, optimizedImageAbs } from '../../lib/image';
 import { processContentForTOC } from '../../utils/tocUtils';
+import { toolsForCategory } from '../../lib/tools/relatedTools';
 import type { Session } from '../../types';
 
 const { slug } = Astro.params;
@@ -44,6 +45,8 @@ if (session?.relatedSessions && session.relatedSessions.length > 0) {
   ).bind(...session.relatedSessions).all();
   relatedSessions = (results || []).map((r: any) => rowToSession(r));
 }
+
+const relatedTools = session ? toolsForCategory(session.category) : [];
 
 // Build SEO meta
 const siteUrl = 'https://dailymeditationguide.com';
@@ -156,6 +159,26 @@ if (session) {
         headings={headings}
         relatedSessions={relatedSessions}
       />
+
+      {relatedTools.length > 0 && (
+        <section class="mt-12 max-w-3xl mx-auto space-y-4 border-t border-white/[0.06] pt-10">
+          <h2 class="font-display text-xl text-zinc-100 font-medium">Try a free tool</h2>
+          <p class="text-sm text-zinc-500">Pair this session with a quick interactive practice — no signup.</p>
+          <div class="flex flex-wrap gap-2">
+            {relatedTools.map((t) => (
+              <a
+                href={t.href}
+                class="px-3 py-1.5 rounded-full border border-white/10 text-xs text-zinc-300 hover:bg-white/5 hover:text-zinc-100 transition-colors"
+              >
+                {t.shortTitle}
+              </a>
+            ))}
+            <a href="/tools" class="px-3 py-1.5 rounded-full border border-indigo-500/30 text-xs text-indigo-300 hover:bg-indigo-500/10 transition-colors">
+              All tools
+            </a>
+          </div>
+        </section>
+      )}
     </div>
   ) : (
     <div class="flex flex-col items-center justify-center min-h-[60vh] text-center space-y-8 animate-[fade-enter_0.5s_ease-out]">

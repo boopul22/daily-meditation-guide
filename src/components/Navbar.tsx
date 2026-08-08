@@ -190,8 +190,9 @@ const Navbar: React.FC = () => {
 
           {/* Desktop Menu */}
           <div className="hidden lg:flex items-center justify-center gap-7">
-            <a href="/" className="text-sm font-medium text-zinc-400 hover:text-zinc-100 transition-colors">Practice</a>
+            <a href="/tools" className="text-sm font-medium text-zinc-100 hover:text-white transition-colors">Tools</a>
             <a href="/sessions" className="text-sm font-medium text-zinc-400 hover:text-zinc-100 transition-colors">Sessions</a>
+            <a href="/video-sessions" className="text-sm font-medium text-zinc-400 hover:text-zinc-100 transition-colors">Videos</a>
 
             <div className="relative" ref={categoriesRef}>
               <button
@@ -257,15 +258,20 @@ const Navbar: React.FC = () => {
 
             <a href="/infographics" className="text-sm font-medium text-zinc-400 hover:text-zinc-100 transition-colors">Infographics</a>
             <a href="/about" className="text-sm font-medium text-zinc-400 hover:text-zinc-100 transition-colors">About</a>
-            <a href="/contact" className="text-sm font-medium text-zinc-400 hover:text-zinc-100 transition-colors">Contact</a>
           </div>
 
           <div className="flex items-center gap-2 justify-end">
             <a
+              href="/tools"
+              className="hidden lg:inline-flex items-center gap-1.5 px-3.5 py-1.5 text-xs font-semibold text-zinc-950 bg-zinc-100 hover:bg-white rounded-full transition-colors"
+            >
+              Try free tools
+            </a>
+            <a
               href="https://ko-fi.com/bipul"
               target="_blank"
               rel="noopener noreferrer"
-              className="hidden lg:inline-flex items-center gap-1.5 px-3.5 py-1.5 text-xs font-semibold text-white bg-gradient-to-r from-pink-500 to-rose-500 hover:from-pink-400 hover:to-rose-400 rounded-full transition-colors shadow-sm shadow-pink-500/20"
+              className="hidden xl:inline-flex items-center gap-1.5 px-3.5 py-1.5 text-xs font-semibold text-white bg-gradient-to-r from-pink-500 to-rose-500 hover:from-pink-400 hover:to-rose-400 rounded-full transition-colors shadow-sm shadow-pink-500/20"
             >
               <iconify-icon icon="solar:heart-bold" width="14"></iconify-icon>
               Donate
@@ -400,8 +406,9 @@ const Navbar: React.FC = () => {
       {isMobileMenuOpen && (
         <div className="fixed inset-0 z-40 bg-[#080706] pt-24 px-6 lg:hidden animate-[fade-enter_0.2s_ease-out]">
           <div className="flex flex-col gap-6 text-lg font-medium text-zinc-300">
-            <a href="/" onClick={() => setIsMobileMenuOpen(false)} className="border-b border-white/5 pb-4">Practice</a>
+            <a href="/tools" onClick={() => setIsMobileMenuOpen(false)} className="border-b border-white/5 pb-4 text-zinc-100 font-medium">Tools</a>
             <a href="/sessions" onClick={() => setIsMobileMenuOpen(false)} className="border-b border-white/5 pb-4">Sessions</a>
+            <a href="/video-sessions" onClick={() => setIsMobileMenuOpen(false)} className="border-b border-white/5 pb-4">Videos</a>
 
             <div className="border-b border-white/5 pb-4">
               <button

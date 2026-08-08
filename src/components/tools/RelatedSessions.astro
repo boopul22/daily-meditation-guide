@@ -1,0 +1,83 @@
+---
+import { SESSION_SELECT_WITH_AUTHOR, rowToSession } from '../../lib/db';
+import { optimizedImage } from '../../lib/image';
+
+interface Props {
+  categoryHints?: string[];
+  limit?: number;
+  title?: string;
+}
+
+const { categoryHints = ['breathwork', 'anxiety', 'sleep'], limit = 3, title = 'Continue with a guided session' } = Astro.props;
+
+const db = Astro.locals.runtime.env.DB;
+
+const placeholders = categoryHints.map(() => 'LOWER(s.category) LIKE ?').join(' OR ');
+const params = categoryHints.map((c) => `%${c.toLowerCase()}%`);
+
+let sessions: ReturnType<typeof rowToSession>[] = [];
+try {
+  const res = await db
+    .prepare(
+      `${SESSION_SELECT_WITH_AUTHOR} WHERE s.status = 'published' AND (${placeholders || "1=1"}) ORDER BY s.published_at DESC LIMIT ?`
+    )
+    .bind(...(placeholders ? params : []), limit)
+    .all();
+  sessions = ((res.results || []) as any[]).map(rowToSession);
+
+  if (sessions.length < limit) {
+    const more = await db
+      .prepare(`${SESSION_SELECT_WITH_AUTHOR} WHERE s.status = 'published' ORDER BY s.published_at DESC LIMIT ?`)
+      .bind(limit)
+      .all();
+    const existing = new Set(sessions.map((s) => s.id));
+    for (const row of (more.results || []) as any[]) {
+      const s = rowToSession(row);
+      if (!existing.has(s.id)) sessions.push(s);
+      if (sessions.length >= limit) break;
+    }
+  }
+} catch {
+  sessions = [];
+}
+---
+
+{
+  sessions.length > 0 && (
+    <section class="space-y-4 mt-2">
+      <div class="flex items-end justify-between gap-4">
+        <h2 class="font-display text-xl text-zinc-100 font-medium">{title}</h2>
+        <a href="/sessions" class="text-xs text-indigo-400 hover:text-indigo-300 font-medium">
+          Library →
+        </a>
+      </div>
+      <div class="grid sm:grid-cols-3 gap-3">
+        {sessions.slice(0, limit).map((s) => (
+          <a
+            href={`/session/${s.slug}`}
+            class="group rounded-2xl border border-white/[0.06] bg-zinc-900/30 overflow-hidden hover:border-white/15 transition-colors"
+          >
+            {s.featuredImage ? (
+              <img
+                src={optimizedImage(s.featuredImage, { width: 400, height: 240, fit: 'cover' })}
+                alt={s.altText || s.title}
+                width="400"
+                height="240"
+                loading="lazy"
+                class="w-full h-28 object-cover opacity-90 group-hover:opacity-100 transition-opacity"
+              />
+            ) : (
+              <div class="h-28 bg-gradient-to-br from-indigo-500/20 to-teal-500/10" />
+            )}
+            <div class="p-3 space-y-1">
+              <p class="text-sm text-zinc-100 font-medium line-clamp-2 group-hover:text-white">{s.title}</p>
+              <p class="text-[11px] text-zinc-500 uppercase tracking-wide">
+                {s.duration || '5 min'} · {s.category}
+              </p>
+            </div>
+          </a>
+        ))}
+      </div>
+    </section>
+  )
+}

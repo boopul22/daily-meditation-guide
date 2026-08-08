@@ -3,9 +3,8 @@ const year = new Date().getFullYear();
 ---
 
 <footer class="w-full border-t border-white/[0.06] bg-[#080706] text-zinc-400 pt-12 pb-24 mt-20">
-  <div class="max-w-6xl mx-auto px-6 grid grid-cols-1 md:grid-cols-3 gap-8">
+  <div class="max-w-6xl mx-auto px-6 grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-8">
 
-    {/* Brand */}
     <div class="space-y-4">
       <a href="/" class="flex items-center gap-2 group cursor-pointer w-fit">
         <img
@@ -20,26 +19,41 @@ const year = new Date().getFullYear();
         <span class="text-zinc-200 font-medium tracking-tighter text-sm">dailymeditationguide.com</span>
       </a>
       <p class="text-xs leading-relaxed max-w-xs">
-        Daily curation of guided meditations and ambient soundscapes to help you find focus and stillness.
+        Free mindfulness tools and guided sessions for sleep, anxiety, and focus.
       </p>
     </div>
 
-    {/* Links Column 1 */}
     <div class="space-y-4">
-      <h4 class="font-display text-zinc-200 font-medium text-sm">Platform</h4>
+      <h4 class="font-display text-zinc-200 font-medium text-sm">Tools</h4>
       <div class="flex flex-col gap-2 text-sm">
-        <a href="/" class="hover:text-zinc-200 transition-colors">Browse</a>
+        <a href="/tools" class="hover:text-zinc-200 transition-colors">All tools</a>
+        <a href="/tools/box-breathing-timer" class="hover:text-zinc-200 transition-colors">Box breathing</a>
+        <a href="/tools/4-7-8-breathing-timer" class="hover:text-zinc-200 transition-colors">4-7-8 breathing</a>
+        <a href="/tools/physiological-sigh" class="hover:text-zinc-200 transition-colors">Physiological sigh</a>
+        <a href="/tools/grounding-5-4-3-2-1" class="hover:text-zinc-200 transition-colors">5-4-3-2-1 grounding</a>
+        <a href="/tools/breathing-technique-quiz" class="hover:text-zinc-200 transition-colors">Breathing quiz</a>
+        <a href="/tools/guides" class="hover:text-zinc-200 transition-colors">Tool guides</a>
+      </div>
+    </div>
+
+    <div class="space-y-4">
+      <h4 class="font-display text-zinc-200 font-medium text-sm">Library</h4>
+      <div class="flex flex-col gap-2 text-sm">
         <a href="/sessions" class="hover:text-zinc-200 transition-colors">Sessions</a>
+        <a href="/video-sessions" class="hover:text-zinc-200 transition-colors">Videos</a>
+        <a href="/categories" class="hover:text-zinc-200 transition-colors">Categories</a>
+        <a href="/infographics" class="hover:text-zinc-200 transition-colors">Infographics</a>
         <a href="/about" class="hover:text-zinc-200 transition-colors">About</a>
       </div>
     </div>
 
-    {/* Links Column 2 */}
     <div class="space-y-4">
       <h4 class="font-display text-zinc-200 font-medium text-sm">Support</h4>
       <div class="flex flex-col gap-2 text-sm">
         <a href="/contact" class="hover:text-zinc-200 transition-colors">Contact Us</a>
         <a href="/disclaimer" class="hover:text-zinc-200 transition-colors">Disclaimer</a>
+        <a href="/privacy" class="hover:text-zinc-200 transition-colors">Privacy</a>
+        <a href="/terms" class="hover:text-zinc-200 transition-colors">Terms</a>
       </div>
     </div>
   </div>

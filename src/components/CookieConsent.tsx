@@ -7,6 +7,8 @@ type ConsentState = 'granted' | 'denied';
 declare global {
     interface Window {
         gtag?: (...args: unknown[]) => void;
+        __dmgLoadAds?: () => void;
+        dataLayer?: unknown[];
     }
 }
 
@@ -18,6 +20,19 @@ function updateGtagConsent(state: ConsentState) {
         ad_personalization: state,
         analytics_storage: state,
     });
+    if (state === 'granted') {
+        // Re-send page view now that analytics storage is allowed
+        window.gtag('event', 'page_view', {
+            page_title: document.title,
+            page_location: window.location.href,
+            page_path: window.location.pathname,
+        });
+        try {
+            window.__dmgLoadAds?.();
+        } catch {
+            /* ignore */
+        }
+    }
 }
 
 const CookieConsent: React.FC = () => {

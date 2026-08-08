@@ -1,0 +1,42 @@
+---
+import ToolLayout from '../../components/tools/ToolLayout.astro';
+import BreathPacer from '../../components/tools/BreathPacer';
+import RelatedSessions from '../../components/tools/RelatedSessions.astro';
+import ToolEmailCapture from '../../components/tools/ToolEmailCapture';
+import { TOOLS } from '../../lib/tools/catalog';
+
+const siblings = TOOLS.filter((t) => t.patternId && t.patternId !== '4-7-8').slice(0, 4).map((t) => ({
+  href: t.href,
+  label: t.shortTitle,
+}));
+
+Astro.response.headers.set('Cache-Control', 'public, max-age=300, s-maxage=3600, stale-while-revalidate=86400');
+---
+
+<ToolLayout
+  title="4-7-8 Breathing Timer — Free Online"
+  description="Free 4-7-8 breathing timer for sleep and wind-down. Visual + audio pacer, no signup."
+  canonical="https://dailymeditationguide.com/tools/4-7-8-breathing-timer"
+  h1="4-7-8 Breathing Timer"
+  lead="Inhale for 4, hold for 7, exhale for 8. A classic wind-down pattern for racing thoughts and bedtime."
+  howToSteps={[
+    'Press Start and follow the expanding circle.',
+    'Optional: enable audio cues or Eyes-closed mode.',
+    'Breathe comfortably — shorten counts if you strain.',
+    'When finished, try a guided session from the suggestions below.',
+  ]}
+  faq={[
+    { question: 'Who created 4-7-8 breathing?', answer: 'Dr. Andrew Weil popularized this pattern as a relaxing breath based on yogic pranayama.' },
+{ question: 'How many cycles should I do?', answer: 'Start with four cycles. Stop if you feel lightheaded.' },
+{ question: 'Is this a sleep meditation?', answer: 'It is a breath pacer. Pair it with a guided sleep session if you want a spoken track.' }
+  ]}
+  relatedCategoryHref="/category/sleep"
+  relatedCategoryLabel="Sleep sessions"
+  siblingLinks={siblings}
+>
+  <BreathPacer client:load slot="tool" initialPattern="4-7-8" />
+  <div slot="after-tool" class="space-y-6 mt-6">
+    <RelatedSessions categoryHints={['sleep', 'anxiety']} />
+    <ToolEmailCapture client:visible toolSlug="4-7-8-breathing-timer" />
+  </div>
+</ToolLayout>
