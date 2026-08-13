@@ -258,7 +258,7 @@ const Navbar: React.FC = () => {
 
             <a href="/infographics" className="text-sm font-medium text-zinc-400 hover:text-zinc-100 transition-colors">Infographics</a>
             <a href="/about" className="text-sm font-medium text-zinc-400 hover:text-zinc-100 transition-colors">About</a>
-            <a href="https://freetexttospeech.net/" className="text-sm font-medium text-zinc-400 hover:text-zinc-100 transition-colors">voicer tool</a>
+            <a href="https://freetexttospeech.net/" target="_blank" rel="noopener noreferrer" className="text-sm font-medium text-zinc-400 hover:text-zinc-100 transition-colors">voicer tool</a>
           </div>
 
           <div className="flex items-center gap-2 justify-end">
@@ -456,7 +456,7 @@ const Navbar: React.FC = () => {
             <a href="/infographics" onClick={() => setIsMobileMenuOpen(false)} className="border-b border-white/5 pb-4">Infographics</a>
             <a href="/about" onClick={() => setIsMobileMenuOpen(false)} className="border-b border-white/5 pb-4">About</a>
             <a href="/contact" onClick={() => setIsMobileMenuOpen(false)} className="border-b border-white/5 pb-4">Contact</a>
-            <a href="https://freetexttospeech.net/" onClick={() => setIsMobileMenuOpen(false)} className="border-b border-white/5 pb-4">voicer tool</a>
+            <a href="https://freetexttospeech.net/" target="_blank" rel="noopener noreferrer" onClick={() => setIsMobileMenuOpen(false)} className="border-b border-white/5 pb-4">voicer tool</a>
             <a
               href="https://ko-fi.com/bipul"
               target="_blank"
