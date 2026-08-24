@@ -141,7 +141,7 @@ const extraHead = `<script type="application/ld+json">${itemListJsonLd}</script>
 >
   <div class="animate-[fade-enter_0.6s_ease-out]">
     {/* ─────────────────────────── HERO ─────────────────────────── */}
-    <header class="relative pb-10 md:pb-14">
+    <header class="relative pb-10 md:pb-14 overflow-x-clip">
       <div
         aria-hidden="true"
         class="absolute -top-16 left-1/2 -translate-x-1/2 w-[42rem] h-[42rem] max-w-none pointer-events-none opacity-50 blur-3xl -z-10"
@@ -216,14 +216,14 @@ const extraHead = `<script type="application/ld+json">${itemListJsonLd}</script>
               role="tab"
               data-type-btn="all"
               aria-pressed="true"
-              class="type-btn active-type px-4 py-1.5 rounded-full text-zinc-400 transition"
+              class="type-btn active-type px-4 py-2.5 rounded-full text-zinc-400 transition"
             >All</button>
             <button
               type="button"
               role="tab"
               data-type-btn="audio"
               aria-pressed="false"
-              class="type-btn px-4 py-1.5 rounded-full text-zinc-400 transition flex items-center gap-1.5"
+              class="type-btn px-4 py-2.5 rounded-full text-zinc-400 transition flex items-center gap-1.5"
             >
               <iconify-icon icon="solar:headphones-round-linear" width="14"></iconify-icon>
               Audio
@@ -233,7 +233,7 @@ const extraHead = `<script type="application/ld+json">${itemListJsonLd}</script>
               role="tab"
               data-type-btn="video"
               aria-pressed="false"
-              class="type-btn px-4 py-1.5 rounded-full text-zinc-400 transition flex items-center gap-1.5"
+              class="type-btn px-4 py-2.5 rounded-full text-zinc-400 transition flex items-center gap-1.5"
             >
               <iconify-icon icon="solar:play-linear" width="14"></iconify-icon>
               Video

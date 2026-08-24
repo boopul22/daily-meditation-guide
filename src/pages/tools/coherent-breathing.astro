@@ -3,8 +3,11 @@ import ToolLayout from '../../components/tools/ToolLayout.astro';
 import BreathPacer from '../../components/tools/BreathPacer';
 import RelatedSessions from '../../components/tools/RelatedSessions.astro';
 import ToolEmailCapture from '../../components/tools/ToolEmailCapture';
+import ToolRichContent from '../../components/tools/ToolRichContent.astro';
 import { TOOLS } from '../../lib/tools/catalog';
+import { LANDING } from '../../lib/tools/landingCopy';
 
+const copy = LANDING['coherent-breathing'];
 const siblings = TOOLS.filter((t) => t.patternId && t.patternId !== 'coherent').slice(0, 4).map((t) => ({
   href: t.href,
   label: t.shortTitle,
@@ -14,21 +17,13 @@ Astro.response.headers.set('Cache-Control', 'public, max-age=300, s-maxage=3600,
 ---
 
 <ToolLayout
-  title="Coherent Breathing Timer — Free Online"
-  description="Free coherent breathing timer near six breaths per minute. Steady inhale/exhale for calm focus."
+  title="Coherent Breathing Timer — Free Online (~6 Breaths/Min)"
+  description="Free coherent breathing timer near six breaths per minute. Steady inhale and exhale for calm focus. Audio cues, no signup."
   canonical="https://dailymeditationguide.com/tools/coherent-breathing"
   h1="Coherent Breathing Timer"
-  lead="Even inhale and exhale near 5.5 seconds each — about six breaths a minute for steady nervous-system practice."
-  howToSteps={[
-    'Press Start and follow the expanding circle.',
-    'Optional: enable audio cues or Eyes-closed mode.',
-    'Breathe comfortably — shorten counts if you strain.',
-    'When finished, try a guided session from the suggestions below.',
-  ]}
-  faq={[
-    { question: 'What is coherent breathing?', answer: 'A balanced rhythm around five to six breaths per minute, often used for HRV and calm focus.' },
-{ question: 'Is it the same as box breathing?', answer: 'No. Coherent breathing usually skips the holds and keeps inhale and exhale even.' }
-  ]}
+  lead={copy.lead}
+  howToSteps={copy.howToSteps}
+  faq={copy.faq}
   relatedCategoryHref="/category/breathwork"
   relatedCategoryLabel="Breathwork sessions"
   siblingLinks={siblings}
@@ -38,4 +33,5 @@ Astro.response.headers.set('Cache-Control', 'public, max-age=300, s-maxage=3600,
     <RelatedSessions categoryHints={['breathwork', 'focus']} />
     <ToolEmailCapture client:visible toolSlug="coherent-breathing" />
   </div>
+  <ToolRichContent slot="content" sections={copy.sections} />
 </ToolLayout>

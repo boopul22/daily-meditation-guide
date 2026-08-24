@@ -48,10 +48,41 @@ const BreathPacer: React.FC<Props> = ({
   const [done, setDone] = useState(false);
 
   const audioCtxRef = useRef<AudioContext | null>(null);
+  const wakeLockRef = useRef<WakeLockSentinel | null>(null);
   const lastPhaseRef = useRef(-1);
   const rafRef = useRef<number>(0);
   const startRef = useRef(0);
   const elapsedBaseRef = useRef(0);
+
+  useEffect(() => {
+    if (!running) {
+      wakeLockRef.current?.release().catch(() => {});
+      wakeLockRef.current = null;
+      return;
+    }
+    let released = false;
+    const requestLock = async () => {
+      try {
+        if ('wakeLock' in navigator && !wakeLockRef.current) {
+          wakeLockRef.current = await navigator.wakeLock.request('screen');
+          wakeLockRef.current.addEventListener('release', () => {
+            wakeLockRef.current = null;
+          });
+        }
+      } catch {
+        /* unsupported or denied */
+      }
+    };
+    void requestLock();
+    const onVisible = () => {
+      if (document.visibilityState === 'visible' && !released) void requestLock();
+    };
+    document.addEventListener('visibilitychange', onVisible);
+    return () => {
+      released = true;
+      document.removeEventListener('visibilitychange', onVisible);
+    };
+  }, [running]);
 
   const step = pattern.steps[stepIndex] ?? pattern.steps[0];
   const scale =
@@ -184,7 +215,7 @@ const BreathPacer: React.FC<Props> = ({
                 setPatternId(p.id as BreathPatternId);
                 reset();
               }}
-              className={`px-3 py-1.5 rounded-full text-xs font-medium transition-colors border ${
+              className={`px-4 py-2.5 rounded-full text-xs font-medium transition-colors border ${
                 patternId === p.id
                   ? 'bg-indigo-500/20 border-indigo-500/40 text-indigo-200'
                   : 'border-white/10 text-zinc-400 hover:text-zinc-200'
@@ -229,7 +260,7 @@ const BreathPacer: React.FC<Props> = ({
                 value={targetMinutes}
                 disabled={running}
                 onChange={(e) => setTargetMinutes(Number(e.target.value))}
-                className="bg-zinc-900 border border-white/10 rounded-lg px-2 py-1 text-zinc-200"
+                className="bg-zinc-900 border border-white/10 rounded-lg px-3 py-2.5 text-zinc-200"
               >
                 {[1, 2, 3, 5, 10].map((m) => (
                   <option key={m} value={m}>
@@ -241,14 +272,14 @@ const BreathPacer: React.FC<Props> = ({
             <button
               type="button"
               onClick={() => setAudioOn((v) => !v)}
-              className="px-2.5 py-1 rounded-lg border border-white/10 hover:bg-white/5"
+              className="px-4 py-2.5 rounded-lg border border-white/10 hover:bg-white/5"
             >
               Audio {audioOn ? 'on' : 'off'}
             </button>
             <button
               type="button"
               onClick={() => setEyesClosed((v) => !v)}
-              className="px-2.5 py-1 rounded-lg border border-white/10 hover:bg-white/5"
+              className="px-4 py-2.5 rounded-lg border border-white/10 hover:bg-white/5"
             >
               {eyesClosed ? 'Show UI' : 'Eyes-closed'}
             </button>

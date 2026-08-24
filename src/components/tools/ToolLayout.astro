@@ -101,7 +101,7 @@ const extraHead = scripts.map((s) => `<script type="application/ld+json">${JSON.
     {
       faq.length > 0 && (
         <section class="space-y-4">
-          <h2 class="font-display text-xl text-zinc-100 font-medium">FAQ</h2>
+          <h2 class="font-display text-xl text-zinc-100 font-medium">Frequently asked questions</h2>
           <div class="space-y-3">
             {faq.map((item) => (
               <details class="group rounded-2xl border border-white/[0.06] bg-zinc-900/20 px-4 py-3">
@@ -125,7 +125,7 @@ const extraHead = scripts.map((s) => `<script type="application/ld+json">${JSON.
             {siblingLinks.map((link) => (
               <a
                 href={link.href}
-                class="px-3 py-1.5 rounded-full border border-white/10 text-xs text-zinc-300 hover:bg-white/5 hover:text-zinc-100 transition-colors"
+                class="px-3.5 py-2.5 rounded-full border border-white/10 text-xs text-zinc-300 hover:bg-white/5 hover:text-zinc-100 transition-colors"
               >
                 {link.label}
               </a>
@@ -133,14 +133,14 @@ const extraHead = scripts.map((s) => `<script type="application/ld+json">${JSON.
             {relatedCategoryHref && (
               <a
                 href={relatedCategoryHref}
-                class="px-3 py-1.5 rounded-full border border-indigo-500/30 text-xs text-indigo-300 hover:bg-indigo-500/10 transition-colors"
+                class="px-3.5 py-2.5 rounded-full border border-indigo-500/30 text-xs text-indigo-300 hover:bg-indigo-500/10 transition-colors"
               >
                 {relatedCategoryLabel || 'Browse related sessions'}
               </a>
             )}
             <a
               href="/tools"
-              class="px-3 py-1.5 rounded-full border border-white/10 text-xs text-zinc-400 hover:text-zinc-100 transition-colors"
+              class="px-3.5 py-2.5 rounded-full border border-white/10 text-xs text-zinc-400 hover:text-zinc-100 transition-colors"
             >
               All tools
             </a>

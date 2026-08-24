@@ -1,8 +1,11 @@
 ---
 import ToolLayout from '../../components/tools/ToolLayout.astro';
 import BreathingQuiz from '../../components/tools/BreathingQuiz';
+import ToolRichContent from '../../components/tools/ToolRichContent.astro';
 import { TOOLS } from '../../lib/tools/catalog';
+import { LANDING } from '../../lib/tools/landingCopy';
 
+const copy = LANDING['breathing-technique-quiz'];
 const siblings = TOOLS.filter((t) => t.patternId).slice(0, 4).map((t) => ({
   href: t.href,
   label: t.shortTitle,
@@ -13,20 +16,14 @@ Astro.response.headers.set('Cache-Control', 'public, max-age=300, s-maxage=3600,
 
 <ToolLayout
   title="Which Breathing Technique? Free Quiz"
-  description="30-second quiz to find the right breathing technique for sleep, anxiety, or focus — then open a free timer."
+  description="30-second quiz to find the right breathing technique for sleep, anxiety, or focus, then open a free timer. No signup."
   canonical="https://dailymeditationguide.com/tools/breathing-technique-quiz"
   h1="Which breathing technique should you use?"
-  lead="Answer a few quick questions. We’ll recommend box breathing, 4-7-8, physiological sigh, or coherent breathing — then send you to a free timer."
-  howToSteps={[
-    'Answer each question honestly for how you feel right now.',
-    'Open the recommended free timer.',
-    'Optionally continue with a matching guided session.',
-  ]}
-  faq={[
-    { question: 'Is this medical advice?', answer: 'No. It is a simple recommendation engine based on common use-cases for popular breath patterns.' },
-    { question: 'Can I ignore the result?', answer: 'Yes. Browse all free tools anytime from the tools hub.' },
-  ]}
+  lead={copy.lead}
+  howToSteps={copy.howToSteps}
+  faq={copy.faq}
   siblingLinks={siblings}
 >
   <BreathingQuiz client:load slot="tool" />
+  <ToolRichContent slot="content" sections={copy.sections} />
 </ToolLayout>

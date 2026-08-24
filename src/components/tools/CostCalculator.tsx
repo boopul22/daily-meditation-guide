@@ -25,7 +25,7 @@ const CostCalculator: React.FC = () => {
             key={p.id}
             type="button"
             onClick={() => setPlanId(p.id)}
-            className={`px-3 py-1.5 rounded-full text-xs border ${
+            className={`px-3.5 py-2.5 rounded-full text-xs border ${
               planId === p.id ? 'bg-indigo-500/20 border-indigo-500/40 text-indigo-200' : 'border-white/10 text-zinc-400'
             }`}
           >

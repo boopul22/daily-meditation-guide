@@ -2,26 +2,22 @@
 import ToolLayout from '../../components/tools/ToolLayout.astro';
 import CognitiveShuffle from '../../components/tools/CognitiveShuffle';
 import RelatedSessions from '../../components/tools/RelatedSessions.astro';
+import ToolRichContent from '../../components/tools/ToolRichContent.astro';
+import { LANDING } from '../../lib/tools/landingCopy';
+
+const copy = LANDING['cognitive-shuffle'];
 
 Astro.response.headers.set('Cache-Control', 'public, max-age=300, s-maxage=3600, stale-while-revalidate=86400');
 ---
 
 <ToolLayout
   title="Cognitive Shuffle Sleep Generator — Free"
-  description="Free cognitive shuffle word generator to quiet racing thoughts at bedtime. Soft random words, no signup."
+  description="Free cognitive shuffle word generator to quiet racing thoughts at bedtime. Soft random words, private in your browser, no signup."
   canonical="https://dailymeditationguide.com/tools/cognitive-shuffle"
   h1="Cognitive Shuffle Sleep Generator"
-  lead="Racing thoughts at bedtime? Softly picture each neutral word as it appears — no story required — until sleep takes over."
-  howToSteps={[
-    'Dim the screen and press Start.',
-    'Gently imagine each word without forcing a narrative.',
-    'If a word sticks, wait for the next one.',
-    'Pair with a guided sleep session if you want a voice.',
-  ]}
-  faq={[
-    { question: 'What is cognitive shuffle?', answer: 'A sleep technique that presents unrelated images/words to interrupt rumination and help the mind drift.' },
-    { question: 'Is this the same as counting sheep?', answer: 'Similar idea, but random neutral words reduce the urge to keep a sequence going.' },
-  ]}
+  lead={copy.lead}
+  howToSteps={copy.howToSteps}
+  faq={copy.faq}
   relatedCategoryHref="/category/sleep"
   relatedCategoryLabel="Sleep sessions"
   siblingLinks={[
@@ -33,4 +29,5 @@ Astro.response.headers.set('Cache-Control', 'public, max-age=300, s-maxage=3600,
   <div slot="after-tool" class="mt-6">
     <RelatedSessions categoryHints={['sleep']} />
   </div>
+  <ToolRichContent slot="content" sections={copy.sections} />
 </ToolLayout>

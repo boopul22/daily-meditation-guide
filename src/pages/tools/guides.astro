@@ -1,7 +1,7 @@
 ---
 /**
- * Lightweight supporting guide index for tool keywords (Phase 4).
- * Each tool page already carries how-to + FAQ; this hub links them for internal SEO.
+ * Supporting guide index for tool keywords.
+ * Each tool page carries deep how-to + FAQ; this hub links them for internal SEO.
  */
 import MainLayout from '../../layouts/MainLayout.astro';
 import { TOOLS } from '../../lib/tools/catalog';
@@ -10,8 +10,8 @@ Astro.response.headers.set('Cache-Control', 'public, max-age=300, s-maxage=3600,
 ---
 
 <MainLayout
-  title="Mindfulness Tool Guides"
-  description="How-to guides for free breathing timers, grounding exercises, and meditation tools on Daily Meditation Guide."
+  title="Mindfulness Tool Guides — How to Use Free Breath & Grounding Tools"
+  description="How-to guides for free breathing timers, grounding exercises, cognitive shuffle, PMR, and other mindfulness tools on Daily Meditation Guide."
   canonical="https://dailymeditationguide.com/tools/guides"
 >
   <div class="max-w-3xl mx-auto space-y-8 animate-[fade-enter_0.4s_ease-out]">
@@ -19,9 +19,18 @@ Astro.response.headers.set('Cache-Control', 'public, max-age=300, s-maxage=3600,
       <p class="text-xs uppercase tracking-widest text-indigo-400">Guides</p>
       <h1 class="font-display text-4xl text-zinc-100 font-medium tracking-tight">Tool guides</h1>
       <p class="text-zinc-500 leading-relaxed">
-        Short how-tos live on each free tool page (steps + FAQ). Start here, then open the interactive practice.
+        Each free tool page includes practice steps, when-to-use notes, and FAQ. Use this list to jump straight into the interactive version.
       </p>
     </header>
+
+    <div class="prose prose-invert max-w-none">
+      <p>
+        Start with the technique that matches the moment. Fast stress: physiological sigh. Focus: box or coherent breathing.
+        Sleep: 4-7-8, PMR, or cognitive shuffle. Overwhelm: 5-4-3-2-1 grounding. If you only want a guided voice, skip to the
+        <a href="/tools/session-finder">session finder</a>.
+      </p>
+    </div>
+
     <ul class="space-y-3">
       {TOOLS.map((t) => (
         <li>
@@ -32,6 +41,19 @@ Astro.response.headers.set('Cache-Control', 'public, max-age=300, s-maxage=3600,
         </li>
       ))}
     </ul>
+
+    <section class="prose prose-invert max-w-none">
+      <h2>How these guides are structured</h2>
+      <p>
+        Every tool page puts the interactive practice first. Below that you get how-to steps, longer explainers (what it is, when it helps, common mistakes), and FAQ markup for search. No thin stub pages.
+      </p>
+      <p>
+        Prefer browsing by goal? Open the
+        <a href="/tools">tools hub</a>
+        and filter by anxiety, sleep, or focus.
+      </p>
+    </section>
+
     <a href="/tools" class="inline-flex text-sm text-indigo-400 hover:text-indigo-300">← Back to all tools</a>
   </div>
 </MainLayout>

@@ -41,7 +41,7 @@ Astro.response.headers.set('Cache-Control', 'public, max-age=300, s-maxage=3600,
         <button
           type="button"
           data-intent={intent.id}
-          class={`tool-filter px-3 py-1.5 rounded-full text-xs border transition-colors ${
+          class={`tool-filter px-3.5 py-2.5 rounded-full text-xs border transition-colors ${
             intent.id === 'all'
               ? 'is-active bg-zinc-100 text-zinc-950 border-transparent'
               : 'border-white/10 text-zinc-400 hover:text-zinc-200'
@@ -75,10 +75,48 @@ Astro.response.headers.set('Cache-Control', 'public, max-age=300, s-maxage=3600,
 
     <section class="rounded-3xl border border-indigo-500/20 bg-indigo-500/5 p-6 sm:p-8 text-center space-y-3">
       <h2 class="font-display text-xl text-zinc-100">Not sure where to start?</h2>
-      <p class="text-sm text-zinc-400">Take the 30-second quiz — we’ll recommend a technique.</p>
+      <p class="text-sm text-zinc-400">Take the 30-second quiz. We’ll recommend a technique.</p>
       <a href="/tools/breathing-technique-quiz" class="inline-flex px-5 py-2.5 rounded-full bg-zinc-100 text-zinc-950 text-sm font-medium">
         Take the quiz
       </a>
+    </section>
+
+    <section class="max-w-3xl mx-auto prose prose-invert">
+      <h2>Free mindfulness tools without an account</h2>
+      <p>
+        Most meditation apps put the useful stuff behind a paywall or a signup form. These tools run in your browser.
+        Breath timers, a grounding walkthrough, sleep helpers, and a session matcher. Use what you need, leave when you are done.
+      </p>
+      <h2>Pick by what you need right now</h2>
+      <ul>
+        <li>
+          <a href="/tools/physiological-sigh">Physiological sigh</a> for a fast stress interrupt
+        </li>
+        <li>
+          <a href="/tools/box-breathing-timer">Box breathing</a> or
+          <a href="/tools/coherent-breathing"> coherent breathing</a> for focus and steady calm
+        </li>
+        <li>
+          <a href="/tools/4-7-8-breathing-timer">4-7-8</a>,
+          <a href="/tools/cognitive-shuffle"> cognitive shuffle</a>, or
+          <a href="/tools/pmr-timer"> PMR</a> when sleep is the problem
+        </li>
+        <li>
+          <a href="/tools/grounding-5-4-3-2-1">5-4-3-2-1 grounding</a> when thoughts feel unreal or stuck
+        </li>
+      </ul>
+      <p>
+        Prefer a voice in your ear? Open the
+        <a href="/sessions">session library</a>
+        or
+        <a href="/tools/session-finder">session finder</a>.
+        Short writeups live in
+        <a href="/tools/guides">tool guides</a>.
+      </p>
+      <h2>Private by default</h2>
+      <p>
+        Timers do not require an email. The streak tracker stores data only on your device. Optional email capture is clearly labeled and never required to use a tool.
+      </p>
     </section>
 
     {

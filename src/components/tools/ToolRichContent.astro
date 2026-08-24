@@ -1,0 +1,31 @@
+---
+import type { ContentSection } from '../../lib/tools/landingCopy';
+
+interface Props {
+  sections: ContentSection[];
+}
+
+const { sections } = Astro.props;
+---
+
+{
+  sections.length > 0 && (
+    <div class="tool-seo prose prose-invert max-w-none">
+      {sections.map((section) => (
+        <section>
+          <h2>{section.heading}</h2>
+          {section.paragraphs.map((p) => (
+            <p set:html={p} />
+          ))}
+          {section.bullets && section.bullets.length > 0 && (
+            <ul>
+              {section.bullets.map((item) => (
+                <li set:html={item} />
+              ))}
+            </ul>
+          )}
+        </section>
+      ))}
+    </div>
+  )
+}

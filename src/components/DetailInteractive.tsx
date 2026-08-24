@@ -111,10 +111,10 @@ export default function DetailInteractive({ session, processedContent, headings,
             </div>
             <div className="flex-grow"></div>
             <div className="flex gap-2">
-              <button className="w-8 h-8 rounded-full border border-white/10 flex items-center justify-center text-zinc-400 hover:bg-white/5 hover:text-white transition-colors">
+              <button className="w-11 h-11 rounded-full border border-white/10 flex items-center justify-center text-zinc-400 hover:bg-white/5 hover:text-white transition-colors">
                 <iconify-icon icon="solar:bookmark-linear" width="16"></iconify-icon>
               </button>
-              <button className="w-8 h-8 rounded-full border border-white/10 flex items-center justify-center text-zinc-400 hover:bg-white/5 hover:text-white transition-colors">
+              <button className="w-11 h-11 rounded-full border border-white/10 flex items-center justify-center text-zinc-400 hover:bg-white/5 hover:text-white transition-colors">
                 <iconify-icon icon="solar:share-linear" width="16"></iconify-icon>
               </button>
             </div>

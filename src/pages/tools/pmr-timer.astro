@@ -2,26 +2,22 @@
 import ToolLayout from '../../components/tools/ToolLayout.astro';
 import PMRTimer from '../../components/tools/PMRTimer';
 import RelatedSessions from '../../components/tools/RelatedSessions.astro';
+import ToolRichContent from '../../components/tools/ToolRichContent.astro';
+import { LANDING } from '../../lib/tools/landingCopy';
+
+const copy = LANDING['pmr-timer'];
 
 Astro.response.headers.set('Cache-Control', 'public, max-age=300, s-maxage=3600, stale-while-revalidate=86400');
 ---
 
 <ToolLayout
   title="Progressive Muscle Relaxation Timer — Free"
-  description="Free progressive muscle relaxation (PMR) timer. Tense and release through the body for sleep and stress relief."
+  description="Free progressive muscle relaxation (PMR) timer. Tense and release through the body for sleep and stress relief. No signup."
   canonical="https://dailymeditationguide.com/tools/pmr-timer"
   h1="Progressive Muscle Relaxation Timer"
-  lead="Move through the body one area at a time — gentle tension, then release. A classic unwind for bedtime and stored stress."
-  howToSteps={[
-    'Lie down or sit comfortably.',
-    'Press Start and follow each body area.',
-    'Tense lightly on the countdown, then fully release.',
-    'Skip any area that causes pain.',
-  ]}
-  faq={[
-    { question: 'What is PMR?', answer: 'Progressive muscle relaxation systematically tenses and releases muscle groups to reduce physical tension.' },
-    { question: 'How long does it take?', answer: 'About 10–15 minutes for a full pass, depending on pacing.' },
-  ]}
+  lead={copy.lead}
+  howToSteps={copy.howToSteps}
+  faq={copy.faq}
   relatedCategoryHref="/category/sleep"
   relatedCategoryLabel="Sleep sessions"
   siblingLinks={[
@@ -33,4 +29,5 @@ Astro.response.headers.set('Cache-Control', 'public, max-age=300, s-maxage=3600,
   <div slot="after-tool" class="mt-6">
     <RelatedSessions categoryHints={['sleep', 'anxiety']} />
   </div>
+  <ToolRichContent slot="content" sections={copy.sections} />
 </ToolLayout>
