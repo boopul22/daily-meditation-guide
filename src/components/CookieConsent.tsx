@@ -7,7 +7,6 @@ type ConsentState = 'granted' | 'denied';
 declare global {
     interface Window {
         gtag?: (...args: unknown[]) => void;
-        __dmgLoadAds?: () => void;
         dataLayer?: unknown[];
     }
 }
@@ -15,10 +14,10 @@ declare global {
 function updateGtagConsent(state: ConsentState) {
     if (typeof window === 'undefined' || typeof window.gtag !== 'function') return;
     window.gtag('consent', 'update', {
-        ad_storage: state,
-        ad_user_data: state,
-        ad_personalization: state,
         analytics_storage: state,
+        ad_storage: 'denied',
+        ad_user_data: 'denied',
+        ad_personalization: 'denied',
     });
     if (state === 'granted') {
         // Re-send page view now that analytics storage is allowed
@@ -27,11 +26,6 @@ function updateGtagConsent(state: ConsentState) {
             page_location: window.location.href,
             page_path: window.location.pathname,
         });
-        try {
-            window.__dmgLoadAds?.();
-        } catch {
-            /* ignore */
-        }
     }
 }
 
@@ -65,7 +59,7 @@ const CookieConsent: React.FC = () => {
                 <div className="flex flex-col md:flex-row items-start md:items-center gap-4">
                     <div className="flex-1">
                         <p className="text-sm text-zinc-300 leading-relaxed">
-                            We use cookies for analytics and personalized advertisements (Google AdSense). You can accept all cookies or decline non-essential ones — essential cookies remain enabled for security and core functionality. Read our{' '}
+                            We use cookies for analytics. You can accept analytics cookies or decline non-essential ones — essential cookies remain enabled for security and core functionality. This site does not currently display ads. Read our{' '}
                             <a href="/privacy" className="text-indigo-400 hover:text-indigo-300 transition-colors">
                                 Privacy Policy
                             </a>.

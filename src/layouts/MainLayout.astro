@@ -64,10 +64,6 @@ const fullTitle = title === 'Daily Meditation Guide' ? title : `${title} | Daily
   <meta name="theme-color" content="#080706" />
   <link rel="preconnect" href="https://api.iconify.design" crossorigin />
   <link rel="dns-prefetch" href="https://www.googletagmanager.com" />
-  <link rel="dns-prefetch" href="https://pagead2.googlesyndication.com" />
-  <link rel="dns-prefetch" href="https://googleads.g.doubleclick.net" />
-  <link rel="dns-prefetch" href="https://ep1.adtrafficquality.google" />
-  <link rel="dns-prefetch" href="https://ep2.adtrafficquality.google" />
   <script src="/vendor/iconify-icon-1.0.7.min.js" defer></script>
   <link rel="preload" as="font" type="font/woff2" href="/fonts/playfair-display.woff2" crossorigin />
   <link rel="preload" as="font" type="font/woff2" href="/fonts/outfit.woff2" crossorigin />
@@ -103,9 +99,6 @@ const fullTitle = title === 'Daily Meditation Guide' ? title : `${title} | Daily
   </style>
   <Fragment set:html={extraHead} />
 
-  <!-- Google AdSense account meta -->
-  <meta name="google-adsense-account" content="ca-pub-7803867089582138" />
-
   <!-- Google tag (gtag.js) — Consent Mode defaults FIRST, then load GA immediately -->
   <script is:inline>
     window.dataLayer = window.dataLayer || [];
@@ -124,9 +117,6 @@ const fullTitle = title === 'Daily Meditation Guide' ? title : `${title} | Daily
       var saved = localStorage.getItem('dmg_cookie_consent');
       if (saved === 'accepted') {
         gtag('consent', 'update', {
-          ad_storage: 'granted',
-          ad_user_data: 'granted',
-          ad_personalization: 'granted',
           analytics_storage: 'granted',
         });
       }
@@ -141,36 +131,6 @@ const fullTitle = title === 'Daily Meditation Guide' ? title : `${title} | Daily
     });
   </script>
 
-  <!-- AdSense: load after consent accepted, or after first interaction if already accepted -->
-  <script is:inline>
-    (function () {
-      var adsLoaded = false;
-      function loadAds() {
-        if (adsLoaded) return;
-        try {
-          if (localStorage.getItem('dmg_cookie_consent') !== 'accepted') return;
-        } catch (e) { return; }
-        adsLoaded = true;
-        var ads = document.createElement('script');
-        ads.async = true;
-        ads.crossOrigin = 'anonymous';
-        ads.src = 'https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-7803867089582138';
-        document.head.appendChild(ads);
-      }
-      window.__dmgLoadAds = loadAds;
-      try {
-        if (localStorage.getItem('dmg_cookie_consent') === 'accepted') {
-          var events = ['scroll', 'pointerdown', 'keydown', 'touchstart'];
-          function onInteract() {
-            events.forEach(function (e) { window.removeEventListener(e, onInteract); });
-            loadAds();
-          }
-          events.forEach(function (e) { window.addEventListener(e, onInteract, { passive: true, once: true }); });
-          setTimeout(loadAds, 3000);
-        }
-      } catch (e) {}
-    })();
-  </script>
   <script type="application/ld+json" set:html={JSON.stringify({
     "@context": "https://schema.org",
     "@type": "Organization",
